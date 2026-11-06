@@ -79,14 +79,14 @@ const SWEEP: Array<{
 const liquidationFromShock = SWEEP.filter((s) => s.isolatedLiquidated)[0]?.shock;
 
 /* ── Equity-under-stress chart geometry ─────────────────────── */
-const CH = { W: 720, H: 240, TICK_H: 210, PAD_L: 8 };
+const CH = { W: 740, H: 240, TICK_H: 210, PAD_L: 8, PAD_R: 14 };
 const Y_MAX = 26_000_000_000n;
 const X_MIN = 2_000n;
 const X_MAX = -3_000n;
 
 function cx(shock: bigint): number {
   const t = Number((X_MIN - shock) * 1000n / (X_MIN - X_MAX)) / 1000;
-  return chSafe(t * CH.W);
+  return chSafe(2 + t * (CH.W - 2 - CH.PAD_R));
 }
 function cy(eq: bigint): number {
   const t = Number((eq * 1000n) / Y_MAX) / 1000;
@@ -333,7 +333,9 @@ export default function DashboardPage() {
                     key={tick.t}
                     x={cx(tick.s)}
                     y={CH.TICK_H + 28}
-                    textAnchor="middle"
+                    textAnchor={
+                      tick.s === X_MIN ? "start" : tick.s === X_MAX ? "end" : "middle"
+                    }
                     fill="var(--text-dim)"
                     fontSize="10"
                     fontFamily="var(--font-data), monospace"
@@ -395,7 +397,7 @@ export default function DashboardPage() {
         <div className="mt-3 grid gap-3 xl:grid-cols-[8fr_4fr]">
           <Panel label="Books on the engine">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] border-collapse text-[13px]">
+              <table className="w-full min-w-[640px] border-collapse text-[13px]">
                 <thead>
                   <tr className="border-b border-line bg-surface-raised text-left">
                     {[
@@ -409,7 +411,7 @@ export default function DashboardPage() {
                     ].map((h, i) => (
                       <th
                         key={h}
-                        className={`px-5 py-2.5 text-[11px] font-medium uppercase tracking-[0.08em] text-dim ${i > 0 ? "text-right" : ""}`}
+                        className={`px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.08em] text-dim ${i > 0 ? "text-right" : ""}`}
                       >
                         {h}
                       </th>
@@ -418,30 +420,30 @@ export default function DashboardPage() {
                 </thead>
                 <tbody>
                   <tr className="border-b border-line last:border-b-0 transition-colors duration-120 hover:bg-surface-raised/60">
-                    <td className="px-5 py-3.5">
+                    <td className="px-4 py-3.5">
                       <div className="text-[13px] font-medium">WETH/USDC v4 · hooked</div>
                       <div className="mt-0.5 font-mono text-[11px] text-dim">
                         0.7fa3…c41d · demo burner
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 text-right font-mono tabular-nums text-[13px]">
+                    <td className="px-4 py-3.5 text-right font-mono tabular-nums text-[13px]">
                       {formatUsdcWhole(DEMO_BOOK.lpNotionalUsdc)}
                     </td>
-                    <td className="px-5 py-3.5 text-right font-mono tabular-nums text-[13px] text-up">
+                    <td className="px-4 py-3.5 text-right font-mono tabular-nums text-[13px] text-up">
                       {formatUsdcWhole(DEMO_BOOK.shortNotionalUsdc)} short
                     </td>
-                    <td className="px-5 py-3.5 text-right font-mono tabular-nums text-[13px] text-gold">
+                    <td className="px-4 py-3.5 text-right font-mono tabular-nums text-[13px] text-gold">
                       {formatUsdcWhole(span.netInitialMarginUsdc)}
                     </td>
-                    <td className="px-5 py-3.5 text-right">
+                    <td className="px-4 py-3.5 text-right">
                       <MarginRatioBar
                         pctBps={(crash.remainingEquityUsdc * 10_000n) / span.netInitialMarginUsdc}
                       />
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-4 py-3.5">
                       <StatusChip tone="gold">settled</StatusChip>
                     </td>
-                    <td className="px-5 py-3.5 text-right">
+                    <td className="px-4 py-3.5 text-right">
                       <a
                         href="/terminal?shock=-3000"
                         className="text-[13px] text-muted transition-colors duration-120 hover:text-gold"
@@ -451,28 +453,28 @@ export default function DashboardPage() {
                     </td>
                   </tr>
                   <tr className="border-b border-line last:border-b-0 transition-colors duration-120 hover:bg-surface-raised/60">
-                    <td className="px-5 py-3.5">
+                    <td className="px-4 py-3.5">
                       <div className="text-[13px] font-medium text-muted">WETH/USDC v4 · isolated</div>
                       <div className="mt-0.5 font-mono text-[11px] text-dim">
                         benchmark account · no hedge
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 text-right font-mono tabular-nums text-[13px] text-muted">
+                    <td className="px-4 py-3.5 text-right font-mono tabular-nums text-[13px] text-muted">
                       {formatUsdcWhole(DEMO_ISOLATED_BOOK.lpNotionalUsdc)}
                     </td>
-                    <td className="px-5 py-3.5 text-right font-mono tabular-nums text-[13px] text-dim">
+                    <td className="px-4 py-3.5 text-right font-mono tabular-nums text-[13px] text-dim">
                       none
                     </td>
-                    <td className="px-5 py-3.5 text-right font-mono tabular-nums text-[13px] text-muted">
+                    <td className="px-4 py-3.5 text-right font-mono tabular-nums text-[13px] text-muted">
                       {formatUsdcWhole(DEMO_ISOLATED_BOOK.postedMarginUsdc)} posted
                     </td>
-                    <td className="px-5 py-3.5 text-right">
+                    <td className="px-4 py-3.5 text-right">
                       <MarginRatioBar pctBps={0n} liquidated />
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-4 py-3.5">
                       <StatusChip tone="down">liquidated</StatusChip>
                     </td>
-                    <td className="px-5 py-3.5 text-right">
+                    <td className="px-4 py-3.5 text-right">
                       <a
                         href="/terminal?shock=-3000"
                         className="text-[13px] text-muted transition-colors duration-120 hover:text-gold"
@@ -543,7 +545,7 @@ function Gauge({
         ? "bg-up"
         : tone === "down"
           ? "bg-down"
-          : "bg-line-strong";
+          : "bg-muted/50";
   const textTone =
     tone === "muted" ? "text-muted" : tone === "gold" ? "text-gold" : tone === "up" ? "text-up" : "text-down";
   return (
