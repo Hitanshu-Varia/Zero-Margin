@@ -98,33 +98,33 @@ export function PositionsStage() {
     setInput("");
   };
 
-  const setStop = (address: string, stopLossBps: number) => {
+  const setStop = (address: string, floorUsdc: number) => {
     const next = { ...stops };
-    if (stopLossBps <= 0) delete next[address];
-    else next[address] = stopLossBps;
+    if (floorUsdc <= 0) delete next[address];
+    else next[address] = floorUsdc;
     setStops(next);
     save(STOPS_KEY, next);
   };
 
   const runKeeperNow = async () => {
     setMonitor("keeper running…");
-    const stopsList = Object.entries(stops).map(([address, stopLossBps]) => ({ address, stopLossBps }));
+    const stopsList = Object.entries(stops).map(([address, floorUsdc]) => ({ address, floorUsdc }));
     if (stopsList.length === 0) {
-      setMonitor("no stop-loss rules configured yet");
+      setMonitor("no stop-loss floors configured yet");
       return;
     }
     const res = await fetch("/api/keeper/monitor", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ stopLosses: stopsList }),
+      body: JSON.stringify({ stops: stopsList }),
     });
     const body = await res.json();
     if (!body.ok) {
       setMonitor(`keeper: ${body.problems?.join(", ").slice(0, 140) ?? "error"}`);
       return;
     }
-    const fired = (body.evaluations as Array<{ address: string; reason: string; executed: boolean; tx: string }>).
-      map((e) => `${e.address.slice(0, 8)}… ${e.executed ? "FIRED" : e.reason.slice(0, 60)}`);
+    const fired = (body.evaluations as Array<{ address: string; reason: string; fired: boolean; tx: string | null }>).
+      map((e) => `${e.address.slice(0, 8)}… ${e.fired ? `FIRED ${e.tx}` : e.reason}`);
     setMonitor(fired.join(" ‖ "));
     void readAll();
   };
@@ -216,21 +216,21 @@ export function PositionsStage() {
               </dl>
             )}
 
-            {/* stop-loss editor */}
+            {/* stop-loss editor: equity floor in whole USDC dollars */}
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
               <label className="text-[12px] text-dim" htmlFor={`stop-${row.address}`}>
-                Stop-loss trigger (bps of price drop)
+                Stop-loss floor (surviving equity in $)
               </label>
               <div className="flex items-center gap-2">
                 <input
                   id={`stop-${row.address}`}
                   type="number"
-                  min={100}
-                  max={50_00}
+                  min={0}
+                  max={500_000}
                   step={100}
                   value={stops[row.address] ?? ""}
                   onChange={(e) => setStop(row.address, Number(e.target.value))}
-                  className="w-24 rounded-field border border-line bg-surface-raised px-2.5 py-1.5 text-end font-mono text-[12px] tabular-nums outline-none focus:border-line-strong"
+                  className="w-28 rounded-field border border-line bg-surface-raised px-2.5 py-1.5 text-end font-mono text-[12px] tabular-nums outline-none focus:border-line-strong"
                 />
                 <span
                   className={cn(
@@ -238,7 +238,7 @@ export function PositionsStage() {
                     stops[row.address] ? "text-saffron" : "text-dim",
                   )}
                 >
-                  {stops[row.address] ? `fires at −${Number(stops[row.address]) / 100}% mark` : "off"}
+                  {stops[row.address] ? `fires when equity < $${Number(stops[row.address]).toLocaleString("en-US")}` : "off"}
                 </span>
               </div>
             </div>

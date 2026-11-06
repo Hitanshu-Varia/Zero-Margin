@@ -71,9 +71,10 @@ contract PortfolioMarginHookTest is Test {
         address hookAddress = vm.computeCreateAddress(address(this), n0);
         PoolKey memory finalKey = poolKeyForHookAt(hookAddress);
         bytes32 poolId = keccak256(abi.encode(finalKey));
-        hook = new PortfolioMarginHook(IClearingMarginEngine(appAddress), IPoolManager(address(this)), poolId, volatileToken);
+        hook = new PortfolioMarginHook(IPoolManager(address(this)), poolId, volatileToken, address(this));
         require(address(hook) == hookAddress, "nonce prediction drifted");
         app = new ClearingAquaApp(IAqua(address(aqua)), address(token), address(adapter), feeKeeper, poolId, ENTRY_PRICE);
+        hook.setEngine(IClearingMarginEngine(address(app)));
         app.setHook(address(hook));
 
         // GV-04 prestate: trader ships 12,000e6 and opens the book

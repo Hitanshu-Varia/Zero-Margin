@@ -21,7 +21,7 @@ contract PortfolioMarginHook is IHooks {
     using StateLibrary for IPoolManager;
 
     IPoolManager public immutable POOL_MANAGER;
-    IClearingMarginEngine public immutable ENGINE;
+    IClearingMarginEngine public ENGINE;
     /// token0/token1 ordering: the volatile leg (WETH-ish) at deploy time.
     address public immutable VOLATILE_TOKEN;
     /// The demo pool the hook guards; supplied at deploy because the pool
@@ -32,6 +32,30 @@ contract PortfolioMarginHook is IHooks {
     uint64 internal constant MIN_MARK_PRICE_USDC = 1e6;
     uint64 internal constant MAX_MARK_PRICE_USDC = 1_000_000e6;
 
+    address public owner;
+    bool public engineSet;
+    error EngineAlreadySet(address engine);
+    error NotOwner(address caller);
+
+    modifier onlyOwner() {
+        if (msg.sender != owner) revert NotOwner(msg.sender);
+        _;
+    }
+
+    /// One-time engine binding so the hook can be mined ahead of the app
+    /// (CREATE2 with the engine's address baked in would be circular).
+    function setEngine(IClearingMarginEngine engine_) external onlyOwner {
+        if (address(engine_) == address(0)) revert ZeroAddress();
+        if (engineSet) revert EngineAlreadySet(address(ENGINE));
+        ENGINE = engine_;
+        engineSet = true;
+    }
+
+    function renounceOwnership() external onlyOwner {
+        owner = address(0);
+    }
+
+    error ZeroAddress();
     error SpanMarginBreach(address trader, uint256 postWithdrawalEquityUsdc, uint256 requiredInitialMarginUsdc);
     error InvalidHookData();
     error NotPoolManager(address caller);
@@ -39,8 +63,9 @@ contract PortfolioMarginHook is IHooks {
     error InvalidLiquidityDelta();
     error PriceOutOfBounds(uint64 price);
 
-    constructor(IClearingMarginEngine engine_, IPoolManager manager, bytes32 poolId_, address volatileToken) {
-        ENGINE = engine_;
+    constructor(IPoolManager manager, bytes32 poolId_, address volatileToken, address owner_) {
+        owner = owner_; // CREATE2-deploys wire through the universal factory,
+        // whose msg.sender is not the operator; the owner is explicit here
         POOL_MANAGER = manager;
         POOL_ID = PoolId.wrap(poolId_);
         VOLATILE_TOKEN = volatileToken;

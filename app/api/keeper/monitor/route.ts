@@ -1,30 +1,33 @@
 /**
  * POST /api/keeper/monitor — the real stop-loss keeper.
- * For every wallet in the request with a stop-loss trigger, it reads the
- * live book state from the deployed app on Base Sepolia, evaluates the
- * trigger against the engine's own math, and when a stop fires it executes
- * the real `unwind` on the app contract signed by the server's wallet
- * (DEMO_PRIVATE_KEY) — because the server wallet owns the demo book or has
- * been granted the keeper role.
+ * For every wallet with an equity floor it reads the live book from the
+ * deployed app on Base Sepolia, computes what the engine's own settlement
+ * would leave the trader with at the tested shock (−3,000 bps), and when
+ * that surviving equity falls below the user's floor it executes the real
+ * `unwind` signed by the server wallet (which owns the demo book or holds
+ * the keeper role). Body: { stops: [{ address, floorUsdc }] } — floor in
+ * whole USDC dollars.
  */
 import { NextResponse } from "next/server";
 import { createPublicClient, createWalletClient, http, type Chain } from "viem";
 import { baseSepolia } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
+import { previewShockUnwind } from "@/lib/spanMath";
+import { DEMO_BOOK, DEMO_VOL_SHOCK_BPS } from "@/lib/spanMath";
 
 const SEPOLIA_RPC = process.env.BASE_SEPOLIA_RPC_URL ?? "https://sepolia.base.org";
-const APP = (process.env.NEXT_PUBLIC_APP_ADDRESS ?? "0x038e8c0d740e05a65b58eadcf46aae16fc2fe2b0") as `0x${string}`;
+const APP = (process.env.NEXT_PUBLIC_APP_ADDRESS ?? "0xB69b36B9bE40fa8848b1E29A17fCF9Fc316CE875") as `0x${string}`;
 const CHAIN = baseSepolia as Chain;
 
 interface Evaluation {
   address: string;
   hasBook: boolean;
-  stopLossBps: number; // trigger: keep at least this ratio of equity vs required IM
+  floorUsdc: number;
   kept: boolean;
+  fired: boolean;
   reason: string;
-  executed: boolean;
   tx: string | null;
-  equityRatioBps: number;
+  remainingEquityUsdc: string;
 }
 
 const readAbi = [{
@@ -57,35 +60,40 @@ const writeAbi = [{
     { name: "trader", type: "address" },
     { name: "priceShockBps", type: "int256" },
   ],
-  outputs: [], // app returns the preview; we only need the tx + order hash event
+  outputs: [],
 }];
 
 export async function POST(request: Request) {
-  let body: {
-    stopLosses?: unknown;
-  };
+  let body: { stops?: unknown };
   try {
-    body = (await request.json()) as { stopLosses?: unknown };
+    body = (await request.json()) as { stops?: unknown };
   } catch {
     return NextResponse.json({ ok: false, problems: ["body must be JSON"] }, { status: 400 });
   }
 
   const privateKey = process.env.DEMO_PRIVATE_KEY ?? "";
-  if (!/^0x[0-9a-fA-F]{64}$/.test(privateKey) || privateKey === "0x" + "0".repeat(64)) {
+  if (!/^0x[0-9a-fA-F]{64}$/.test(privateKey) || privateKey === `0x${"0".repeat(64)}`) {
     return NextResponse.json({
       ok: false,
       problems: [
-        "server keeper wallet is not configured: paste the demo burner private key into .env.local (DEMO_PRIVATE_KEY) to enable real stop-loss execution",
+        "server keeper wallet is not configured: paste a real burner private key into .env.local (DEMO_PRIVATE_KEY) to enable real stop-loss execution",
       ],
     }, { status: 200 });
   }
 
-  const stops = (Array.isArray(body.stopLosses) ? body.stopLosses : []).filter(
-    (s): s is { address: string; stopLossBps: number } =>
+  const stops = (Array.isArray(body.stops) ? body.stops : []).filter(
+    (s): s is { address: string; floorUsdc: number } =>
       !!s && typeof s === "object" &&
-      /^[0-9a-fA-F]{40}$|^(0x)[0-9a-fA-F]{40}$/.test(String((s as { address?: unknown }).address ?? "")) &&
-      typeof (s as { stopLossBps?: unknown }).stopLossBps === "number",
-  ) as Array<{ address: string; stopLossBps: number }>;
+      /^(0x)?[0-9a-fA-F]{40}$/.test(String((s as { address?: unknown }).address ?? "")) &&
+      Number.isFinite(Number((s as { floorUsdc?: unknown }).floorUsdc ?? (s as { stopLossBps?: unknown }).stopLossBps)),
+  ).map((s) => ({
+    address: String(s.address).toLowerCase().replace(/^0x/, ""),
+    floorUsdc: Math.trunc(Number(s.floorUsdc ?? (s as unknown as { stopLossBps: number }).stopLossBps ?? 0)),
+  })) as Array<{ address: string; floorUsdc: number }>;
+
+  if (stops.length === 0) {
+    return NextResponse.json({ ok: true, evaluations: [], problems: ["no stop-loss floors supplied"] });
+  }
 
   const client = createPublicClient({
     chain: CHAIN,
@@ -98,102 +106,98 @@ export async function POST(request: Request) {
     transport: http(SEPOLIA_RPC),
   });
 
-  const mark = Number(await client.readContract({ address: APP, abi: readAbi, functionName: "markPriceUsdc" }));
+  const mark = await client.readContract({ address: APP, abi: readAbi, functionName: "markPriceUsdc" });
+  const markUsdc = BigInt(String(mark));
+
   const evaluations: Evaluation[] = [];
 
   for (const stop of stops.slice(0, 20)) {
-    const normalized = stop.address.toLowerCase() as `0x${string}`;
+    const normalized = (`0x${stop.address}`) as `0x${string}`;
     try {
       const book = (await client.readContract({
         address: APP,
         abi: readAbi,
         functionName: "books",
         args: [normalized],
-      })) as [bigint, bigint, bigint, bigint, bigint, string, boolean];
+      })) as [bigint, bigint, bigint, bigint, bigint, `0x${string}`, boolean];
       const [lpNotional, shortNotional, posted] = book;
-      const active = book[6];
-      if (!active || posted === 0n || lpNotional === 0n) {
+      if (!book[6] || posted === 0n || lpNotional === 0n) {
         evaluations.push({
-          address: stop.address,
+          address: normalized,
           hasBook: false,
-          stopLossBps: stop.stopLossBps,
+          floorUsdc: stop.floorUsdc,
           kept: false,
-          reason: "no active book on the app",
-          executed: false,
+          fired: false,
+          reason: "no active book on the app for this address",
           tx: null,
-          equityRatioBps: 0,
+          remainingEquityUsdc: "0",
         });
         continue;
       }
 
-      // the engine's rule, mirrored from SpanMath: equity = posted, the grid
-      // asks for L_SPAN + haircut; when the live mark moves, pricedEquity moves
-      const priceBps = mark; // mark in USDC per WETH, 6 decimals; stop-loss is on
-      const assessed = Number(priceBps);
-      // the book keeps an entry price: a mark that falls below entry×(1 − stop)
-      // means the LP leg is under water by the stop's threshold
-      const stopFloor = Math.max(1_000, stop.stopLossBps / 100) / 1e6; // stopLossBps of 3_000 → 3,000 bps drop
-      const dropThreshold = (100_000 - stop.stopLossBps) / 100_000;
-      const ratioNow = assessed / markedEntry(book);
+      // engine math mirrors the deployed SpanMathLib exactly (BigInt parity),
+      // at the same tested shock the terminal replays
+      const q = previewShockUnwind(lpNotional, shortNotional, posted, -3_000n, DEMO_VOL_SHOCK_BPS);
 
-      evaluationLog(normalized, stop.stopLossBps, ratioNow, dropThreshold);
-      const shouldStop = ratioNow < dropThreshold;
-      evaluations.push({
-        address: stop.address,
-        hasBook: true,
-        stopLossBps: stop.stopLossBps,
-        kept: !shouldStop,
-        reason: shouldStop
-          ? `mark ratio ${ratioNow} below the stop threshold ${dropThreshold}; firing the unwind`
-          : `mark ratio ${ratioNow} above the stop threshold ${dropThreshold}; kept`,
-        executed: false,
-        tx: null,
-        equityRatioBps: Math.round(ratioNow * 10_000),
-      });
-      void stopFloor;
+      if (q.badDebtUsdc === 0n && q.remainingEquityUsdc >= BigInt(stop.floorUsdc) * 1_000_000n) {
+        evaluations.push({
+          address: normalized,
+          hasBook: true,
+          floorUsdc: stop.floorUsdc,
+          kept: true,
+          fired: false,
+          reason: `surviving equity ${q.remainingEquityUsdc} >= floor ${stop.floorUsdc}e6; kept`,
+          tx: null,
+          remainingEquityUsdc: q.remainingEquityUsdc.toString(),
+        });
+        continue;
+      }
 
-      if (shouldStop) {
-        try {
-          const tx = await wallet.writeContract({
-            address: APP,
-            abi: writeAbi,
-            functionName: "unwind",
-            args: [normalized, -3_000n],
-          });
-          const last = evaluations[evaluations.length - 1];
-          last.executed = true;
-          last.tx = tx;
-          last.reason = `stop fired; unwind broadcast ${tx}`;
-        } catch (err) {
-          const last = evaluations[evaluations.length - 1];
-          last.reason = `stop fired but the onchain unwind failed: ${err instanceof Error ? err.message.slice(0, 160) : err}`;
-          last.tx = null;
-        }
+      // stop fires: the real unwind broadcast from the server wallet
+      try {
+        const tx = await wallet.writeContract({
+          address: APP,
+          abi: writeAbi,
+          functionName: "unwind",
+          args: [normalized, -3_000n],
+        });
+        evaluations.push({
+          address: normalized,
+          hasBook: true,
+          floorUsdc: stop.floorUsdc,
+          kept: false,
+          fired: true,
+          reason: q.badDebtUsdc > 0n
+            ? `surviving equity would leave ${q.remainingEquityUsdc}${q.badDebtUsdc > 0n ? ` with ${q.badDebtUsdc} bad debt` : ""} < floor ${stop.floorUsdc}e6; unwind broadcast`
+            : `surviving equity ${q.remainingEquityUsdc} < floor ${stop.floorUsdc}e6; unwind broadcast`,
+          tx,
+          remainingEquityUsdc: q.remainingEquityUsdc.toString(),
+        });
+      } catch (err) {
+        evaluations.push({
+          address: normalized,
+          hasBook: true,
+          floorUsdc: stop.floorUsdc,
+          kept: false,
+          fired: false,
+          reason: `stop fired but the broadcast failed: ${err instanceof Error ? err.message.slice(0, 140) : String(err)}`,
+          tx: null,
+          remainingEquityUsdc: q.remainingEquityUsdc.toString(),
+        });
       }
     } catch (err) {
       evaluations.push({
-        address: stop.address,
+        address: normalized,
         hasBook: false,
-        stopLossBps: stop.stopLossBps,
+        floorUsdc: stop.floorUsdc,
         kept: false,
+        fired: false,
         reason: `onchain read failed: ${err instanceof Error ? err.message.slice(0, 140) : String(err)}`,
-        executed: false,
         tx: null,
-        equityRatioBps: 0,
+        remainingEquityUsdc: "0",
       });
     }
   }
 
-  return NextResponse.json({ ok: true, source: "onchain", mark, evaluations });
-}
-
-function markedEntry(book: unknown): number {
-  const b = book as [bigint, bigint, bigint, bigint, bigint, string, boolean];
-  // entry spot price is uint64; 0 entries mean unmarked
-  return Number(b[3] ?? 0) || 3_000e6;
-}
-
-function evaluationLog(address: string, stop: number, ratio: number, threshold: number): void {
-  // silent; the response carries the reasoning
-  void address; void stop; void ratio; void threshold;
+  return NextResponse.json({ ok: true, source: "onchain", mark: markUsdc.toString(), evaluations });
 }

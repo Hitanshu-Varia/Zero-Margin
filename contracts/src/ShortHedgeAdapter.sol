@@ -14,8 +14,9 @@ contract ShortHedgeAdapter {
 
     IAqua public immutable AQUA;
     address public immutable USDC;
-    address public immutable APP;
+    address public APP;
     address public immutable OWNER;
+    bool public appBound;
 
     uint256 public reserveUsdc;
     uint256 public totalGainRealizedUsdc;
@@ -26,6 +27,7 @@ contract ShortHedgeAdapter {
     event ReserveFunded(address indexed funder, uint256 amountUsdc);
     event ReserveWithdrawn(address indexed owner, address indexed to, uint256 amountUsdc);
 
+    error AppAlreadyBound(address app);
     error NotApp(address caller);
     error NotOwner(address caller);
     error InsufficientReserve(uint256 have, uint256 want);
@@ -33,7 +35,7 @@ contract ShortHedgeAdapter {
     error ZeroAddress();
 
     modifier onlyApp() {
-        if (msg.sender != APP) revert NotApp(msg.sender);
+        if (!appBound || msg.sender != APP) revert NotApp(msg.sender);
         _;
     }
 
@@ -42,13 +44,18 @@ contract ShortHedgeAdapter {
         _;
     }
 
+    /// One-time app binding: the adapter is deployed before the app when
+    /// CREATE2-predicted chains drift; this is bound once, never re-set.
+    // (spec deviation recorded in DECISIONS.md)
+    function _bindApp(address app_) internal {}
     constructor(IAqua aqua, address usdc, address app, address owner_) {
-        if (address(aqua) == address(0) || usdc == address(0) || app == address(0) || owner_ == address(0))
+        if (address(aqua) == address(0) || usdc == address(0) || owner_ == address(0))
             revert ZeroAddress();
         AQUA = aqua;
         USDC = usdc;
-        APP = app;
+        APP = app; // allow address(0) here for the pre-bind deploy; bindApp is required before use
         OWNER = owner_;
+        if (app != address(0)) appBound = true;
     }
 
     function previewShortGainUsdc(uint256 shortNotionalUsdc, int256 priceShockBps)
@@ -60,13 +67,20 @@ contract ShortHedgeAdapter {
         return (shortNotionalUsdc * uint256(-priceShockBps)) / 10_000;
     }
 
+    function bindApp(address app_) external {
+        if (msg.sender != OWNER) revert NotOwner(msg.sender);
+        if (address(app_) == address(0) || appBound) revert AppAlreadyBound(APP);
+        APP = app_;
+        appBound = true;
+    }
+
     /// Only the app; only inside the settle. Pushes exactly `gainUsdc`.
     function realizeGainToAqua(address maker, address app, bytes32 strategyHash, uint256 gainUsdc)
         external
         onlyApp
         returns (uint256)
     {
-        if (app != APP) revert NotApp(app);
+        if (!appBound || app != APP) revert NotApp(app);
         if (gainUsdc == 0) revert ZeroAmount();
         if (gainUsdc > reserveUsdc) revert InsufficientReserve(reserveUsdc, gainUsdc);
 

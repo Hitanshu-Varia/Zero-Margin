@@ -32,9 +32,9 @@ contract DeployFork is Script {
         vm.startBroadcast();
 
         // deterministic chain: adapter → hook → app, each predicted via nonce
-        address appAddress = vm.computeCreateAddress(address(this), vm.getNonce(address(this)) + 2);
+        // the app is deployed directly beneath the hook; the adapter binds after
 
-        ShortHedgeAdapter adapter = new ShortHedgeAdapter(aqua, usdc, appAddress, msg.sender);
+        ShortHedgeAdapter adapter = new ShortHedgeAdapter(aqua, usdc, address(1), msg.sender);
         IERC20(usdc).approve(address(adapter), hedgeReserve);
         adapter.fundReserve(hedgeReserve);
 
@@ -43,13 +43,13 @@ contract DeployFork is Script {
             CREATE2_DEPLOYER,
             REQUIRED_FLAGS,
             type(PortfolioMarginHook).creationCode,
-            abi.encode(IClearingMarginEngine(appAddress), poolManager, poolId, weth)
+            abi.encode(poolManager, poolId, weth, msg.sender)
         );
         PortfolioMarginHook hook = new PortfolioMarginHook{salt: hookSalt}(
-            IClearingMarginEngine(appAddress),
             poolManager,
             poolId,
-            weth
+            weth,
+            msg.sender
         );
         require(address(hook) == hookAddress, "CREATE2 mismatch: constructor args drifted from the mined args");
 
@@ -61,8 +61,11 @@ contract DeployFork is Script {
             poolId,
             uint64(vm.envOr("INITIAL_MARK_PRICE_USDC", uint256(3_000e6)))
         );
+        adapter.bindApp(address(app));
         app.setHook(address(hook));
+        hook.setEngine(IClearingMarginEngine(address(app)));
         app.renounceOwnership();
+        hook.renounceOwnership();
 
         vm.stopBroadcast();
 

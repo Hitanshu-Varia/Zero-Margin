@@ -11,7 +11,7 @@ import { baseSepolia } from "viem/chains";
 const SEPOLIA_CHAIN = baseSepolia;
 const SEPOLIA_RPC = process.env.BASE_SEPOLIA_RPC_URL ?? "https://sepolia.base.org";
 
-export const APP_ADDRESS = process.env.NEXT_PUBLIC_APP_ADDRESS ?? "0x038e8c0d740e05a65b58eadcf46aae16fc2fe2b0";
+export const APP_ADDRESS = process.env.NEXT_PUBLIC_APP_ADDRESS ?? "0xB69b36B9bE40fa8848b1E29A17fCF9Fc316CE875";
 export const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_ADDRESS ?? "0xbc7dc56707cec31fd10e7c790be9ff8ab3b2ecfb";
 
 export function sepoliaClient() {
