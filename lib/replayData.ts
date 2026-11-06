@@ -39,9 +39,9 @@ export const CRASH_WINDOWS: Array<{
   startRow: number;
   widthRows: number;
 }> = [
-  { label: "Aug 5 2024", date: "2024-08-05", startRow: 5_184, widthRows: 60 },
-  { label: "Feb 3 2025", date: "2025-02-03", startRow: 20_736, widthRows: 60 },
-  { label: "Oct 30 2026", date: "2026-10-30", startRow: 38_880, widthRows: 60 },
+  { label: "Aug 5 2024", date: "2024-08-05", startRow: 5_184, widthRows: 1_440 },
+  { label: "Feb 3 2025", date: "2025-02-03", startRow: 20_736, widthRows: 1_440 },
+  { label: "Oct 30 2026", date: "2026-10-30", startRow: 38_880, widthRows: 1_440 },
 ];
 
 function buildRows(): BasisRow[] {
@@ -55,7 +55,7 @@ function buildRows(): BasisRow[] {
         const ramp = j / w.widthRows;
         // rise sharply, decay slowly — the funding-gap signature
         spike =
-          320 * (ramp < 0.15 ? ramp / 0.15 : Math.exp(-2.2 * (ramp - 0.15)));
+          320 * (ramp < 0.08 ? ramp / 0.08 : Math.exp(-1.1 * (ramp - 0.08)));
         break;
       }
     }
