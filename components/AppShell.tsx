@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 const nav = [
-  { href: "/", label: "Dashboard", icon: "grid" },
+  { href: "/dashboard", label: "Dashboard", icon: "grid" },
   { href: "/terminal", label: "Terminal", icon: "terminal" },
   { href: "/replay", label: "Replay", icon: "pulse" },
   { href: "/arkiv", label: "Attestations", icon: "layers" },
@@ -86,11 +86,16 @@ function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () 
 
 /**
  * Application shell: persistent sidebar on desktop, drawer on mobile,
- * and a topbar with the command bar, chain chip, and wallet pill.
+ * and a topbar with the command bar and wallet pill. The landing route
+ * renders its own marketing chrome instead of the app frame.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  if (pathname === "/") {
+    return <>{children}</>;
+  }
 
   return (
     <div className="min-h-dvh">
