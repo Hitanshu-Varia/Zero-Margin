@@ -29,9 +29,14 @@ lint:
 	python3 scripts/lint_claims.py
 
 fork-test:
-	# requires BASE_MAINNET_RPC_URL (Section 16.1); canonical Aqua push/pull only
-	@test -n "$$BASE_MAINNET_RPC_URL" && (cd contracts && FORK_CHAIN_ID=31337 forge test --match-contract Fork -vv) || \
-		echo "SKIP: BASE_MAINNET_RPC_URL not provided (canonical Aqua unavailable; LOCAL mode covers the rest)"
+	# Requires the user's own base fork: `anvil --fork-url $${BASE_MAINNET_RPC_URL}`
+	# or pass the public RPC itself. Foundry 1.7.1's op-revm panics on post-Isthmus
+	# Base inside the fork ("Missing operator fee scalar for isthmus L1 Block")
+	# — see DECISIONS.md; bump foundry once the patch lands, the onchain setup
+	# beneath it is already pinned in test/Fork.t.sol.
+	set -a; test -f ../.env.local && . ../.env.local; set +a; \
+	BASE_MAINNET_RPC_URL=$${BASE_MAINNET_RPC_URL:-https://mainnet.base.org} \
+	(cd contracts && BASE_MAINNET_RPC_URL=$${BASE_MAINNET_RPC_URL} forge test --match-contract AquaForkTest -vv)
 
 arkiv-verify:
 	# live Rabdi write needs ARKIV_ACCESS_KEY + a funded writer
@@ -41,7 +46,7 @@ replay:
 	npm run replay || echo "SKIP: replay dataset scripts live with the web terminal; basis stats derive from lib/replayData.ts"
 
 snapshot:
-	cd contracts && forge snapshot --check || (forge snapshot > .gas-snapshot && echo "snapshot recorded")
+	cd contracts && forge snapshot --check && echo "GAS SNAPSHOT OK"
 
 demo: web-build
 	npm start
@@ -56,5 +61,5 @@ check-submission:
 screenshots:
 	node scripts/e2e.mjs || echo "screenshots need a built app on :3123"
 
-ci: lint web-build test check-submission
+ci: lint web-build test snapshot check-submission
 	@echo "ENV OK"
