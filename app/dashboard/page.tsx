@@ -35,8 +35,8 @@ export default function DashboardPage() {
             Overview
           </h1>
           <p className="mt-1 max-w-[62ch] text-pretty text-[14px] leading-relaxed text-muted">
-            {formatUsdcWhole(DEMO_BOOK.lpNotionalUsdc)} v4 LP against a{" "}
-            {formatUsdcWhole(DEMO_BOOK.shortNotionalUsdc)} short hedge, cross-margined on one grid.
+            A {formatUsdcWhole(DEMO_BOOK.lpNotionalUsdc)} liquidity position hedged by a{" "}
+            {formatUsdcWhole(DEMO_BOOK.shortNotionalUsdc)} short — one margin account for both, per the spec's GV-01 test case (swap to your own numbers any time on the terminal's crash console).
           </p>
         </div>
         <a
@@ -63,7 +63,8 @@ export default function DashboardPage() {
             <CountUp final={span.capitalSavingsBps} variant="percent" />
           </p>
           <p className="mt-1.5 text-[11px] text-dim">
-            {formatUsdcWhole(span.isolatedInitialMarginUsdc)} → {formatUsdcWhole(span.netInitialMarginUsdc)}
+            posting drops from {formatUsdcWhole(span.isolatedInitialMarginUsdc)} (standard) to{" "}
+            {formatUsdcWhole(span.netInitialMarginUsdc)} (netted)
           </p>
         </div>
         <div className="lift rounded-panel border border-line bg-surface p-5">
@@ -71,14 +72,14 @@ export default function DashboardPage() {
           <p className="mt-2.5 font-mono text-[24px] tabular-nums">
             {formatPercentFromBps((crash.remainingEquityUsdc * 10_000n) / span.netInitialMarginUsdc, 0)}
           </p>
-          <p className="mt-1.5 text-[11px] text-dim">equity ÷ net IM after settle</p>
+          <p className="mt-1.5 text-[11px] text-dim">remaining equity ÷ what the book must keep posted</p>
         </div>
         <div className="lift rounded-panel border border-line bg-surface p-5">
           <p className="text-[12px] text-dim">Bad debt in envelope</p>
           <p className="mt-2.5 font-mono text-[24px] tabular-nums">
             {formatUsdcWhole(0n)}
           </p>
-          <p className="mt-1.5 text-[11px] text-dim">shock grid spans −30% to +20%</p>
+          <p className="mt-1.5 text-[11px] text-dim">across the full tested shock range (−30% to +20% price moves)</p>
         </div>
       </div>
 

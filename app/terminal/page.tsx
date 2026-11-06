@@ -67,8 +67,10 @@ function ScenarioGrid({
     <div className="space-y-1.5">
       {[0, 1].map((m) => (
         <div key={m} className="flex items-end gap-2">
-          <span className="w-12 shrink-0 pt-3 font-mono text-[10px] text-dim">
-            ν {m === 0 ? "0" : "150"}
+          <span className="w-16 shrink-0 pt-3 text-[10px] leading-tight text-dim">
+            {m === 0
+              ? "calm market, bps"
+              : "normal volatility, bps"}
           </span>
           <div className="grid flex-1 grid-cols-8 gap-1">
             {PRICE_SHOCKS_BPS.map((_, k) => {
@@ -103,8 +105,11 @@ function ScenarioGrid({
         </div>
       ))}
       <p className="font-mono text-[10px] text-dim">
-        profit/loss in USDC per scenario; columns are price moves (−30% to
-        +20%), rows are calm vs volatile; the amber ring is the selected shock
+        every bar shows ONE tested case — what the whole book gains or
+        loses at that price move (columns), in calm or higher-volatility
+        conditions (rows). the highlighted bar is the shock you are settling
+        now. the grid is the engine's promise: it has priced every one of
+        these cases before you open the book.
       </p>
     </div>
   );
@@ -239,8 +244,8 @@ function Terminal() {
                 How far the price moves — both accounts see the same crash
               </label>
               <Num tone={shockBps > 0n ? "up" : shockBps < 0n ? "down" : "text"} size="lg">
-                {formatShock(shockBps)}
-                <span className="ml-1 text-[12px] text-dim">bps</span>
+                {shockPercent(shockBps)}%
+                <span className="ml-1 text-[12px] text-dim">price move</span>
               </Num>
             </div>
             <input
@@ -635,9 +640,9 @@ function Terminal() {
             <div className="mt-4">
               <EngineVerifier
                 input={{
-                  lpNotionalUsdc: DEMO_BOOK.lpNotionalUsdc.toString(),
-                  shortNotionalUsdc: DEMO_BOOK.shortNotionalUsdc.toString(),
-                  postedMarginUsdc: DEMO_BOOK.postedMarginUsdc.toString(),
+                  lpNotionalUsdc: notionals.lp.toString(),
+                  shortNotionalUsdc: notionals.short.toString(),
+                  postedMarginUsdc: notionals.posted.toString(),
                   priceShockBps: shockBps.toString(),
                   volShockBps: DEMO_VOL_SHOCK_BPS.toString(),
                 }}

@@ -45,7 +45,7 @@ export default function ProofPage() {
       </div>
 
       {/* Golden vectors */}
-      <Panel label="Golden vectors — SPAN-style grid, ν = 150 bps" accent>
+      <Panel label="Golden vectors — the exact test cases" accent>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] border-collapse text-[13px]">
             <thead>
@@ -57,13 +57,13 @@ export default function ProofPage() {
                   Book
                 </th>
                 <th className="px-4 py-2 text-right text-[11px] font-medium text-dim">
-                  Isolated IM
+                  Isolated IM (what to post alone)
                 </th>
                 <th className="px-4 py-2 text-right text-[11px] font-medium text-dim">
-                  Net IM
+                  Net IM (what to post netted)
                 </th>
                 <th className="px-4 py-2 text-right text-[11px] font-medium text-dim">
-                  Savings
+                  Collateral saved
                 </th>
               </tr>
             </thead>
@@ -98,8 +98,9 @@ export default function ProofPage() {
           </table>
         </div>
         <div className="border-t border-line px-4 py-2.5 font-mono text-[11px] text-dim">
-          parameters: γ 5,000 bps, basis h 500 bps, maintenance ratio
-          7,500 bps, isolated short α 5,000 bps, fee φ 5 bps
+          grid knobs: convexity γ 50%, cross-venue haircut 5% (500 bps),
+          maintenance ratio 75%, isolated short α 50%, one-time fee 0.05%
+          (5 bps) — “bps” is basis points, 1 bp = 0.01%
         </div>
       </Panel>
 
@@ -268,8 +269,8 @@ export default function ProofPage() {
       </div>
 
       <p className="mt-5 font-mono text-[11px] text-dim">
-        observed ν = {Number(DEMO_VOL_SHOCK_BPS)} bps across every vector,
-        vectors recomputed at build time from lib/spanMath.ts
+        volatility assumption in every vector: {Number(DEMO_VOL_SHOCK_BPS)} bps
+        (= 1.5%); recomputed at build time from lib/spanMath.ts
       </p>
     </main>
   );

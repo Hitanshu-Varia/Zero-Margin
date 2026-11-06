@@ -240,7 +240,7 @@ export function PositionsStage() {
             {/* stop-loss editor: equity floor in whole USDC dollars */}
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
               <label className="text-[12px] text-dim" htmlFor={`stop-${row.address}`}>
-                Stop-loss floor (surviving equity in $)
+                Stop-loss floor — sell the whole book if surviving equity falls below
               </label>
               <div className="flex items-center gap-2">
                 <input
