@@ -17,7 +17,9 @@ import {
   DEMO_VOL_SHOCK_BPS,
   evaluateSpan16,
   isolatedAccountAtShock,
+  lpNetPnlUsdc,
   previewShockUnwind,
+  shortNetPnlUsdc,
   signedFloorDiv,
   BPS,
 } from "@/lib/spanMath";
@@ -47,44 +49,6 @@ const CRASH_PRESETS: Array<{ bps: bigint; label: string }> = [
 ];
 
 import { PRICE_SHOCKS_BPS } from "@/lib/spanMath";
-
-function WaterfallRow({
-  label,
-  value,
-  sign,
-  tone,
-  rule = false,
-}: {
-  label: string;
-  value: string;
-  sign: string;
-  tone: "down" | "up" | "cobalt" | "muted" | "text";
-  rule?: boolean;
-}) {
-  const toneClass =
-    tone === "down"
-      ? "text-down"
-      : tone === "up"
-        ? "text-up"
-        : tone === "cobalt"
-          ? "text-cobalt"
-          : tone === "muted"
-            ? "text-muted"
-            : "text-text";
-  return (
-    <tr className={rule ? "border-b border-line" : ""}>
-      <td className="py-1 text-[13px] text-muted">{label}</td>
-      <td className="py-1 text-right">
-        <span className="font-mono text-[12px] tabular-nums text-dim">
-          {sign}
-        </span>{" "}
-        <span className={`font-mono text-[13px] tabular-nums ${toneClass}`}>
-          {value}
-        </span>
-      </td>
-    </tr>
-  );
-}
 
 function ScenarioGrid({
   scenarioNetPnlUsdc,
@@ -535,78 +499,120 @@ function Terminal() {
               collateral saved: {formatBps(span.capitalSavingsBps)} ({formatBps(span.capitalSavingsBps)} ÷ 10,000 = {formatPercentFromBps(span.capitalSavingsBps)}); a basis point is one hundredth of a percent
             </p>
 
-            {/* ── Settlement waterfall ──────────────────────── */}
+            {/* ── Where your money goes — first-timer arithmetic ──── */}
             <div className="rule-t mt-4 pt-3">
               <div className="mb-2 flex items-baseline justify-between">
-                <span className="text-[13px] text-muted">
-                  Settlement waterfall
+                <span className="text-[13px] text-medium text-muted">
+                  The crash, in your own money
                 </span>
                 <span className="font-mono text-[11px] text-dim">
-                  quote ≡ execution
+                  the quote you see is what executes
                 </span>
               </div>
-              <table className="w-full border-separate border-spacing-0">
-                <tbody>
-                  <WaterfallRow
-                    label="LP leg loss (what the liquidity position lost)"
-                    sign={quote.lpLossUsdc === 0n ? "" : "−"}
-                    tone="down"
-                    value={formatUsdc(quote.lpLossUsdc)}
-                  />
-                  <WaterfallRow
-                    label="Short gain (the hedge pays in)"
-                    sign="+"
-                    tone="up"
-                    value={formatUsdc(quote.shortGainUsdc)}
-                  />
-                  <WaterfallRow
-                    label="Netted: the hedge covers the loss"
-                    sign="="
-                    tone="cobalt"
-                    value={formatUsdc(quote.nettedOffsetUsdc)}
-                    rule
-                  />
-                  <WaterfallRow
-                    label="Unwind fee (0.05%, one-time)"
-                    sign={quote.protocolFeeUsdc === 0n ? "" : "−"}
-                    tone="muted"
-                    value={formatUsdc(quote.protocolFeeUsdc)}
-                  />
-                  <WaterfallRow
-                    label="Margin spent (your deposit used)"
-                    sign={quote.traderMarginUsedUsdc === 0n ? "" : "−"}
-                    tone="text"
-                    value={formatUsdc(quote.traderMarginUsedUsdc)}
-                    rule
-                  />
+
+              <ol className="space-y-2.5">
+                {/* act 1 — the two legs and what each did */}
+                <li className="flex items-baseline justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[13px] text-text">1. Your LP position</p>
+                    <p className="text-[11px] leading-relaxed text-dim">
+                      {(() => {
+                        const r = lpNetPnlUsdc(notionals.lp, shockBps, DEMO_VOL_SHOCK_BPS);
+                        return r < 0n
+                          ? "the price move hit your liquidity position"
+                          : r > 0n
+                            ? "the price move paid your liquidity position"
+                            : "the price move left it flat";
+                      })()}
+                    </p>
+                  </div>
+                  <Num tone={lpNetPnlUsdc(notionals.lp, shockBps, DEMO_VOL_SHOCK_BPS) < 0n ? "down" : "up"} size="sm">
+                    {formatUsdc(lpNetPnlUsdc(notionals.lp, shockBps, DEMO_VOL_SHOCK_BPS))}
+                  </Num>
+                </li>
+
+                <li className="flex items-baseline justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[13px] text-text">2. Your hedge</p>
+                    <p className="text-[11px] leading-relaxed text-dim">
+                      {(() => {
+                        const r = shortNetPnlUsdc(notionals.short, shockBps);
+                        return r > 0n
+                          ? "pays you back, covering most of that loss"
+                          : r < 0n
+                            ? "owes on the same price move — the legs move against each other"
+                            : "flat";
+                      })()}
+                    </p>
+                  </div>
+                  <Num tone={shortNetPnlUsdc(notionals.short, shockBps) > 0n ? "up" : "down"} size="sm">
+                    {formatUsdc(shortNetPnlUsdc(notionals.short, shockBps))}
+                  </Num>
+                </li>
+
+                {/* act 2 — what the hedge does NOT reach */}
+                <li className="flex items-baseline justify-between gap-3 rounded-field bg-surface-raised px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="text-[13px] text-text">3. shortfall the hedge cannot reach</p>
+                    <p className="text-[11px] leading-relaxed text-dim">
+                      {"("}
+                      {formatUsdcWhole(quote.lpLossUsdc > 0n ? quote.lpLossUsdc : 0n)}
+                      {" − "}
+                      {formatUsdcWhole(quote.nettedOffsetUsdc)}
+                      {" = "}
+                      {formatUsdcWhole(quote.lpLossUsdc > quote.nettedOffsetUsdc ? quote.lpLossUsdc - quote.nettedOffsetUsdc : 0n)}
+                      {") — this part of the loss is yours"}
+                    </p>
+                  </div>
+                  <span className="font-mono text-[13px] tabular-nums text-text">
+                    {formatUsdc(quote.lpLossUsdc > quote.nettedOffsetUsdc ? quote.lpLossUsdc - quote.nettedOffsetUsdc : 0n)}
+                  </span>
+                </li>
+
+                {/* act 3 — the fee */}
+                <li className="flex items-baseline justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[13px] text-text">4. one-time settle fee (0.05%)</p>
+                    <p className="text-[11px] leading-relaxed text-dim">charged once, on the whole notional</p>
+                  </div>
+                  <span className="font-mono text-[13px] tabular-nums text-muted">
+                    −{formatUsdc(quote.protocolFeeUsdc)}
+                  </span>
+                </li>
+              </ol>
+
+              {/* the reconciliation line: the sentence a first-timer can check */}
+              <div className="mt-3 rounded-field border border-line-strong bg-surface px-3 py-2.5">
+                <p className="text-pretty text-[13px] leading-relaxed text-text">
+                  Your{" "}
+                  <span className="font-mono">{formatUsdcWhole(notionals.posted)}</span> deposit{" "}
+                  <span className="font-mono">− {formatUsdc(quote.traderMarginUsedUsdc)}</span>{" "}
+                  taken by the shortfall and fee ={" "}
+                  <strong className="font-mono">{formatUsdc(quote.remainingEquityUsdc)}</strong>{" "}
+                  back to you.
                   {quote.badDebtUsdc > 0n && (
-                    <WaterfallRow
-                      label="Bad debt"
-                      sign="!"
-                      tone="down"
-                      value={formatUsdc(quote.badDebtUsdc)}
-                    />
+                    <>
+                      {" "}A{" "}
+                      <span className="text-down">{formatUsdc(quote.badDebtUsdc)}</span>{" "}
+                      part could not be covered even by the whole deposit — that
+                      is the state the withdrawal guard exists to prevent.
+                    </>
                   )}
-                  <tr>
-                    <td className="pt-2.5 text-[13px] text-text">
-                      Remaining equity
-                    </td>
-                    <td className="pt-2.5 text-right">
-                      <Num tone={bookTone} size="lg">
-                        {formatUsdc(quote.remainingEquityUsdc)}
-                      </Num>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                </p>
+                <p className="mt-1 font-mono text-[10px] text-dim">
+                  the minus sign checked: {formatUsdcWhole(quote.lpLossUsdc > 0n ? quote.lpLossUsdc : 0n)} lost,
+                  {formatUsdcWhole(quote.nettedOffsetUsdc)} covered → {formatUsdcWhole(quote.lpLossUsdc > quote.nettedOffsetUsdc ? quote.lpLossUsdc - quote.nettedOffsetUsdc : 0n)} left,
+                  +{formatUsdcWhole(quote.protocolFeeUsdc)} fee = {formatUsdc(quote.traderMarginUsedUsdc)} total
+                </p>
+              </div>
             </div>
 
             {/* ── Aqua transfer ledger ──────────────────────── */}
-            <div className="rule-t mt-4 pt-3">
-              <div className="mb-2 text-[13px] text-muted">
-                The settle, step by step (one transaction)
-              </div>
-              <div className="flex flex-wrap items-center gap-1.5 font-mono text-[11px]">
+            <details className="rule-t mt-4 pt-3">
+              <summary className="cursor-pointer list-none text-[13px] text-muted [&::-webkit-details-marker]:hidden">
+                The exact onchain steps (for the technical reader) ▾
+              </summary>
+              <div className="flex flex-wrap items-center gap-1.5 pt-2 font-mono text-[11px]">
                 <span className="rounded-field border border-line bg-surface-raised px-2 py-1 text-muted">
                   <span className="text-cobalt">ship</span> {formatUsdcWhole(notionals.posted)} <span className="text-dim">(deposit in)</span>
                 </span>
@@ -623,7 +629,7 @@ function Terminal() {
                   {formatUsdcWhole(quote.remainingEquityUsdc)} equity (yours)
                 </span>
               </div>
-            </div>
+              </details>
 
             {/* ── Engine parity check: the API verifies these figures ── */}
             <div className="mt-4">
