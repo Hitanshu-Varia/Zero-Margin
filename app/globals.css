@@ -388,12 +388,24 @@ input[type="range"]:focus-visible {
   display: none;
 }
 
-/* Dot lattice hero background (Motionsites "interactive" family) */
+/* Dot lattice hero background (Motionsites "interactive" family).
+   Painted on a ::before layer so the mask never dims page content. */
 .lattice {
+  position: relative;
+}
+.lattice::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background-image:
-    radial-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+    radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
   background-size: 22px 22px;
-  mask-image: radial-gradient(60% 62% at 50% 0%, #000 55%, transparent 100%);
+  mask-image: radial-gradient(70% 80% at 55% 0%, #000 30%, transparent 78%);
+}
+.lattice > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Marquee rail for claim chips */
