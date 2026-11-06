@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Num } from "@/components/Num";
 import { Panel, Stat, KpiCard } from "@/components/Panel";
 import { Reveal } from "@/components/motion/Reveal";
+import { CountUp } from "@/components/motion/CountUp";
 import { StatusChip } from "@/components/Badge";
 import { StressChart } from "@/components/dashboard/StressChart";
 import {
