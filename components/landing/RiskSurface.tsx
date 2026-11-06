@@ -10,7 +10,7 @@ import {
   evaluateSpan16,
   previewShockUnwind,
 } from "@/lib/spanMath";
-import { formatUsdcWhole, formatShockAbs, formatPercentFromBps } from "@/lib/format";
+import { formatUsdcWhole, formatShock, formatShockAbs, formatPercentFromBps } from "@/lib/format";
 
 /**
  * The risk surface: the product's own 16-scenario grid drawn to scale.
@@ -116,7 +116,7 @@ export function RiskSurface() {
           Risk surface, 16 scenarios
         </p>
         <p className="font-mono text-[11px] tabular-nums text-dim">
-          column {activeCol + 1} of 8, shock {formatShockAbs(activeShock)} bps
+          column {activeCol + 1} of 8, shock {formatShock(activeShock)} bps
         </p>
       </div>
 
@@ -135,7 +135,7 @@ export function RiskSurface() {
             y={10}
             width={HW * 2 + 8}
             height={290}
-            fill={col === activeCol ? "rgba(77,141,246,0.07)" : "transparent"}
+            fill={col === activeCol ? "color-mix(in srgb, var(--cobalt) 7%, transparent)" : "transparent"}
             onMouseEnter={() => takeControl(col)}
             style={{ cursor: "crosshair" }}
           />
@@ -153,14 +153,14 @@ export function RiskSurface() {
               const loss = pnl < 0n;
               const intensity = Number(((pnl < 0n ? -pnl : pnl) * 100n) / maxAbs) / 100;
               const topFill = loss
-                ? `rgba(242, 99, 84, ${0.28 + 0.72 * intensity})`
+                ? `color-mix(in srgb, var(--red) ${Math.round(30 + 70 * intensity)}%, var(--surface))`
                 : pnl > 0n
-                  ? `rgba(63, 207, 142, ${0.22 + 0.5 * intensity})`
+                  ? `color-mix(in srgb, var(--green) ${Math.round(24 + 52 * intensity)}%, var(--surface))`
                   : "var(--line-strong)";
               const sideFill = loss
-                ? `rgba(178, 62, 48, ${0.34 + 0.6 * intensity})`
+                ? `color-mix(in srgb, var(--red) ${Math.round(38 + 56 * intensity)}%, var(--background))`
                 : pnl > 0n
-                  ? `rgba(38, 132, 92, ${0.3 + 0.5 * intensity})`
+                  ? `color-mix(in srgb, var(--green) ${Math.round(30 + 48 * intensity)}%, var(--background))`
                   : "var(--line)";
               const active = col === activeCol;
               return (
@@ -211,7 +211,7 @@ export function RiskSurface() {
                 fontFamily="var(--font-data), monospace"
                 fill={active ? "var(--cobalt)" : "var(--text-dim)"}
               >
-                {shock === 0n ? "0" : `${shock < 0n ? "−" : "+"}${formatShockAbs(shock)}`}
+                {shock === 0n ? "0" : `${shock < 0n ? "−" : "+"}${formatShockAbs(shock / 100n)}`}
               </text>
             </g>
           );
@@ -223,7 +223,7 @@ export function RiskSurface() {
           fontFamily="var(--font-data), monospace"
           fill="var(--text-dim)"
         >
-          bps
+          %
         </text>
 
         {/* scale legend: heights are scenario losses */}
@@ -255,7 +255,7 @@ export function RiskSurface() {
       {/* readout rows */}
       <div className="flex flex-wrap items-baseline gap-x-8 gap-y-1 border-t border-line px-5 py-3 font-mono text-[12px] tabular-nums">
         <span className="text-dim">
-          shock <span className="text-text">{formatShockAbs(activeShock)} bps</span>
+          shock <span className="text-text">{formatShock(activeShock)} bps</span>
         </span>
         <span className="text-dim">
           net PnL ν0 <span className="text-text">{formatUsdcWhole(span.scenarioNetPnlUsdc[activeCol * 2])}</span>
