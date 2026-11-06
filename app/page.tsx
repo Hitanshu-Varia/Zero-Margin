@@ -284,16 +284,20 @@ export default function LandingPage() {
               <div className="flex w-full items-end gap-6 px-6 pb-8">
                 <BarPair
                   label="Isolated"
-                  bars={[
-                    { h: 100, cls: "bg-line-strong", tag: "posted" },
-                    { h: 4, cls: "bg-down", tag: "returned" },
+                  values={[
+                    { h: 100, cls: "bg-line-strong", tag: formatUsdcWhole(DEMO_ISOLATED_BOOK.postedMarginUsdc) },
+                    { h: 4, cls: "bg-down", tag: formatUsdcWhole(0n) },
                   ]}
                 />
                 <BarPair
                   label="ZeroMargin"
-                  bars={[
-                    { h: 100, cls: "bg-line-strong", tag: "posted" },
-                    { h: 79, cls: "bg-gold", tag: "returned" },
+                  values={[
+                    { h: 100, cls: "bg-line-strong", tag: formatUsdcWhole(DEMO_BOOK.postedMarginUsdc) },
+                    {
+                      h: 79,
+                      cls: "bg-gold",
+                      tag: formatUsdcWhole(crash.remainingEquityUsdc),
+                    },
                   ]}
                 />
               </div>
@@ -371,30 +375,26 @@ export default function LandingPage() {
 
 function BarPair({
   label,
-  bars,
+  values,
 }: {
   label: string;
-  bars: Array<{ h: number; cls: string; tag: string }>;
+  values: Array<{ h: number; cls: string; tag: string }>;
 }) {
   return (
     <div className="flex flex-1 flex-col items-center gap-2">
       <div className="flex h-44 w-full items-end justify-center gap-2">
-        {bars.map((bar, i) => (
-          <div key={i} className="flex h-full w-10 flex-col justify-end md:w-14">
+        {values.map((bar, i) => (
+          <div key={i} className="flex h-full w-10 flex-col items-center justify-end gap-1.5 md:w-14">
+            <span className="font-mono text-[10px] tabular-nums text-dim">{bar.tag}</span>
             <div
               aria-hidden="true"
-              className={`w-full rounded-t-[6px] transition-[height] duration-200 ${bar.cls}`}
+              className={`w-full rounded-t-[6px] ${bar.cls}`}
               style={{ height: `${bar.h}%` }}
             />
           </div>
         ))}
       </div>
       <p className="text-[12px] font-medium text-muted">{label}</p>
-      <div className="flex gap-2 font-mono text-[10px] text-dim">
-        {bars.map((bar, i) => (
-          <span key={i}>{bar.tag}</span>
-        ))}
-      </div>
     </div>
   );
 }

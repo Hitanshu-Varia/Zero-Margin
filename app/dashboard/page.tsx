@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Num } from "@/components/Num";
 import { Panel, Stat, KpiCard } from "@/components/Panel";
 import { StatusChip } from "@/components/Badge";
+import { StressChart } from "@/components/dashboard/StressChart";
 import {
   DEMO_BOOK,
   DEMO_ISOLATED_BOOK,
@@ -41,79 +42,6 @@ const crashIsolated = isolatedAccountAtShock(
   DEMO_VOL_SHOCK_BPS,
 );
 const basisStats = computeBasisStats(BASIS_ROWS);
-
-/* ── Equity sweep: +2,000 bps down to −3,000 bps ────────────── */
-const SWEEP_STEP = 100n;
-const SWEEP: Array<{
-  shock: bigint;
-  isolatedEquity: bigint;
-  isolatedLiquidated: boolean;
-  bookEquity: bigint;
-}> = [];
-{
-  let shock = 2_000n;
-  const step = SWEEP_STEP;
-  while (shock >= -3_000n) {
-    const iso = isolatedAccountAtShock(
-      DEMO_ISOLATED_BOOK.lpNotionalUsdc,
-      DEMO_ISOLATED_BOOK.postedMarginUsdc,
-      shock,
-      DEMO_VOL_SHOCK_BPS,
-    );
-    const book = previewShockUnwind(
-      DEMO_BOOK.lpNotionalUsdc,
-      DEMO_BOOK.shortNotionalUsdc,
-      DEMO_BOOK.postedMarginUsdc,
-      shock,
-      DEMO_VOL_SHOCK_BPS,
-    );
-    SWEEP.push({
-      shock,
-      isolatedEquity: iso.equityUsdc,
-      isolatedLiquidated: iso.liquidated,
-      bookEquity: book.remainingEquityUsdc,
-    });
-    shock -= step;
-  }
-}
-const liquidationFromShock = SWEEP.filter((s) => s.isolatedLiquidated)[0]?.shock;
-
-/* ── Equity-under-stress chart geometry ─────────────────────── */
-const CH = { W: 740, H: 240, TICK_H: 210, PAD_L: 8, PAD_R: 14 };
-const Y_MAX = 26_000_000_000n;
-const X_MIN = 2_000n;
-const X_MAX = -3_000n;
-
-function cx(shock: bigint): number {
-  const t = Number((X_MIN - shock) * 1000n / (X_MIN - X_MAX)) / 1000;
-  return chSafe(2 + t * (CH.W - 2 - CH.PAD_R));
-}
-function cy(eq: bigint): number {
-  const t = Number((eq * 1000n) / Y_MAX) / 1000;
-  return chSafe(CH.TICK_H - Math.min(1, Math.max(0, t)) * CH.TICK_H);
-}
-function chSafe(v: number): number {
-  return Math.max(0, Math.min(CH.W, v));
-}
-
-function linePath(select: (s: (typeof SWEEP)[number]) => bigint): string {
-  return SWEEP.map((s, i) => {
-    const x = cx(s.shock);
-    const y = cy(select(s));
-    return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(" ");
-}
-
-const bookPathG = linePath((s) => s.bookEquity);
-const isolatedPathG = linePath((s) => s.isolatedEquity);
-const areaPathG =
-  linePath((s) => s.bookEquity) +
-  ` L${cx(-3_000n).toFixed(1)},${cy(0n).toFixed(1)} L${cx(2_000n).toFixed(1)},${cy(0n).toFixed(1)} Z`;
-
-const Y_TICKS = [26_000, 20_000, 15_000, 10_000, 5_000].map((v) => ({
-  v: BigInt(v) * 1_000_000n,
-  label: formatUsdcCompact(BigInt(v) * 1_000_000n),
-}));
 
 /** Events derived from the engine, newest first. */
 const EVENTS: Array<{ event: string; detail: string; ts: string; tone: "up" | "down" | "gold" | "muted" }> = [
@@ -238,113 +166,7 @@ export default function DashboardPage() {
               </span>
             }
           >
-            <div className="px-5 pb-4 pt-4">
-              <div className="mb-3 flex items-center gap-5 text-[12px] text-muted">
-                <span className="flex items-center gap-2">
-                  <span aria-hidden="true" className="h-[2px] w-5 rounded-full bg-gold" />
-                  ZeroMargin book
-                </span>
-                <span className="flex items-center gap-2">
-                  <span aria-hidden="true" className="h-[2px] w-5 rounded-full bg-line-strong" />
-                  Isolated LP account
-                </span>
-                <span className="flex items-center gap-2">
-                  <span aria-hidden="true" className="h-3 w-3 rounded-[3px] bg-down-dim" />
-                  Liquidation zone from{" "}
-                  {liquidationFromShock ? formatPercentFromBps(-liquidationFromShock, 0) : "—"}
-                </span>
-              </div>
-              <svg
-                viewBox={`0 0 ${CH.W} ${CH.H}`}
-                className="w-full"
-                role="img"
-                aria-label={`Equity of both accounts as price falls from +20 to -30 percent: the isolated account liquidates and returns nothing below the ${liquidationFromShock ? formatPercentFromBps(-liquidationFromShock, 0) : ""} mark, while the ZeroMargin book settles smoothly to ${formatUsdcWhole(crash.remainingEquityUsdc)} with no penalty`}
-              >
-                {Y_TICKS.map((t) => (
-                  <g key={t.label}>
-                    <line
-                      x1={0}
-                      x2={CH.W}
-                      y1={cy(t.v)}
-                      y2={cy(t.v)}
-                      stroke="var(--line)"
-                      strokeWidth="1"
-                    />
-                    <text
-                      x={CH.PAD_L}
-                      y={cy(t.v) - 4}
-                      fill="var(--text-dim)"
-                      fontSize="10"
-                      fontFamily="var(--font-data), monospace"
-                    >
-                      {t.label}
-                    </text>
-                  </g>
-                ))}
-
-                {/* liquidation zone band */}
-                {liquidationFromShock && (
-                  <rect
-                    x={cx(liquidationFromShock)}
-                    y={0}
-                    width={CH.W - cx(liquidationFromShock)}
-                    height={CH.TICK_H + 14}
-                    fill="var(--red-dim)"
-                    opacity="0.45"
-                  />
-                )}
-
-                {/* isolated (dies at the band) */}
-                <path d={isolatedPathG} fill="none" stroke="var(--line-strong)" strokeWidth="2" />
-
-                {/* area + gold line */}
-                <path d={areaPathG} fill="var(--gold-dim)" opacity="0.35" />
-                <path d={bookPathG} fill="none" stroke="var(--gold)" strokeWidth="2.5" />
-
-                {/* crash marker */}
-                <line
-                  x1={cx(-3_000n)}
-                  x2={cx(-3_000n)}
-                  y1={cy(e6(25_000))}
-                  y2={cy(0n)}
-                  stroke="var(--text-dim)"
-                  strokeWidth="1"
-                  strokeDasharray="3 4"
-                />
-                <circle cx={cx(-3_000n)} cy={cy(crash.remainingEquityUsdc)} r="4" fill="var(--gold)" />
-                <circle cx={cx(-3_000n)} cy={cy(crashIsolated.equityUsdc)} r="4" fill="var(--red)" />
-
-                {/* x axis */}
-                <line
-                  x1={0}
-                  x2={CH.W}
-                  y1={CH.TICK_H + 14}
-                  y2={CH.TICK_H + 14}
-                  stroke="var(--line-strong)"
-                />
-                {[
-                  { s: 2_000n, t: "+20%" },
-                  { s: 0n, t: "0%" },
-                  { s: -1_000n, t: "−10%" },
-                  { s: -2_000n, t: "−20%" },
-                  { s: -3_000n, t: "−30%" },
-                ].map((tick) => (
-                  <text
-                    key={tick.t}
-                    x={cx(tick.s)}
-                    y={CH.TICK_H + 28}
-                    textAnchor={
-                      tick.s === X_MIN ? "start" : tick.s === X_MAX ? "end" : "middle"
-                    }
-                    fill="var(--text-dim)"
-                    fontSize="10"
-                    fontFamily="var(--font-data), monospace"
-                  >
-                    {tick.t}
-                  </text>
-                ))}
-              </svg>
-            </div>
+            <StressChart />
           </Panel>
 
           <Panel label="Risk monitor">
