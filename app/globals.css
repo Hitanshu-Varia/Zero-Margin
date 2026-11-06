@@ -171,36 +171,7 @@ button.bg-paper,
   scrollbar-width: none;
 }
 
-/* Drifting hairline field: one ambient layer, pauses offscreen */
-.drift-field {
-  position: relative;
-  isolation: isolate;
-  overflow: clip;
-}
-.drift-field::before {
-  content: "";
-  position: absolute;
-  inset: -18%;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--line) 62%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--line) 62%, transparent) 1px, transparent 1px);
-  background-size: 34px 34px;
-  animation: drift-grid 56s linear infinite;
-}
-.drift-paused::before {
-  animation-play-state: paused;
-}
-@keyframes drift-grid {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-68px, -34px, 0);
-  }
-}
-
+/* ── ink / bone / saffron chrome ─────────────────────────────── */
 /* One orchestrated entrance per page */
 .rise {
   animation: rise 0.5s var(--ease-out) both;
@@ -239,10 +210,7 @@ button.bg-paper,
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .lift:hover,
-  .rise,
-  .drift-field::before {
+  .marquee {
     animation: none;
-    transform: none;
   }
 }

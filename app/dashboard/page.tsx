@@ -2,13 +2,11 @@ import { Panel } from "@/components/Panel";
 import { CountUp } from "@/components/motion/CountUp";
 import { StatusChip } from "@/components/Badge";
 import { StressChart } from "@/components/dashboard/StressChart";
-import { ScenarioGrid } from "@/components/desk/ScenarioGrid";
 import {
   DEMO_BOOK,
   DEMO_ISOLATED_BOOK,
   DEMO_VOL_SHOCK_BPS,
   evaluateSpan16,
-  isolatedAccountAtShock,
   previewShockUnwind,
 } from "@/lib/spanMath";
 import {
@@ -26,14 +24,6 @@ const crash = previewShockUnwind(
   -3_000n,
   DEMO_VOL_SHOCK_BPS,
 );
-const crashIsolated = isolatedAccountAtShock(
-  DEMO_ISOLATED_BOOK.lpNotionalUsdc,
-  DEMO_ISOLATED_BOOK.postedMarginUsdc,
-  -3_000n,
-  DEMO_VOL_SHOCK_BPS,
-);
-const hedgeRatio = (DEMO_BOOK.shortNotionalUsdc * 10_000n) / DEMO_BOOK.lpNotionalUsdc;
-const maintShare = (span.netMaintenanceMarginUsdc * 10_000n) / span.netInitialMarginUsdc;
 
 export default function DashboardPage() {
   return (
@@ -59,66 +49,47 @@ export default function DashboardPage() {
       </div>
 
       {/* Stat band */}
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <div className="lift rounded-panel border border-line bg-surface p-5">
           <p className="text-[12px] text-dim">Equity after settlement</p>
-          <p className="mt-2 font-mono text-[22px] tabular-nums text-up">
+          <p className="mt-2.5 font-mono text-[24px] tabular-nums text-up">
             <CountUp final={crash.remainingEquityUsdc} variant="usdcWhole" />
           </p>
-          <p className="mt-1 text-[11px] text-dim">−30% replay, {formatUsdcWhole(DEMO_BOOK.postedMarginUsdc)} posted</p>
+          <p className="mt-1.5 text-[11px] text-dim">−30% replay, {formatUsdcWhole(DEMO_BOOK.postedMarginUsdc)} posted</p>
         </div>
         <div className="lift rounded-panel border border-line bg-surface p-5">
           <p className="text-[12px] text-dim">Collateral unlocked</p>
-          <p className="mt-2 font-mono text-[22px] tabular-nums text-saffron">
+          <p className="mt-2.5 font-mono text-[24px] tabular-nums text-saffron">
             <CountUp final={span.capitalSavingsBps} variant="percent" />
           </p>
-          <p className="mt-1 text-[11px] text-dim">
+          <p className="mt-1.5 text-[11px] text-dim">
             {formatUsdcWhole(span.isolatedInitialMarginUsdc)} → {formatUsdcWhole(span.netInitialMarginUsdc)}
           </p>
         </div>
         <div className="lift rounded-panel border border-line bg-surface p-5">
           <p className="text-[12px] text-dim">Book health</p>
-          <p className="mt-2 font-mono text-[22px] tabular-nums">
+          <p className="mt-2.5 font-mono text-[24px] tabular-nums">
             {formatPercentFromBps((crash.remainingEquityUsdc * 10_000n) / span.netInitialMarginUsdc, 0)}
           </p>
-          <p className="mt-1 text-[11px] text-dim">equity ÷ net IM after settle</p>
+          <p className="mt-1.5 text-[11px] text-dim">equity ÷ net IM after settle</p>
         </div>
         <div className="lift rounded-panel border border-line bg-surface p-5">
           <p className="text-[12px] text-dim">Bad debt in envelope</p>
-          <p className="mt-2 font-mono text-[22px] tabular-nums">
+          <p className="mt-2.5 font-mono text-[24px] tabular-nums">
             {formatUsdcWhole(0n)}
           </p>
-          <p className="mt-1 text-[11px] text-dim">shock grid spans −30% to +20%</p>
+          <p className="mt-1.5 text-[11px] text-dim">shock grid spans −30% to +20%</p>
         </div>
       </div>
 
       {/* Chart + risk monitor */}
-      <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <Panel label="Equity under price stress">
-          <StressChart />
-        </Panel>
-
-        <div className="flex flex-col gap-3">
-          <Panel label="Risk settings">
-            <div className="flex flex-col gap-4 p-5 pt-4">
-              <ROW label="Hedge ratio" value={formatPercentFromBps(hedgeRatio, 0)} pct={Number(hedgeRatio) / 10_000} />
-              <ROW label="Maintenance share" value={formatPercentFromBps(maintShare, 0)} pct={Number(maintShare) / 10_000} />
-              <ROW label="Basis haircut" value={formatUsdcWhole(span.basisHaircutUsdc)} pct={0.5} />
-            </div>
-          </Panel>
-          <Panel label="16-scenario grid">
-            <div className="p-5 pt-4">
-              <ScenarioGrid values={span.scenarioNetPnlUsdc} />
-              <p className="mt-3 text-[11px] text-dim">
-                Net PnL per cell; the worst cell loses {formatUsdcWhole(span.worstScenarioLossUsdc)}.
-              </p>
-            </div>
-          </Panel>
-        </div>
-      </div>
+      {/* Equity under stress, full width */}
+      <Panel label="Equity under price stress" className="mt-4">
+        <StressChart />
+      </Panel>
 
       {/* Books + activity */}
-      <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Panel label="Books">
           <table className="w-full min-w-[560px]">
             <thead>
@@ -185,19 +156,4 @@ function toneClass(tone: "up" | "down" | "cobalt" | "muted") {
         : "text-text";
 }
 
-function ROW({ label, value, pct }: { label: string; value: string; pct: number }) {
-  return (
-    <div>
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="text-[12px] text-muted">{label}</span>
-        <span className="font-mono text-[12px] tabular-nums">{value}</span>
-      </div>
-      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-surface-raised">
-        <div
-          className="h-full rounded-full bg-saffron"
-          style={{ width: `${Math.max(2, Math.min(100, pct * 100))}%` }}
-        />
-      </div>
-    </div>
-  );
-}
+

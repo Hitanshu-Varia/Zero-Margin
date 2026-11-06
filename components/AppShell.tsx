@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
@@ -21,7 +21,7 @@ function Brand() {
     >
       <span
         aria-hidden="true"
-        className="grid size-6 place-items-center rounded-[6px] bg-saffron text-[--ink]"
+        className="grid size-6 place-items-center rounded-[6px] bg-saffron"
       >
         <span className="font-mono text-[12px] font-semibold leading-none" style={{ color: "var(--ink)" }}>
           Z
@@ -33,36 +33,22 @@ function Brand() {
 }
 
 /**
- * One header for the whole product: brand, centered primary nav,
- * engine-mode chip, single action. No sidebar, no fake controls.
+ * One compact header: brand, a truly centered segmented nav, engine
+ * mode chip, one action. The mobile row is a slim scrolling strip.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-20 border-b border-line bg-background/88">
-        <div className="mx-auto w-full max-w-[1128px] px-4 pt-[env(safe-area-inset-top)] md:px-6">
-          <div className="flex h-14 items-center gap-3">
-            <Brand />
-            <span
-              title="LOCAL — every figure is computed from the deterministic span engine in this browser; no node is connected."
-              className="ml-auto hidden cursor-help items-center gap-1.5 rounded-field border border-line bg-surface px-2 py-1 font-mono text-[10px] text-dim sm:flex"
-            >
-              <span aria-hidden="true" className="size-1.5 rounded-full bg-saffron" />
-              LOCAL
-            </span>
-            <Link
-              href="/dashboard"
-              className="ml-auto flex h-9 shrink-0 items-center rounded-field bg-paper px-3.5 text-[13px] font-medium transition-transform duration-100 ease-out active:scale-[0.97] sm:ml-3"
-              style={{ color: "var(--ink)" }}
-            >
-              Open the desk
-            </Link>
-          </div>
+      <header className="sticky top-0 z-20 border-b border-line bg-background/92">
+        <div className="relative mx-auto flex h-14 w-full max-w-[1128px] items-center justify-between gap-3 px-4 pt-[env(safe-area-inset-top)] md:px-6">
+          <Brand />
+
+          {/* the nav, dead-centered regardless of brand/right widths */}
           <nav
             aria-label="Primary"
-            className="no-scrollbar flex items-center gap-1 overflow-x-auto pb-1 md:mx-auto md:max-w-max md:justify-center md:pb-0"
+            className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-0.5 rounded-full border border-line bg-surface p-1 md:flex"
           >
             {nav.map((item) => {
               const active = pathname === item.href;
@@ -72,8 +58,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "relative flex h-10 shrink-0 items-center rounded-field px-3 text-[13px] transition-colors duration-100 hover:text-text",
-                    active ? "bg-surface-raised text-text" : "text-muted",
+                    "flex h-8 items-center rounded-full px-4 text-[13px] transition-colors duration-100",
+                    active ? "bg-surface-raised text-text" : "text-muted hover:text-text",
                   )}
                 >
                   {item.label}
@@ -81,7 +67,49 @@ export function AppShell({ children }: { children: ReactNode }) {
               );
             })}
           </nav>
+
+          <div className="flex items-center gap-2.5">
+            <span
+              title="LOCAL — every figure is computed from the deterministic span engine in this browser; no node is connected."
+              className="hidden cursor-help items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-1 font-mono text-[10px] text-dim sm:flex"
+            >
+              <span aria-hidden="true" className="size-1.5 rounded-full bg-saffron" />
+              LOCAL
+            </span>
+            <Link
+              href="/dashboard"
+              className="flex h-9 shrink-0 items-center rounded-full bg-paper px-4 text-[13px] font-medium transition-transform duration-100 ease-out active:scale-[0.97]"
+              style={{ color: "var(--ink)" }}
+            >
+              Open the desk
+            </Link>
+          </div>
         </div>
+
+        {/* mobile: one slim chip strip */}
+        <nav
+          aria-label="Primary"
+          className="no-scrollbar flex gap-1.5 overflow-x-auto px-4 pb-2 pt-0.5 md:hidden"
+        >
+          {nav.map((item) => {
+            const active = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "flex h-8 shrink-0 items-center rounded-full border px-3 text-[12px]",
+                  active
+                    ? "border-line-strong bg-surface-raised text-text"
+                    : "border-line text-muted",
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
       </header>
 
       <main className="min-w-0 flex-1">{children}</main>
@@ -89,8 +117,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       <footer className="mt-2 border-t border-line">
         <div className="mx-auto flex w-full max-w-[1128px] flex-wrap items-baseline justify-between gap-4 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-5 md:px-6">
           <p className="max-w-[46ch] text-pretty text-[12px] leading-relaxed text-dim">
-            A hackathon prototype; the code is tested, not audited. The short leg
-            settles against a pre-funded demo adapter, and every figure is
+            A hackathon prototype; the code is tested, not audited. The short
+            leg settles against a pre-funded demo adapter, and every figure is
             computed locally by the span engine.
           </p>
           <p className="font-mono text-[11px] tabular-nums text-dim">
