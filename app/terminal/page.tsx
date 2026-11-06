@@ -7,6 +7,8 @@ import { Panel, Stat } from "@/components/Panel";
 import { StatusChip } from "@/components/Badge";
 import { EngineVerifier } from "@/components/desk/EngineVerifier";
 import { SettleAction } from "@/components/desk/SettleAction";
+import { LiveBookActions } from "@/components/desk/LiveBookActions";
+import { LiveStateLine } from "@/components/desk/LiveStateLine";
 import {
   DEMO_BOOK,
   DEMO_ENTRY_PRICE_USDC,
@@ -242,13 +244,14 @@ function Terminal() {
 
   return (
     <main className="mx-auto w-full max-w-[1240px] px-4 pb-16 pt-6 md:px-6">
+      <LiveStateLine />
       {/* ── Shock console ─────────────────────────────────────── */}
       <Panel
         label="Price shock console"
         accent
         meta={
           <span className="flex items-center gap-2">
-            <span className="font-mono text-dim">entry $3,000.00</span>
+            <span className="font-mono text-dim">live mark (chain)</span>
             <span aria-hidden="true">→</span>
             <Num tone="cobalt" size="xs">
               {formatUsdcWhole(mark)}
@@ -643,6 +646,9 @@ function Terminal() {
       </div>
 
       {/* ── Settlement action ─────────────────────────────────── */}
+      {/* ── Live book actions bound to the deployed app ────────── */}
+      <LiveBookActions shockBps={shockBps} />
+
       <SettleAction
         input={{
           lpNotionalUsdc: DEMO_BOOK.lpNotionalUsdc.toString(),

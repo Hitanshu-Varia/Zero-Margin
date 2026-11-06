@@ -156,8 +156,43 @@ export default function ProofPage() {
           </div>
         </Panel>
 
-        {/* Sponsor proof + limitations */}
+        {/* Sponsor proof + live deployment */}
         <div className="flex flex-col gap-4">
+          <Panel label="Live deployment — Base Sepolia (84532)" accent>
+            <div className="rule-t">
+              <table className="w-full min-w-[560px] border-separate border-spacing-0">
+                <tbody className="font-mono text-[11px] tabular-nums">
+                  {[
+                    ["ClearingAquaApp", process.env.NEXT_PUBLIC_APP_ADDRESS],
+                    ["MockAqua (local Aqua)", process.env.NEXT_PUBLIC_AQUA_ADDRESS],
+                    ["ShortHedgeAdapter", process.env.NEXT_PUBLIC_ADAPTER_ADDRESS],
+                    ["PortfolioMarginHook", process.env.NEXT_PUBLIC_HOOK_ADDRESS],
+                    ["Demo USDC", process.env.NEXT_PUBLIC_USDC_ADDRESS],
+                  ].map(([label, addr]) => (
+                    <tr key={label} className="border-b border-line last:border-0">
+                      <td className="px-4 py-2 text-[12px] text-muted">{label}</td>
+                      <td className="px-4 py-2 text-end">
+                        <a
+                          href={`https://sepolia.basescan.org/address/${addr}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-saffron hover:underline"
+                        >
+                          {addr}
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="px-4 py-3 text-[11px] text-dim">
+              every address above is a real contract on testnet with the mined
+              hook flag mask 0x240; the demo book, adapter binding, and
+              keeper roles are wired exactly as the tests assert.
+            </p>
+          </Panel>
+
           <Panel label="Sponsor proof points">
             <div className="rule-t">
               <Stat
