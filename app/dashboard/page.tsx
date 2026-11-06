@@ -123,7 +123,7 @@ export default function DashboardPage() {
               value={
                 <CountUp
                   final={crash.remainingEquityUsdc}
-                  format={(v) => formatUsdc(v)}
+                  variant="usdc"
                   className="cobalt-lead"
                 />
               }
@@ -140,7 +140,7 @@ export default function DashboardPage() {
               value={
                 <CountUp
                   final={span.capitalSavingsBps}
-                  format={(v) => formatPercentFromBps(v)}
+                  variant="percent"
                   className="text-cobalt"
                 />
               }
@@ -157,7 +157,7 @@ export default function DashboardPage() {
               value={
                 <CountUp
                   final={span.netInitialMarginUsdc}
-                  format={(v) => formatUsdcWhole(v)}
+                  variant="usdcWhole"
                 />
               }
               caption={
