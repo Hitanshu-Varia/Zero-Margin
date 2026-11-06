@@ -9,6 +9,9 @@ import {
 } from "@/lib/spanMath";
 import { HeroDemo } from "@/components/landing/HeroDemo";
 import { Num } from "@/components/Num";
+import { BorderBeam } from "@/components/motion/BorderBeam";
+import { Reveal } from "@/components/motion/Reveal";
+import { CountUp } from "@/components/motion/CountUp";
 import {
   formatPercentFromBps,
   formatUsdcWhole,
@@ -69,7 +72,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-dvh">
       {/* ── Masthead ─────────────────────────────────────────── */}
-      <header className="border-b border-line bg-surface">
+      <header className="sticky top-0 z-40 border-b border-line bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-[1240px] items-center gap-8 px-4 md:px-8">
           <a href="/" className="flex items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-ring">
             <span
@@ -102,48 +105,51 @@ export default function LandingPage() {
 
       <main className="mx-auto w-full max-w-[1240px] px-4 md:px-8">
         {/* ── Hero, left-set ───────────────────────────────── */}
-        <section className="grid gap-10 pb-14 pt-14 md:pt-20 lg:grid-cols-[6fr_5fr] lg:gap-16">
+        <section className="lattice grid gap-10 pb-16 pt-14 md:pt-20 lg:grid-cols-[6fr_5fr] lg:gap-16">
           <div className="max-w-[62ch]">
             <h1 className="text-[36px] font-medium leading-[1.06] tracking-[-0.01em] md:text-[46px]">
               A flash crash is one
               transaction, not a liquidation.
             </h1>
-            <p className="mt-5 max-w-[58ch] text-[16px] leading-[1.6] text-muted">
-              ZeroMargin cross-margins a Uniswap v4 liquidity position against
-              an offsetting short hedge inside one Aqua virtual balance. The
-              worst case is netted on a 16-scenario grid, so the crash settles
-              in a single transaction with no liquidation penalty and no
-              floating-point surprises.
-            </p>
+            <Reveal delay={0.12} y={10}>
+              <p className="mt-5 max-w-[58ch] text-[16px] leading-[1.6] text-muted">
+                ZeroMargin cross-margins a Uniswap v4 liquidity position against
+                an offsetting short hedge inside one Aqua virtual balance. The
+                worst case is netted on a 16-scenario grid, so the crash settles
+                in a single transaction with no liquidation penalty and no
+                floating-point surprises.
+              </p>
 
-            {/* The two-numeral settlement: the typographic moment */}
-            <p className="mt-9 flex flex-wrap items-baseline gap-x-4 gap-y-1 font-mono text-[24px] font-medium tabular-nums tracking-tight md:text-[30px]">
-              <span className="text-down line-through decoration-[1.5px] decoration-down/60">
-                $147,500
-              </span>
-              <span className="text-[15px] text-dim">became</span>
-              <span className="text-text">$10,000</span>
-              <span className="text-[13px] text-dim">
-                of locked collateral on GV-01 ({formatPercentFromBps(span.capitalSavingsBps)} less)
-              </span>
-            </p>
+              {/* The two-numeral settlement: the typographic moment */}
+              <p className="mt-9 flex flex-wrap items-baseline gap-x-4 gap-y-1 font-mono text-[24px] font-medium tabular-nums tracking-tight md:text-[30px]">
+                <span className="text-down line-through decoration-[1.5px] decoration-down/60">
+                  $147,500
+                </span>
+                <span className="text-[15px] text-dim">became</span>
+                <span className="text-text">$10,000</span>
+                <span className="text-[13px] text-dim">
+                  of locked collateral on GV-01 ({formatPercentFromBps(span.capitalSavingsBps)} less)
+                </span>
+              </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <a
-                href="/dashboard"
-                className="flex h-10 items-center rounded-field bg-paper px-4 text-[14px] font-medium text-white transition-colors duration-100 hover:bg-text"
-              >
-                Open the dashboard
-              </a>
-              <a
-                href="/terminal?shock=-3000"
-                className="flex h-10 items-center rounded-field border border-rule-strong bg-surface px-4 text-[14px] text-muted transition-colors duration-100 hover:text-text"
-              >
-                Watch the −30% replay
-              </a>
-            </div>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <a
+                  href="/dashboard"
+                  className="flex h-10 items-center rounded-field bg-paper px-4 text-[14px] font-medium text-white transition-colors duration-100 hover:bg-cobalt/90"
+                >
+                  Open the dashboard
+                </a>
+                <a
+                  href="/terminal?shock=-3000"
+                  className="flex h-10 items-center rounded-field border border-line-strong bg-surface px-4 text-[14px] text-muted transition-colors duration-100 hover:text-text"
+                >
+                  Watch the −30% replay
+                </a>
+              </div>
+            </Reveal>
 
-            <dl className="mt-10 grid max-w-[580px] grid-cols-3 gap-6 border-t border-line pt-6">
+            <Reveal delay={0.28} y={10}>
+              <dl className="mt-10 grid max-w-[580px] grid-cols-3 gap-6 border-t border-line pt-6">
               {[
                 {
                   dt: "Settled equity at −30%",
@@ -170,16 +176,45 @@ export default function LandingPage() {
                 </div>
               ))}
             </dl>
+            </Reveal>
           </div>
 
-          {/* The console inset: the one dark element on the page */}
+          {/* The console: the product moment, framed by the accent beam */}
           <div className="lg:pt-8">
-            <HeroDemo />
+            <BorderBeam duration={9}>
+              <HeroDemo />
+            </BorderBeam>
           </div>
         </section>
 
+        {/* ── Claim rail ─────────────────────────────────────── */}
+        <div className="marquee border-b border-line py-4">
+          <div className="marquee-track font-mono text-[12px] tabular-nums text-dim">
+            {[0, 1].map((copy) => (
+              <div key={copy} className="flex shrink-0 items-center gap-10">
+                {[
+                  "GV-01 net initial margin 10,000.000000e6",
+                  "isolated margin baseline 147,500.000000e6",
+                  `capital savings ${formatPercentFromBps(span.capitalSavingsBps)}`,
+                  "span grid 8 price shocks × 2 vol states",
+                  "solvent at +2,000 bps, liquidation-free at −3,000 bps",
+                  `unwind fee ${formatUsdcWhole(crash.protocolFeeUsdc)} on the atomic settle`,
+                  "basis haircut 500 bps vs observed worst 328 bps",
+                ].map((line) => (
+                  <span key={line} className="flex items-center gap-10">
+                    {line}
+                    <span aria-hidden="true" className="text-line-strong">
+                      ▪
+                    </span>
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* ── Clause 1: how the engine works ─────────────────── */}
-        <section className="border-t-2 border-text pb-16 pt-8">
+        <section className="border-t border-line pb-16 pt-8">
           <div className="clause">
             <span className="clause-no" aria-hidden="true">§1</span>
             <div className="min-w-0 flex-1">
@@ -231,7 +266,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── Clause 2: the ledger, stated plain ─────────────── */}
-        <section className="border-t-2 border-text pb-16 pt-8">
+        <section className="border-t border-line pb-16 pt-8">
           <div className="clause">
             <span className="clause-no" aria-hidden="true">§2</span>
             <div className="min-w-0 flex-1">
@@ -301,7 +336,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── Clause 3: answers ─────────────────────────────── */}
-        <section className="border-t-2 border-text pb-16 pt-8">
+        <section className="border-t border-line pb-16 pt-8">
           <div className="clause">
             <span className="clause-no" aria-hidden="true">§3</span>
             <div className="min-w-0 flex-1">
