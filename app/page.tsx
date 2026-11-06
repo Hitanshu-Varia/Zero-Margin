@@ -287,7 +287,15 @@ export default function TerminalPage() {
       </Panel>
 
       {/* ── Split screen ──────────────────────────────────────── */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_1fr]">
+      <div className="mt-5">
+        <div className="mb-3 flex items-center gap-3">
+          <span aria-hidden="true" className="h-px flex-1 bg-line" />
+          <span className="font-mono text-[10px] tracking-[0.2em] text-dim">
+            SAME SHOCK · SAME OBSERVATION WINDOW
+          </span>
+          <span aria-hidden="true" className="h-px flex-1 bg-line" />
+        </div>
+        <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
         {/* Left: isolated account */}
         <Panel
           label="Isolated LP account"
@@ -309,6 +317,57 @@ export default function TerminalPage() {
               <span className="font-mono text-[12px] text-dim">
                 maint. {formatUsdcWhole(isolated.maintenanceMarginUsdc)}
               </span>
+            </div>
+
+            {/* Margin-health track: equity against a posted-margin scale */}
+            <div
+              role="img"
+              aria-label={`Margin health: equity ${formatUsdcWhole(isolated.equityUsdc)} against maintenance threshold ${formatUsdcWhole(isolated.maintenanceMarginUsdc)}`}
+              className="mt-4 h-[6px] overflow-hidden rounded-full bg-surface-raised"
+            >
+              <div
+                aria-hidden="true"
+                className="relative h-full overflow-visible rounded-full bg-line-strong"
+              >
+                <div
+                  aria-hidden="true"
+                  className={`h-full rounded-full transition-[width] duration-100 ${
+                    isolated.liquidated
+                      ? "bg-down"
+                      : isolated.equityUsdc <= isolated.maintenanceMarginUsdc
+                        ? "bg-down"
+                        : isolated.breachMarginBps < 12_500n
+                          ? "bg-amber"
+                          : "bg-line-strong"
+                  }`}
+                  style={{
+                    width: `${
+                      isolated.liquidated
+                        ? 4
+                        : isolated.postedMarginUsdc === 0n
+                          ? 0
+                          : Math.max(
+                              2,
+                              Number(
+                                (isolated.equityUsdc * 1000n) /
+                                  isolated.postedMarginUsdc /
+                                  10n,
+                              ),
+                            )
+                    }%`,
+                  }}
+                />
+                <div
+                  aria-hidden="true"
+                  title="Maintenance threshold — breach liquidates the account"
+                  className="absolute top-[-3px] h-[12px] w-[2px] bg-line-strong"
+                  style={{ left: "50%" }}
+                />
+              </div>
+            </div>
+            <div className="mt-1 flex justify-between font-mono text-[10px] text-dim">
+              <span>equity</span>
+              <span>maintenance breach</span>
             </div>
 
             {isolated.liquidated ? (
@@ -504,6 +563,7 @@ export default function TerminalPage() {
             </div>
           </div>
         </Panel>
+        </div>
       </div>
 
       <p className="mt-5 max-w-3xl font-mono text-[12px] leading-relaxed text-dim">
