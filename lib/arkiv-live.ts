@@ -116,12 +116,14 @@ export async function writeAttestation(fields: {
   };
 }
 
-/** The keeper's read: UNWIND_ELIGIBLE inside its own margin envelope. */
+/** The keeper's read: UNWIND_ELIGIBLE inside its own margin envelope. The
+ *  read is access-key key-only: no writer key is needed, so a read works
+ *  even when the burner has no Rabdi gas or a zero placeholder key. */
 export async function queryAttestations(): Promise<Attestation[]> {
   const rows: Attestation[] = [];
   // the SDK's typed select wraps the same raw arkiv_query; keep the raw
   // string identical to the README's runnable query out of honesty
-  const response = (await walletClient().transport.request({
+  const response = (await publicClient().transport.request({
     method: "arkiv_query",
     params: [
       `arkiv.schema = str('${ARKIV_SCHEMA}') AND status = str('UNWIND_ELIGIBLE') AND marginRatioBps < i32(10000) ORDER BY $key ASC`,
