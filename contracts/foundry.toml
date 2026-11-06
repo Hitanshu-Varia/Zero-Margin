@@ -1,0 +1,16 @@
+[profile.default]
+solc_version = "0.8.26"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = false
+fs_permissions = [{ access = "read", path = "./data" }]
+bytecode_hash = "none"
+cbor_metadata = false
+
+[profile.default.fuzz]
+runs = 32
+max_test_rejects = 65536
+
+[rpc_endpoints]
+base_mainnet = "${BASE_MAINNET_RPC_URL}"
