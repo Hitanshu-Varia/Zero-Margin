@@ -134,8 +134,7 @@ function ScenarioGrid({
         </div>
       ))}
       <p className="font-mono text-[10px] text-dim">
-        net PnL in USDC per scenario · cobalt highlight marks the current
-        shock band
+        net PnL in USDC per scenario; the cobalt ring marks the current shock band
       </p>
     </div>
   );
@@ -331,7 +330,7 @@ function Terminal() {
         <div className="mb-3 flex items-center gap-3">
           <span aria-hidden="true" className="h-px flex-1 bg-line" />
           <span className="font-mono text-[10px] tracking-[0.2em] text-dim">
-            SAME SHOCK · SAME OBSERVATION WINDOW
+            the same shock, observed by both books
           </span>
           <span aria-hidden="true" className="h-px flex-1 bg-line" />
         </div>
