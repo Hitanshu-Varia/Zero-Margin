@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { SiteHeader } from "@/components/SiteHeader";
-import { SiteFooter } from "@/components/SiteFooter";
+import { AppShell } from "@/components/AppShell";
 
 const display = Instrument_Sans({
   variable: "--font-display",
@@ -32,9 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${display.variable} ${data.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">{children}</div>
-        <SiteFooter />
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );
