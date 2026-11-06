@@ -4,7 +4,7 @@ type BadgeVariant = "local" | "fork" | "cache" | "error" | "status";
 
 const variantClass: Record<BadgeVariant, string> = {
   local:
-    "border-amber-dim bg-amber-dim/40 text-amber",
+    "border-gold-dim bg-gold-dim/40 text-gold",
   fork: "border-up-dim bg-up-dim/40 text-up",
   cache: "border-chain-dim bg-chain-dim/40 text-chain",
   error: "border-down-dim bg-down-dim/40 text-down",
@@ -53,10 +53,10 @@ export function StatusChip({
   tone = "status",
 }: {
   children: ReactNode;
-  tone?: "status" | "up" | "down" | "amber";
+  tone?: "status" | "up" | "down" | "gold";
 }) {
   const toneKey: BadgeVariant =
-    tone === "up" ? "fork" : tone === "down" ? "error" : tone === "amber" ? "local" : "status";
+    tone === "up" ? "fork" : tone === "down" ? "error" : tone === "gold" ? "local" : "status";
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[11px] tracking-[0.06em] uppercase ${

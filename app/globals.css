@@ -47,11 +47,8 @@
   --color-ring: var(--ring);
   --font-sans: var(--font-display);
   --font-mono: var(--font-data);
-  --radius-panel: 12px;
+  --radius-panel: 16px;
   --radius-field: 10px;
-  /* legacy aliases — removed in the token rename pass */
-  --color-amber: var(--gold);
-  --color-amber-dim: var(--gold-dim);
 }
 
 html {

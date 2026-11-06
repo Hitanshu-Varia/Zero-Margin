@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-type Tone = "text" | "muted" | "dim" | "up" | "down" | "amber";
+type Tone = "text" | "muted" | "dim" | "up" | "down" | "gold";
 type Size = "xs" | "sm" | "md" | "lg" | "hero";
 
 const toneClass: Record<Tone, string> = {
@@ -9,15 +9,15 @@ const toneClass: Record<Tone, string> = {
   dim: "text-dim",
   up: "text-up",
   down: "text-down",
-  amber: "text-amber",
+  gold: "text-gold",
 };
 
 const sizeClass: Record<Size, string> = {
   xs: "text-[11px]",
   sm: "text-[13px]",
   md: "text-[14px]",
-  lg: "text-[18px]",
-  hero: "text-[32px] md:text-[36px] leading-none tracking-tight",
+  lg: "text-[18px] font-medium",
+  hero: "text-[34px] md:text-[38px] leading-none tracking-tight font-medium",
 };
 
 /**

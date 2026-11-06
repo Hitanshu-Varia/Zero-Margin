@@ -84,7 +84,7 @@ export default function ReplayPage() {
           <div className="text-[11px] uppercase tracking-[0.08em] text-dim">
             99th percentile · nearest-rank
           </div>
-          <Num size="lg" tone="amber" className="mt-1.5 block">
+          <Num size="lg" tone="gold" className="mt-1.5 block">
             {STATS.p99Bps.toFixed(1)} bps
           </Num>
         </Panel>
@@ -127,12 +127,12 @@ export default function ReplayPage() {
               x2={W}
               y1={y(500)}
               y2={y(500)}
-              stroke="var(--amber)"
+              stroke="var(--gold)"
               strokeWidth="1"
               strokeDasharray="5 5"
               opacity="0.6"
             />
-            <text x={W - 4} y={y(500) - 5} textAnchor="end" fill="var(--amber)" fontSize="10" fontStyle="monospace">
+            <text x={W - 4} y={y(500) - 5} textAnchor="end" fill="var(--gold)" fontSize="10" fontStyle="monospace">
               500 bps haircut
             </text>
             {/* crash windows */}

@@ -23,13 +23,13 @@ export function QueryBlock({ query }: { query: string }) {
     <div className="overflow-hidden rounded-panel border border-line bg-surface">
       <div className="flex items-center justify-between border-b border-line px-4 py-2">
         <span className="text-[12px] uppercase tracking-[0.08em] text-muted">
-          <span aria-hidden="true" className="mr-2 inline-block h-[6px] w-[6px] bg-amber align-middle" />
+          <span aria-hidden="true" className="mr-2 inline-block h-[6px] w-[6px] bg-gold align-middle" />
           Keeper query — runnable on Rabdi 7794095
         </span>
         <button
           type="button"
           onClick={copy}
-          className="rounded-field border border-line-strong bg-surface-raised px-2.5 py-1 font-mono text-[11px] text-muted transition-colors duration-100 hover:border-amber-dim hover:text-amber"
+          className="rounded-field border border-line-strong bg-surface-raised px-2.5 py-1 font-mono text-[11px] text-muted transition-colors duration-100 hover:border-gold-dim hover:text-gold"
         >
           {copied ? "copied ✓" : "copy"}
         </button>

@@ -29,7 +29,7 @@ function RatioCell({ attestation }: { attestation: Attestation }) {
         />
         <div
           aria-hidden="true"
-          className="absolute inset-y-0 w-[1px] bg-amber"
+          className="absolute inset-y-0 w-[1px] bg-gold"
           style={{ left: "40%" }}
         />
       </div>
@@ -104,7 +104,7 @@ export default function ArkivPage() {
                     {formatUsdcWhole(a.shortNotionalUsdc)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Num tone="amber" size="xs">
+                    <Num tone="gold" size="xs">
                       {formatUsdcWhole(a.netInitialMarginUsdc)}
                     </Num>
                   </td>
@@ -129,7 +129,7 @@ export default function ArkivPage() {
       <p className="mt-5 max-w-3xl font-mono text-[12px] leading-relaxed text-dim">
         schema fields: portfolioId str · trader addr · status str ·
         marginRatioBps i32 · notionals dec · equityUsdc dec · ttl
-        ExpirationTime.fromMinutes(5) · the amber tick marks 100%
+        ExpirationTime.fromMinutes(5) · the gold tick marks 100%
         coverage; left of it, the book is UNWIND_ELIGIBLE
       </p>
     </main>

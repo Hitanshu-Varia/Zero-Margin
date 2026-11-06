@@ -39,7 +39,7 @@ export default function ProofPage() {
         <p className="mt-1 max-w-2xl text-[14px] leading-relaxed text-muted">
           Golden vectors, the withdrawal guard, and the stated limits.
           Every number in the table is recomputed from the engine at page
-          load — a parity failure in <code className="font-mono text-amber">lib/spanMath.ts</code>{" "}
+          load — a parity failure in <code className="font-mono text-gold">lib/spanMath.ts</code>{" "}
           fails the vitest suite, not the display.
         </p>
       </div>
@@ -72,7 +72,7 @@ export default function ProofPage() {
                 const s = evaluateSpan16(v.lp, v.short);
                 return (
                   <tr key={v.id} className="border-b border-line last:border-b-0">
-                    <td className="px-4 py-3 font-mono text-[13px] text-amber">
+                    <td className="px-4 py-3 font-mono text-[13px] text-gold">
                       {v.id}
                     </td>
                     <td className="px-4 py-3 text-muted">{v.book}</td>
@@ -87,7 +87,7 @@ export default function ProofPage() {
                       </Num>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Num tone="amber" size="xs">
+                      <Num tone="gold" size="xs">
                         {formatBps(s.capitalSavingsBps)} ·{" "}
                         {formatPercentFromBps(s.capitalSavingsBps)}
                       </Num>
@@ -136,7 +136,7 @@ export default function ProofPage() {
               />
               <Stat
                 label="Required initial margin"
-                tone="amber"
+                tone="gold"
                 value={formatUsdcWhole(guard.requiredInitialMarginUsdc)}
               />
               <Stat
@@ -221,9 +221,9 @@ export default function ProofPage() {
                 ],
               ].map(([term, body]) => (
                 <li key={term} className="flex gap-2.5">
-                  <span className="mt-[7px] h-[5px] w-[5px] shrink-0 rounded-full bg-amber" />
+                  <span className="mt-[7px] h-[5px] w-[5px] shrink-0 rounded-full bg-gold" />
                   <span className="text-[13px] leading-relaxed text-muted">
-                    <span className="font-mono text-amber">{term}</span> —{" "}
+                    <span className="font-mono text-gold">{term}</span> —{" "}
                     {body}
                   </span>
                 </li>

@@ -53,7 +53,7 @@ function WaterfallRow({
   label: string;
   value: string;
   sign: string;
-  tone: "down" | "up" | "amber" | "muted" | "text";
+  tone: "down" | "up" | "gold" | "muted" | "text";
   rule?: boolean;
 }) {
   const toneClass =
@@ -61,8 +61,8 @@ function WaterfallRow({
       ? "text-down"
       : tone === "up"
         ? "text-up"
-        : tone === "amber"
-          ? "text-amber"
+        : tone === "gold"
+          ? "text-gold"
           : tone === "muted"
             ? "text-muted"
             : "text-text";
@@ -118,11 +118,11 @@ function ScenarioGrid({
                       negative
                         ? active ? "bg-down" : "bg-down-dim"
                         : active ? "bg-up" : "bg-up-dim"
-                    } ${active ? "ring-1 ring-amber" : ""}`}
+                    } ${active ? "ring-1 ring-gold" : ""}`}
                   />
                   <span
                     className={`font-mono text-[10px] leading-none ${
-                      active ? "text-amber" : "text-dim"
+                      active ? "text-gold" : "text-dim"
                     }`}
                   >
                     {labels[k]}
@@ -134,7 +134,7 @@ function ScenarioGrid({
         </div>
       ))}
       <p className="font-mono text-[10px] text-dim">
-        net PnL in USDC per scenario · amber highlight marks the current
+        net PnL in USDC per scenario · gold highlight marks the current
         shock band
       </p>
     </div>
@@ -227,11 +227,11 @@ function Terminal() {
   const isolatedTone = isolated.liquidated
     ? "down"
     : isolated.equityUsdc < isolated.maintenanceMarginUsdc
-      ? "amber"
+      ? "gold"
       : "text";
   const settled = quote.protocolFeeUsdc > 0n && shockBps <= 0n;
   const bookTone =
-    quote.badDebtUsdc > 0n ? "down" : settled ? "amber" : "text";
+    quote.badDebtUsdc > 0n ? "down" : settled ? "gold" : "text";
   const hedgeRatio = (DEMO_BOOK.shortNotionalUsdc * 10_000n) / DEMO_BOOK.lpNotionalUsdc;
 
   const runCrash = useCallback(
@@ -269,7 +269,7 @@ function Terminal() {
           <span className="flex items-center gap-2">
             <span className="font-mono text-dim">entry $3,000.00</span>
             <span aria-hidden="true">→</span>
-            <Num tone="amber" size="xs">
+            <Num tone="gold" size="xs">
               {formatUsdcWhole(mark)}
             </Num>
             <span className="text-dim">/ WETH</span>
@@ -379,7 +379,7 @@ function Terminal() {
                     : isolated.equityUsdc <= isolated.maintenanceMarginUsdc
                       ? "bg-down"
                       : isolated.breachMarginBps < 15_000n
-                        ? "bg-amber"
+                        ? "bg-gold"
                         : "bg-line-strong"
                 }`}
                 style={{
@@ -457,7 +457,7 @@ function Terminal() {
                   {
                     label: "ZeroMargin fee",
                     value: crashQuote.protocolFeeUsdc,
-                    tone: "text-amber",
+                    tone: "text-gold",
                   },
                   {
                     label: "Netted offset",
@@ -484,7 +484,7 @@ function Terminal() {
           accent
           label="ZeroMargin book"
           meta={
-            <StatusChip tone={quote.badDebtUsdc > 0n ? "down" : shockBps < 0n ? "amber" : "status"}>
+            <StatusChip tone={quote.badDebtUsdc > 0n ? "down" : shockBps < 0n ? "gold" : "status"}>
               {quote.badDebtUsdc > 0n
                 ? "breach"
                 : shockBps < 0n
@@ -509,13 +509,13 @@ function Terminal() {
               </span>
             </div>
 
-            <div className="mt-4 rounded-field border border-amber-dim bg-amber-dim/20 px-3 py-2.5">
+            <div className="mt-4 rounded-field border border-gold-dim bg-gold-dim/20 px-3 py-2.5">
               <p className="font-mono text-[12px] leading-relaxed text-muted">
                 short leg nets{" "}
                 <span className="text-up">{formatUsdc(quote.shortGainUsdc)}</span> against{" "}
                 <span className="text-down">{formatUsdc(quote.lpLossUsdc)}</span> LP loss ·
                 offset{" "}
-                <span className="text-amber">{formatUsdc(quote.nettedOffsetUsdc)}</span>
+                <span className="text-gold">{formatUsdc(quote.nettedOffsetUsdc)}</span>
                 {quote.badDebtUsdc === 0n && (
                   <span className="text-dim"> · no liquidation penalty</span>
                 )}
@@ -531,7 +531,7 @@ function Terminal() {
               />
               <Stat
                 label="Capital savings"
-                tone="amber"
+                tone="gold"
                 value={`${formatBps(span.capitalSavingsBps)} · ${formatPercentFromBps(span.capitalSavingsBps)}`}
               />
               <Stat label="Hedge ratio" value={formatPercentFromBps(hedgeRatio, 0)} />
@@ -564,7 +564,7 @@ function Terminal() {
                   <WaterfallRow
                     label="Netted offset"
                     sign="="
-                    tone="amber"
+                    tone="gold"
                     value={formatUsdc(quote.nettedOffsetUsdc)}
                     rule
                   />
@@ -610,7 +610,7 @@ function Terminal() {
               </div>
               <div className="flex flex-wrap items-center gap-1.5 font-mono text-[11px]">
                 <span className="rounded-field border border-line bg-surface-raised px-2 py-1 text-muted">
-                  <span className="text-amber">ship</span> {formatUsdcWhole(DEMO_BOOK.postedMarginUsdc)}
+                  <span className="text-gold">ship</span> {formatUsdcWhole(DEMO_BOOK.postedMarginUsdc)}
                 </span>
                 <span aria-hidden="true" className="text-dim">→</span>
                 <span className="rounded-field border border-line bg-surface-raised px-2 py-1 text-muted">
@@ -621,7 +621,7 @@ function Terminal() {
                   <span className="text-down">pull</span> {formatUsdcWhole(quote.nettedOffsetUsdc + quote.traderMarginUsedUsdc)}
                 </span>
                 <span aria-hidden="true" className="text-dim">=</span>
-                <span className="rounded-field border border-amber-dim bg-amber-dim/20 px-2 py-1 text-amber">
+                <span className="rounded-field border border-gold-dim bg-gold-dim/20 px-2 py-1 text-gold">
                   {formatUsdcWhole(quote.remainingEquityUsdc)} equity
                 </span>
               </div>
