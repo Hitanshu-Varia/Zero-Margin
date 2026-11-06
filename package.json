@@ -10,6 +10,7 @@
     "lint:claims": "python3 scripts/lint_claims.py"
   },
   "dependencies": {
+    "motion": "^14.10.0",
     "next": "16.4.5",
     "react": "19.3.0",
     "react-dom": "19.3.0"

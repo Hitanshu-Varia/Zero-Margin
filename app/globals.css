@@ -288,3 +288,133 @@ input[type="range"]:focus-visible {
   );
   pointer-events: none;
 }
+
+/* ── Motion primitives (21st.dev lineage, system tokens) ─────── */
+
+/* Border beam: accent arc chasing the frame of ONE hero card */
+.border-beam {
+  position: relative;
+}
+.border-beam .beam {
+  position: absolute;
+  pointer-events: none;
+  background: var(--cobalt);
+  z-index: 2;
+}
+.beam-x {
+  top: 0;
+  height: 2px;
+  width: 68px;
+  border-radius: 999px 0 0 999px;
+  filter: drop-shadow(0 0 6px rgba(77, 141, 246, 0.55));
+  animation: beam-x var(--beam-duration, 7s) linear infinite;
+}
+.beam-y {
+  top: 0;
+  width: 2px;
+  height: 56px;
+  border-radius: 0 0 999px 999px;
+  filter: drop-shadow(0 0 6px rgba(77, 141, 246, 0.55));
+  animation: beam-y var(--beam-duration, 7s) linear infinite;
+  animation-delay: calc(var(--beam-duration, 7s) * 0.28);
+  right: 0;
+  transform-origin: top right;
+  background: linear-gradient(180deg, transparent, var(--cobalt));
+  background: linear-gradient(180deg, transparent, var(--cobalt));
+  background: linear-gradient(180deg, transparent, var(--cobalt)) !important;
+}
+@keyframes beam-x {
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+  4% {
+    opacity: 1;
+  }
+  62% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    left: calc(100% - 68px);
+    opacity: 0;
+  }
+}
+@keyframes beam-y {
+  0% {
+    transform: rotate(0deg) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+}
+/* the spinning ring wrapper holds a gradient edge arc */
+.border-beam::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--beam-angle, 0turn),
+    transparent 0turn,
+    transparent 0.86turn,
+    var(--cobalt) 0.97turn,
+    transparent 1turn
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: beam-angle var(--beam-duration, 7s) linear infinite;
+}
+@property --beam-angle {
+  syntax: "<angle>";
+  initial-value: 0turn;
+  inherits: false;
+}
+@keyframes beam-angle {
+  0% {
+    --beam-angle: 0turn;
+  }
+  100% {
+    --beam-angle: 1turn;
+  }
+}
+.border-beam > .beam {
+  display: none;
+}
+
+/* Dot lattice hero background (Motionsites "interactive" family) */
+.lattice {
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(60% 62% at 50% 0%, #000 55%, transparent 100%);
+}
+
+/* Marquee rail for claim chips */
+.marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee-track {
+  display: flex;
+  gap: 40px;
+  width: max-content;
+  animation: marquee 36s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
