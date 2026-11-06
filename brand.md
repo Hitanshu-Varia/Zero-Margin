@@ -13,14 +13,16 @@
 - **Type** · Inter for words; Geist Mono with `tabular-nums` for
   every number. Headlines are short, medium-weight, balanced with
   `text-balance`; no tracked caps, no eyebrow labels.
-- **The one memorable object** · the **shock compass** on the
-  landing page: the eight price shocks arranged as spokes whose
-  length is equity returned, with an amber spring needle and a
-  mono readout in the hub. The dashboard keeps the same discipline
-  with stat bands, an interactive sweep, and a 16-cell grid map.
-- **Motion** · one ambient drift layer (offscreen-paused), one
-  orchestrated `rise` entrance, spring needle, `scale(0.97)`
-  press feedback, all flattened under `prefers-reduced-motion`.
+- **The one memorable object** · metengine-style landing rhythm:
+  statement hero, live settlement ticker of all eight shocks,
+  four figure counters that count into place, ordered mechanism
+  cards, the two-desks crash comparison, and a real FAQ. All
+  numbers engine-computed at render.
+- **Motion** · metengine-grade and quiet: one ambient drift layer
+  (offscreen-paused), a seamless settlement ticker that pauses
+  off-screen, CountUp counters, scroll-into-view fade-and-rise
+  (RevealOnView), `scale(0.97)` press feedback, all flattened
+  under `prefers-reduced-motion`.
 - **Layout rules** · 1128px content column, generous section
   spacing, one primary action per view, short copy, footer carries
   the honest disclaimer (tested, not audited; demo adapter).

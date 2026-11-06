@@ -144,8 +144,27 @@ button.bg-paper,
   color: var(--ink);
 }
 
+/* Seamless settlement ticker */
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee-slide 32s linear infinite;
+}
+@keyframes marquee-slide {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-paused {
+  animation-play-state: paused;
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 .no-scrollbar {
   -ms-overflow-style: none;
