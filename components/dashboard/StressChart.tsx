@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import {
   DEMO_BOOK,
   DEMO_ISOLATED_BOOK,
@@ -82,6 +83,7 @@ const Y_TICKS = [26_000, 20_000, 15_000, 10_000, 5_000].map((v) => ({
  */
 export function StressChart() {
   const [index, setIndex] = useState(CRASH_INDEX);
+  const reduce = useReducedMotion();
   const current = SWEEP[index];
 
   const bookPath = useMemo(() => path((s) => s.bookEquity), []);
@@ -153,7 +155,15 @@ export function StressChart() {
 
           <path d={isoPath} fill="none" stroke="var(--line-strong)" strokeWidth="2" />
           <path d={areaPath} fill="var(--cobalt-dim)" opacity="0.35" />
-          <path d={bookPath} fill="none" stroke="var(--cobalt)" strokeWidth="2.5" />
+          <motion.path
+            d={bookPath}
+            fill="none"
+            stroke="var(--cobalt)"
+            strokeWidth="2.5"
+            initial={reduce ? { pathLength: 1 } : { pathLength: 0, opacity: 0.4 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 1.1, ease: [0.32, 0.72, 0, 1] }}
+          />
 
           {/* cursor */}
           <line

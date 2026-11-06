@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Num } from "@/components/Num";
 import { Panel, Stat, KpiCard } from "@/components/Panel";
+import { Reveal } from "@/components/motion/Reveal";
 import { StatusChip } from "@/components/Badge";
 import { StressChart } from "@/components/dashboard/StressChart";
 import {
@@ -115,44 +116,68 @@ export default function DashboardPage() {
 
         {/* KPI rail */}
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <KpiCard
-            label="Book equity — settled"
-            value={<span className="cobalt-lead">{formatUsdc(crash.remainingEquityUsdc)}</span>}
-            caption={
-              <span className="text-dim">
-                no liquidation penalty at the −30% replay
-              </span>
-            }
-          />
-          <KpiCard
-            label="Collateral unlocked"
-            value={formatPercentFromBps(span.capitalSavingsBps)}
-            valueClass="text-cobalt"
-            caption={
-              <span className="text-dim">
-                from {formatUsdcWhole(span.isolatedInitialMarginUsdc)} down to {formatUsdcWhole(span.netInitialMarginUsdc)} on GV-01
-              </span>
-            }
-          />
-          <KpiCard
-            label="Net initial margin"
-            value={formatUsdcWhole(span.netInitialMarginUsdc)}
-            caption={
-              <span className="text-dim">
-                maintenance {formatUsdcWhole(span.netMaintenanceMarginUsdc)} · worst case + haircut
-              </span>
-            }
-          />
-          <KpiCard
-            label="Bad debt in envelope"
-            value={formatUsdcWhole(0n)}
-            valueClass="text-up"
-            caption={
-              <span className="text-dim">
-                shocks [−3,000, +2,000] bps on books hedged 80–100%
-              </span>
-            }
-          />
+          <Reveal>
+            <KpiCard
+              label="Book equity — settled"
+              value={
+                <CountUp
+                  final={crash.remainingEquityUsdc}
+                  format={(v) => formatUsdc(v)}
+                  className="cobalt-lead"
+                />
+              }
+              caption={
+                <span className="text-dim">
+                  no liquidation penalty at the −30% replay
+                </span>
+              }
+            />
+          </Reveal>
+          <Reveal delay={0.08}>
+            <KpiCard
+              label="Collateral unlocked"
+              value={
+                <CountUp
+                  final={span.capitalSavingsBps}
+                  format={(v) => formatPercentFromBps(v)}
+                  className="text-cobalt"
+                />
+              }
+              caption={
+                <span className="text-dim">
+                  from {formatUsdcWhole(span.isolatedInitialMarginUsdc)} down to {formatUsdcWhole(span.netInitialMarginUsdc)} on GV-01
+                </span>
+              }
+            />
+          </Reveal>
+          <Reveal delay={0.16}>
+            <KpiCard
+              label="Net initial margin"
+              value={
+                <CountUp
+                  final={span.netInitialMarginUsdc}
+                  format={(v) => formatUsdcWhole(v)}
+                />
+              }
+              caption={
+                <span className="text-dim">
+                  maintenance {formatUsdcWhole(span.netMaintenanceMarginUsdc)} · worst case + haircut
+                </span>
+              }
+            />
+          </Reveal>
+          <Reveal delay={0.24}>
+            <KpiCard
+              label="Bad debt in envelope"
+              value={formatUsdcWhole(0n)}
+              valueClass="text-up"
+              caption={
+                <span className="text-dim">
+                  shocks [−3,000, +2,000] bps on books hedged 80–100%
+                </span>
+              }
+            />
+          </Reveal>
         </div>
 
         {/* Chart + risk monitor */}
