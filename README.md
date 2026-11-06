@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ZeroMargin
 
-## Getting Started
+A non-custodial margin engine that cross-margins a Uniswap v4 LP position
+against an offsetting short hedge inside one 1inch Aqua virtual balance,
+and settles a flash crash in a single transaction with no liquidation
+penalty inside the tested envelope.
 
-First, run the development server:
+This repository is the web terminal. It computes every number on screen
+from the same deterministic `BigInt` fixed-point spec the contracts use:
+a 16-scenario SPAN-style risk grid, a `500 bps` cross-venue basis haircut,
+and a cross-leg settlement waterfall.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Pages
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Route | What it shows |
+| :--- | :--- |
+| `/` | Split-screen terminal: isolated account versus the ZeroMargin book under the same price shock. |
+| `/replay` | Basis statistics and the three named crash windows. |
+| `/arkiv` | Wallet-owned risk attestations with a `300`-second expiration. |
+| `/proof` | Sponsor proof points, golden vectors, and stated limitations. |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Math
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`lib/spanMath.ts` is the TypeScript mirror of `SpanMathLib.sol`. All
+monetary values are USDC base units (`1e6 = $1.00`). There is no
+floating-point arithmetic in the math path — `BigInt` and integer
+division only, with ceiling rounding on every requirement and floor
+rounding on every credit.
 
-## Learn More
+Verified golden vectors:
 
-To learn more about Next.js, take a look at the following resources:
+| ID | Book | Net initial margin | Isolated margin | Savings |
+| :--- | :--- | ---: | ---: | ---: |
+| GV-01 | `$100,000` LP / `$95,000` short | `$10,000` | `$147,500` | `9,322 bps` |
+| GV-02 | `$100,000` LP / `$80,000` short | `$13,750` | `$140,000` | `9,017 bps` |
+| GV-03 | `$100,000` LP / unhedged | `$33,750` | `$100,000` | `6,625 bps` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Status
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+A hackathon prototype. Not audited. The atomic unwind is demonstrated on
+a fork with a pre-funded demo hedge adapter that settles both legs —
+there is no live venue connected. Basis, venue, smart-contract, and
+oracle risk remain.
