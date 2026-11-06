@@ -102,7 +102,7 @@ export function StressChart() {
     <div className="px-5 pb-4 pt-4">
       <div className="mb-3 flex flex-wrap items-center gap-5 text-[12px] text-muted">
         <span className="flex items-center gap-2">
-          <span aria-hidden="true" className="h-[2px] w-5 rounded-full bg-gold" />
+          <span aria-hidden="true" className="h-[2px] w-5 rounded-full bg-cobalt" />
           ZeroMargin book
         </span>
         <span className="flex items-center gap-2">
@@ -152,8 +152,8 @@ export function StressChart() {
           )}
 
           <path d={isoPath} fill="none" stroke="var(--line-strong)" strokeWidth="2" />
-          <path d={areaPath} fill="var(--gold-dim)" opacity="0.35" />
-          <path d={bookPath} fill="none" stroke="var(--gold)" strokeWidth="2.5" />
+          <path d={areaPath} fill="var(--cobalt-dim)" opacity="0.35" />
+          <path d={bookPath} fill="none" stroke="var(--cobalt)" strokeWidth="2.5" />
 
           {/* cursor */}
           <line
@@ -164,7 +164,7 @@ export function StressChart() {
             stroke="var(--line-strong)"
             strokeDasharray="3 4"
           />
-          <circle cx={cursorX} cy={cy(current.bookEquity)} r="4.5" fill="var(--gold)" />
+          <circle cx={cursorX} cy={cy(current.bookEquity)} r="4.5" fill="var(--cobalt)" />
           <circle
             cx={cursorX}
             cy={cy(current.isolatedEquity)}
@@ -201,7 +201,7 @@ export function StressChart() {
           </p>
           <p className="mt-1 flex justify-between gap-2 text-[12px]">
             <span className="text-muted">ZeroMargin</span>
-            <span className="font-mono tabular-nums text-gold">
+            <span className="font-mono tabular-nums text-cobalt">
               {formatUsdcWhole(current.bookEquity)}
             </span>
           </p>

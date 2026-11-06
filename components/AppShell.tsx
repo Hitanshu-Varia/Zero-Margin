@@ -107,7 +107,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="flex h-14 items-center gap-2.5 border-b border-line px-5">
           <span
             aria-hidden="true"
-            className="grid h-6 w-6 place-items-center rounded-[8px] bg-gold text-background"
+            className="grid h-6 w-6 place-items-center rounded-[8px] bg-cobalt text-background"
           >
             <span className="font-mono text-[13px] font-bold leading-none">Z</span>
           </span>
@@ -158,7 +158,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <span
                 aria-hidden="true"
-                className="grid h-6 w-6 place-items-center rounded-[8px] bg-gold text-background"
+                className="grid h-6 w-6 place-items-center rounded-[8px] bg-cobalt text-background"
               >
                 <span className="font-mono text-[13px] font-bold leading-none">Z</span>
               </span>

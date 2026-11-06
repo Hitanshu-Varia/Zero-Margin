@@ -104,7 +104,7 @@ export function HeroDemo() {
           LIVE DEMO
         </span>
         <span className="font-mono text-[11px] text-dim">
-          entry $3,000.00 → <span className="text-gold">{formatUsdcWhole(mark)}</span> / WETH
+          entry $3,000.00 → <span className="text-cobalt">{formatUsdcWhole(mark)}</span> / WETH
         </span>
         <button
           type="button"
@@ -134,10 +134,10 @@ export function HeroDemo() {
             </p>
           </div>
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-gold">
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-cobalt">
               ZeroMargin book
             </p>
-            <p className="mt-1 font-mono text-[26px] leading-none tracking-tight settle text-gold">
+            <p className="mt-1 font-mono text-[26px] leading-none tracking-tight settle text-cobalt">
               {formatUsdcWhole(quote.remainingEquityUsdc)}
             </p>
             <p className="mt-1.5 font-mono text-[11px] text-dim">
@@ -165,7 +165,7 @@ export function HeroDemo() {
               label="Netted offset"
               value={formatUsdcWhole(quote.nettedOffsetUsdc)}
               width={maxLeg(quote.nettedOffsetUsdc)}
-              tone="gold"
+              tone="cobalt"
             />
           </div>
 
@@ -175,7 +175,7 @@ export function HeroDemo() {
               <label htmlFor="hero-shock" className="text-[12px] text-muted">
                 Price shock — drag it
               </label>
-              <span className="font-mono text-[13px] tabular-nums text-gold">
+              <span className="font-mono text-[13px] tabular-nums text-cobalt">
                 {crashDepth > 0 ? "−" : ""}
                 {crashDepth.toFixed(0)}%
               </span>
@@ -210,10 +210,10 @@ function FlowBar({
   label: string;
   value: string;
   width: number;
-  tone: "down" | "up" | "gold";
+  tone: "down" | "up" | "cobalt";
 }) {
-  const bar = tone === "down" ? "bg-down" : tone === "up" ? "bg-up" : "bg-gold";
-  const glow = tone === "down" ? "bg-down-dim" : tone === "up" ? "bg-up-dim" : "bg-gold-dim";
+  const bar = tone === "down" ? "bg-down" : tone === "up" ? "bg-up" : "bg-cobalt";
+  const glow = tone === "down" ? "bg-down-dim" : tone === "up" ? "bg-up-dim" : "bg-cobalt-dim";
   return (
     <div className="flex items-center gap-3">
       <span className="w-24 shrink-0 text-[11px] uppercase tracking-wide text-muted">

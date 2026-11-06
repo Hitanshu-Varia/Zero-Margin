@@ -73,7 +73,7 @@ export default function LandingPage() {
           <a href="/" className="flex items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-ring">
             <span
               aria-hidden="true"
-              className="grid h-7 w-7 place-items-center rounded-[8px] bg-gold text-background"
+              className="grid h-7 w-7 place-items-center rounded-[8px] bg-cobalt text-background"
             >
               <span className="font-mono text-[14px] font-bold leading-none">Z</span>
             </span>
@@ -115,7 +115,7 @@ export default function LandingPage() {
             </p>
             <h1 className="mt-5 text-[38px] font-semibold leading-[1.08] tracking-tight md:text-[54px]">
               A flash crash is one transaction, not a{" "}
-              <span className="gold-gradient">liquidation</span>
+              <span className="cobalt-lead">liquidation</span>
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-[16px] leading-relaxed text-muted">
               ZeroMargin cross-margins a Uniswap v4 LP against an offsetting
@@ -157,7 +157,7 @@ export default function LandingPage() {
                 dt: "Margin cut on GV-01",
                 dd: (
                   <>
-                    <Num size="lg" tone="gold" className="block">{formatPercentFromBps(span.capitalSavingsBps)}</Num>
+                    <Num size="lg" tone="cobalt" className="block">{formatPercentFromBps(span.capitalSavingsBps)}</Num>
                     <span className="text-[12px] text-dim">$147,500 → $10,000</span>
                   </>
                 ),
@@ -166,7 +166,7 @@ export default function LandingPage() {
                 dt: "Equity after −30% crash",
                 dd: (
                   <>
-                    <Num size="lg" tone="gold" className="block">{formatUsdcWhole(crash.remainingEquityUsdc)}</Num>
+                    <Num size="lg" tone="cobalt" className="block">{formatUsdcWhole(crash.remainingEquityUsdc)}</Num>
                     <span className="text-[12px] text-dim">
                       from ${formatUsdcWhole(crashIsolated.equityUsdc)} isolated · $50 fee
                     </span>
@@ -224,7 +224,7 @@ export default function LandingPage() {
                 step: "02",
                 title: "Guard the withdrawal",
                 body: "A mined-address v4 hook evaluates every liquidity removal against the surviving book and reverts SpanMarginBreach before the PoolManager can release collateral.",
-                link: ["See the guard", "/proof"],
+                link: ["see the guard", "/proof"],
               },
               {
                 step: "03",
@@ -237,12 +237,12 @@ export default function LandingPage() {
                 key={card.step}
                 className="group rounded-panel border border-line bg-surface p-6 transition-colors duration-120 hover:border-line-strong"
               >
-                <p className="font-mono text-[11px] tracking-[0.14em] text-gold">{card.step}</p>
+                <p className="font-mono text-[11px] tracking-[0.14em] text-cobalt">{card.step}</p>
                 <h3 className="mt-3 text-[17px] font-semibold">{card.title}</h3>
                 <p className="mt-2 text-[13px] leading-relaxed text-muted">{card.body}</p>
                 <a
                   href={card.link[1]}
-                  className="mt-4 inline-block text-[13px] text-dim transition-colors duration-120 group-hover:text-gold"
+                  className="mt-4 inline-block text-[13px] text-dim transition-colors duration-120 group-hover:text-cobalt"
                 >
                   {card.link[0]} →
                 </a>
@@ -262,7 +262,7 @@ export default function LandingPage() {
                 The isolated desk loses its whole margin.
                 <br />
                 The hedged book keeps{" "}
-                <span className="gold-gradient">$19,700</span>.
+                <span className="cobalt-lead">$19,700</span>.
               </h2>
               <p className="mt-4 max-w-md text-[14px] leading-relaxed text-muted">
                 Same crash, same book, same block. The isolated account pays a
@@ -295,7 +295,7 @@ export default function LandingPage() {
                     { h: 100, cls: "bg-line-strong", tag: formatUsdcWhole(DEMO_BOOK.postedMarginUsdc) },
                     {
                       h: 79,
-                      cls: "bg-gold",
+                      cls: "bg-cobalt",
                       tag: formatUsdcWhole(crash.remainingEquityUsdc),
                     },
                   ]}
@@ -331,7 +331,7 @@ export default function LandingPage() {
 
         {/* ── CTA ───────────────────────────────────────────── */}
         <section className="pb-20">
-          <div className="flex flex-col items-start justify-between gap-6 rounded-panel border border-gold-dim bg-gold-dim/20 p-8 md:flex-row md:items-center md:p-10">
+          <div className="flex flex-col items-start justify-between gap-6 rounded-panel border border-cobalt/40 bg-cobalt-dim/20 p-8 md:flex-row md:items-center md:p-10">
             <div>
               <h2 className="text-[22px] font-semibold tracking-tight">
                 Open the books and drag the crash yourself

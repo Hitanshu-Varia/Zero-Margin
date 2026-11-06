@@ -44,12 +44,12 @@ const crashIsolated = isolatedAccountAtShock(
 const basisStats = computeBasisStats(BASIS_ROWS);
 
 /** Events derived from the engine, newest first. */
-const EVENTS: Array<{ event: string; detail: string; ts: string; tone: "up" | "down" | "gold" | "muted" }> = [
+const EVENTS: Array<{ event: string; detail: string; ts: string; tone: "up" | "down" | "cobalt" | "muted" }> = [
   {
     event: "BookUnwound",
     detail: `settled ±0 liquidation at −3,000 bps · equity ${formatUsdcWhole(crash.remainingEquityUsdc)}`,
     ts: "T−00:41",
-    tone: "gold",
+    tone: "cobalt",
   },
   {
     event: "MarginAdded",
@@ -86,7 +86,7 @@ export default function DashboardPage() {
               Overview
             </p>
             <h1 className="mt-1.5 text-[26px] font-semibold tracking-tight">
-              <span className="gold-gradient">One virtual balance</span>, both legs
+              <span className="cobalt-lead">One virtual balance</span>, both legs
               settled
             </h1>
             <p className="mt-1 max-w-xl text-[14px] leading-relaxed text-muted">
@@ -117,7 +117,7 @@ export default function DashboardPage() {
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard
             label="Book equity — settled"
-            value={<span className="gold-gradient">{formatUsdc(crash.remainingEquityUsdc)}</span>}
+            value={<span className="cobalt-lead">{formatUsdc(crash.remainingEquityUsdc)}</span>}
             caption={
               <span className="text-dim">
                 −30% replay · no liquidation penalty
@@ -127,7 +127,7 @@ export default function DashboardPage() {
           <KpiCard
             label="Collateral unlocked"
             value={formatPercentFromBps(span.capitalSavingsBps)}
-            valueClass="text-gold"
+            valueClass="text-cobalt"
             caption={
               <span className="text-dim">
                 {formatUsdcWhole(span.isolatedInitialMarginUsdc)} → {formatUsdcWhole(span.netInitialMarginUsdc)} on GV-01
@@ -175,14 +175,14 @@ export default function DashboardPage() {
                 label="Margin ratio at settlement"
                 displayText={formatPercentFromBps((crash.remainingEquityUsdc * 10_000n) / span.netInitialMarginUsdc, 0)}
                 fillPct={Number((crash.remainingEquityUsdc * 10000n) / span.netInitialMarginUsdc) / 400}
-                tone="gold"
+                tone="cobalt"
                 note="equity ÷ net IM after the −30% settle"
               />
               <Gauge
                 label="Hedge ratio"
                 displayText={formatPercentFromBps(hedgeRatio, 0)}
                 fillPct={Number(hedgeRatio) / 10_000}
-                tone="gold"
+                tone="cobalt"
                 note="$95,000 short against the LP leg"
               />
               <Gauge
@@ -208,7 +208,7 @@ export default function DashboardPage() {
                 <Stat
                   label="Basis haircut on matched notional"
                   value={formatUsdcWhole(span.basisHaircutUsdc)}
-                  tone="gold"
+                  tone="cobalt"
                 />
               </div>
             </div>
@@ -254,7 +254,7 @@ export default function DashboardPage() {
                     <td className="px-4 py-3.5 text-right font-mono tabular-nums text-[13px] text-up">
                       {formatUsdcWhole(DEMO_BOOK.shortNotionalUsdc)} short
                     </td>
-                    <td className="px-4 py-3.5 text-right font-mono tabular-nums text-[13px] text-gold">
+                    <td className="px-4 py-3.5 text-right font-mono tabular-nums text-[13px] text-cobalt">
                       {formatUsdcWhole(span.netInitialMarginUsdc)}
                     </td>
                     <td className="px-4 py-3.5 text-right">
@@ -263,12 +263,12 @@ export default function DashboardPage() {
                       />
                     </td>
                     <td className="px-4 py-3.5">
-                      <StatusChip tone="gold">settled</StatusChip>
+                      <StatusChip tone="cobalt">settled</StatusChip>
                     </td>
                     <td className="px-4 py-3.5 text-right">
                       <a
                         href="/terminal?shock=-3000"
-                        className="text-[13px] text-muted transition-colors duration-120 hover:text-gold"
+                        className="text-[13px] text-muted transition-colors duration-120 hover:text-cobalt"
                       >
                         inspect →
                       </a>
@@ -299,7 +299,7 @@ export default function DashboardPage() {
                     <td className="px-4 py-3.5 text-right">
                       <a
                         href="/terminal?shock=-3000"
-                        className="text-[13px] text-muted transition-colors duration-120 hover:text-gold"
+                        className="text-[13px] text-muted transition-colors duration-120 hover:text-cobalt"
                       >
                         inspect →
                       </a>
@@ -322,8 +322,8 @@ export default function DashboardPage() {
                           ? "text-down"
                           : ev.tone === "up"
                             ? "text-up"
-                            : ev.tone === "gold"
-                              ? "text-gold"
+                            : ev.tone === "cobalt"
+                              ? "text-cobalt"
                               : "text-muted"
                       }`}
                     >
@@ -357,19 +357,19 @@ function Gauge({
   label: string;
   displayText: string;
   fillPct: number;
-  tone: "gold" | "up" | "down" | "muted";
+  tone: "cobalt" | "up" | "down" | "muted";
   note: string;
 }) {
   const fill =
-    tone === "gold"
-      ? "bg-gold"
+    tone === "cobalt"
+      ? "bg-cobalt"
       : tone === "up"
         ? "bg-up"
         : tone === "down"
           ? "bg-down"
           : "bg-muted/50";
   const textTone =
-    tone === "muted" ? "text-muted" : tone === "gold" ? "text-gold" : tone === "up" ? "text-up" : "text-down";
+    tone === "muted" ? "text-muted" : tone === "cobalt" ? "text-cobalt" : tone === "up" ? "text-up" : "text-down";
   return (
     <div className="border-b border-line py-3 last:border-b-0">
       <div className="flex items-baseline justify-between gap-3">
@@ -412,7 +412,7 @@ function MarginRatioBar({ pctBps, liquidated = false }: { pctBps: bigint; liquid
         ) : (
           <div
             aria-hidden="true"
-            className="h-full rounded-full bg-gold"
+            className="h-full rounded-full bg-cobalt"
             style={{ width: `${Math.max(2, Math.min(100, pct * 100))}%` }}
           />
         )}
