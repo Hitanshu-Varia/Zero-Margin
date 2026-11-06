@@ -51,14 +51,14 @@ export default function DashboardPage() {
       {/* Stat band */}
       <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <div className="lift rounded-panel border border-line bg-surface p-5">
-          <p className="text-[12px] text-dim">Equity after settlement</p>
+          <p className="text-[12px] text-dim">Equity after settlement (GV-01 vector)</p>
           <p className="mt-2.5 font-mono text-[24px] tabular-nums text-up">
             <CountUp final={crash.remainingEquityUsdc} variant="usdcWhole" />
           </p>
           <p className="mt-1.5 text-[11px] text-dim">−30% replay, {formatUsdcWhole(DEMO_BOOK.postedMarginUsdc)} posted</p>
         </div>
         <div className="lift rounded-panel border border-line bg-surface p-5">
-          <p className="text-[12px] text-dim">Collateral unlocked</p>
+          <p className="text-[12px] text-dim">Collateral unlocked (GV-01 vector)</p>
           <p className="mt-2.5 font-mono text-[24px] tabular-nums text-saffron">
             <CountUp final={span.capitalSavingsBps} variant="percent" />
           </p>
@@ -67,7 +67,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="lift rounded-panel border border-line bg-surface p-5">
-          <p className="text-[12px] text-dim">Book health</p>
+          <p className="text-[12px] text-dim">Book health (GV-01 vector)</p>
           <p className="mt-2.5 font-mono text-[24px] tabular-nums">
             {formatPercentFromBps((crash.remainingEquityUsdc * 10_000n) / span.netInitialMarginUsdc, 0)}
           </p>
