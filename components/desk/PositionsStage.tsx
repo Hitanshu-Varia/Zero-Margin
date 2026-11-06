@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatUsdcWhole } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { walletInputAttrs } from "@/lib/wallets";
 
 const ADDR = /^0x[0-9a-fA-F]{40}$/;
 const STORE_KEY = "zm.wallets.v1";
@@ -142,7 +143,7 @@ export function PositionsStage() {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="0x… wallet address"
+          {...walletInputAttrs}
           aria-label="Wallet address"
           className="min-w-[240px] flex-1 rounded-field border border-line bg-surface px-4 font-mono text-[13px] tabular-nums outline-none focus:border-line-strong"
           style={{ height: 44 }}

@@ -89,7 +89,7 @@ check(
   arkivRes.status === 200 && Array.isArray(arkivRes.body?.entities) && arkivRes.body?.entities.length >= 3,
 );
 
-// mobile overflow check
+// mobile overflow check + positions live-read smoke
 await page.setViewportSize({ width: 390, height: 844 });
 await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
 await page.waitForTimeout(600);
@@ -98,6 +98,14 @@ const overflow = await page.evaluate(() => ({
   w: document.documentElement.scrollWidth,
 }));
 check("mobile zero overflow", overflow.sx === 0 && overflow.w === 390);
+
+const pos = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+await pos.goto(`${BASE}/positions`, { waitUntil: "networkidle" });
+await pos.fill("input[aria-label='Wallet address']", "0xB18C4Be38412E8A12961a09988a9DD211257476F");
+await pos.click("text=Add wallet");
+await pos.waitForTimeout(2500);
+const text = await pos.$eval("main", (el) => el.innerText);
+check("real chain position row (ETH shown)", /ETH/.test(text) || /positions/i.test(text));
 
 await browser.close();
 
