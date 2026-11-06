@@ -43,6 +43,8 @@
   --color-ring: var(--ring);
   --font-sans: var(--font-display);
   --font-mono: var(--font-data);
+  --radius-panel: 10px;
+  --radius-field: 6px;
 }
 
 html {
