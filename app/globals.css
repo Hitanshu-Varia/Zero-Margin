@@ -26,6 +26,8 @@
   --console-line: #26282c;
   --console-text: #e8e9ea;
   --console-amber: #e6b75c;
+  --up-bright: #3ecf8e;
+  --down-bright: #ff7a63;
 }
 
 @theme inline {
@@ -56,6 +58,9 @@
   --color-gold-dim: var(--cobalt-dim);
   --color-amber: var(--cobalt);
   --color-amber-dim: var(--cobalt-dim);
+  --color-down-bright: var(--down-bright);
+  --color-up-bright: var(--up-bright);
+  --color-surface-dim: var(--background);
   --font-sans: var(--font-display);
   --font-mono: var(--font-data);
   --radius-panel: 3px;

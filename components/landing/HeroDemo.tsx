@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  BPS,
   DEMO_BOOK,
+  DEMO_ENTRY_PRICE_USDC,
   DEMO_ISOLATED_BOOK,
   DEMO_VOL_SHOCK_BPS,
   isolatedAccountAtShock,
@@ -10,15 +12,14 @@ import {
   signedFloorDiv,
 } from "@/lib/spanMath";
 import { formatUsdcWhole } from "@/lib/format";
-import { DEMO_ENTRY_PRICE_USDC } from "@/lib/spanMath";
-import { BPS } from "@/lib/spanMath";
 
 const TARGET = -3_000n;
 
 /**
- * The landing demo: the demo book played on a loop. The slider drives
- * the crash; auto-play sweeps 0 bps down to −3,000 bps with an eased
- * rAF loop (skipped under prefers-reduced-motion, which pins the crash).
+ * The settlement console: the one dark element in the paper design,
+ * pinned into the hero like a terminal taped to a memo. Auto-play sweeps
+ * entry to −3,000 bps on a loop; the slider takes over the moment it is
+ * touched; prefers-reduced-motion pins the crash statically.
  */
 export function HeroDemo() {
   const [shock, setShock] = useState(0n);
@@ -40,13 +41,11 @@ export function HeroDemo() {
     let timer: ReturnType<typeof setTimeout>;
 
     const frame = () => {
-      // sweep
       const start = performance.now();
       const duration = 1500;
       const sweep = (now: number) => {
         if (cancelled) return;
         const t = Math.min(1, (now - start) / duration);
-        // accelerate into the crash — shock easing
         const eased = t * t;
         setShock(TARGET * BigInt(Math.round(eased * 1_000)) / 1_000n);
         if (t < 1) {
@@ -83,101 +82,99 @@ export function HeroDemo() {
     DEMO_VOL_SHOCK_BPS,
   );
   const mark = DEMO_ENTRY_PRICE_USDC + signedFloorDiv(DEMO_ENTRY_PRICE_USDC * shock, BPS);
-  const crashDepth = Number((-shock * 100n) / 100n) / 100; // 0..30 (%)
+  const crashDepth = Number(shock < 0n ? -shock : 0n) / 100;
 
-  // waterfall bars, scaled against the worst absolute leg in this quote
-  const maxLeg = (v: bigint) => {
-    const abs = v < 0n ? -v : v;
-    const peak = abs > quote.lpLossUsdc ? abs : quote.lpLossUsdc > 0n ? quote.lpLossUsdc : 1n;
-    return Number((abs * 100n) / (peak === 0n ? 1n : peak));
-  };
+  const peak = quote.lpLossUsdc > quote.shortGainUsdc ? quote.lpLossUsdc : quote.shortGainUsdc;
+  const barOf = (v: bigint) =>
+    Number(((v < 0n ? -v : v) * 100n) / (peak === 0n ? 1n : peak));
 
   return (
     <section
       aria-label="Live demo of the ZeroMargin settlement"
-      className="overflow-hidden rounded-panel border border-line bg-surface"
+      className="overflow-hidden rounded-panel border border-console-line bg-console text-console-text"
     >
-      {/* console bar */}
-      <div className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-3">
-        <span className="flex items-center gap-2 font-mono text-[11px] tracking-[0.08em] text-dim">
+      <div className="flex flex-wrap items-center gap-3 border-b border-console-line px-5 py-3">
+        <span className="flex items-center gap-2 font-mono text-[11px] tracking-[0.08em] text-console-amber uppercase">
+          {/* ALL-CAPS kept only here: a console title is literally how terminals write */}
           <span aria-hidden="true" className="pulse-dot h-[6px] w-[6px] rounded-full bg-up" />
-          LIVE DEMO
+          Settlement console
         </span>
-        <span className="font-mono text-[11px] text-dim">
-          entry $3,000.00 → <span className="text-cobalt">{formatUsdcWhole(mark)}</span> / WETH
+        <span className="ml-auto font-mono text-[11px] tabular-nums text-surface/60">
+          {formatUsdcWhole(DEMO_ENTRY_PRICE_USDC)} →{" "}
+          <span className="text-console-amber">{formatUsdcWhole(mark)}</span> / WETH
         </span>
         <button
           type="button"
           onClick={() => setPlaying((v) => !v)}
-          className="ml-auto rounded-chip border border-line bg-surface-raised px-2.5 py-1 font-mono text-[11px] text-muted transition-colors duration-120 hover:border-line-strong hover:text-text"
+          className="rounded-chip border border-console-line px-2.5 py-1 font-mono text-[11px] text-console-text/70 transition-colors duration-100 hover:border-console-amber hover:text-console-amber"
         >
-          {playing ? "⏸ pause" : "▶ play"}
+          {playing ? "pause" : "play"}
         </button>
       </div>
 
-      {/* readout */}
-      <div className="grid gap-6 px-5 pb-5 pt-4 md:grid-cols-[auto_1fr] md:gap-10">
-        <div className="flex w-full flex-row justify-between gap-8 md:w-56 md:flex-col md:justify-start md:gap-5">
+      <div className="grid gap-6 px-5 pb-5 pt-4 md:grid-cols-[168px_1fr] md:gap-8">
+        {/* the two accounts */}
+        <div className="flex flex-row justify-between gap-6 md:flex-col md:justify-start md:gap-5">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-dim">
-              Isolated account
-            </p>
+            <p className="text-[12px] text-surface/55">Isolated desk</p>
             <p
-              className={`mt-1 font-mono text-[26px] leading-none tracking-tight settle ${
-                isolated.liquidated ? "text-down" : "text-muted"
+              className={`mt-1 font-mono text-[24px] leading-none tabular-nums tracking-tight settle ${
+                isolated.liquidated ? "text-down-bright" : "text-console-text"
               }`}
             >
               {formatUsdcWhole(isolated.equityUsdc)}
             </p>
-            <p className="mt-1.5 font-mono text-[11px] text-dim">
-              {isolated.liquidated ? "liquidated · 10% penalty" : "4× leverage on the LP leg"}
+            <p className="mt-1.5 text-[11px] leading-snug text-surface/50">
+              4× leverage, no hedge
             </p>
           </div>
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-cobalt">
-              ZeroMargin book
-            </p>
-            <p className="mt-1 font-mono text-[26px] leading-none tracking-tight settle text-cobalt">
+            <p className="text-[12px] text-surface/55">ZeroMargin book</p>
+            <p
+              className={`mt-1 font-mono text-[24px] leading-none tabular-nums tracking-tight text-console-amber settle`}
+            >
               {formatUsdcWhole(quote.remainingEquityUsdc)}
             </p>
-            <p className="mt-1.5 font-mono text-[11px] text-dim">
-              one transaction · {quote.badDebtUsdc === 0n ? "no liquidation penalty" : "bad debt"}
+            <p className="mt-1.5 text-[11px] leading-snug text-surface/50">
+              one transaction, netted
             </p>
           </div>
         </div>
 
+        {/* waterfall */}
         <div className="min-w-0">
-          {/* waterfall bars */}
-          <div className="space-y-2">
-            <FlowBar
+          <div className="space-y-2.5">
+            <ConsoleBar
               label="LP leg loss"
               value={formatUsdcWhole(quote.lpLossUsdc)}
-              width={maxLeg(quote.lpLossUsdc)}
-              tone="down"
+              width={barOf(quote.lpLossUsdc)}
+              tone="loss"
             />
-            <FlowBar
+            <ConsoleBar
               label="Short gain"
               value={formatUsdcWhole(quote.shortGainUsdc)}
-              width={maxLeg(quote.shortGainUsdc)}
-              tone="up"
+              width={barOf(quote.shortGainUsdc)}
+              tone="gain"
             />
-            <FlowBar
-              label="Netted offset"
+            <ConsoleBar
+              label="Netted"
               value={formatUsdcWhole(quote.nettedOffsetUsdc)}
-              width={maxLeg(quote.nettedOffsetUsdc)}
-              tone="cobalt"
+              width={barOf(quote.nettedOffsetUsdc)}
+              tone="amber"
             />
           </div>
 
-          {/* interactive slider */}
           <div className="mt-5">
             <div className="mb-2 flex items-baseline justify-between gap-3">
-              <label htmlFor="hero-shock" className="text-[12px] text-muted">
-                Price shock — drag it
+              <label
+                htmlFor="hero-shock"
+                className="text-[12px] text-surface/60"
+              >
+                shock (bps)
               </label>
-              <span className="font-mono text-[13px] tabular-nums text-cobalt">
-                {crashDepth > 0 ? "−" : ""}
-                {crashDepth.toFixed(0)}%
+              <span className="font-mono text-[13px] tabular-nums text-console-amber">
+                {shock < 0n ? "−" : ""}
+                {Number((shock < 0n ? -shock : shock)).toLocaleString("en-US")} bps
               </span>
             </div>
             <input
@@ -187,7 +184,7 @@ export function HeroDemo() {
               max={0}
               step={10}
               value={Number(shock)}
-              aria-valuetext={`down ${crashDepth.toFixed(0)} percent from entry`}
+              aria-valuetext={`down ${crashDepth.toFixed(1)} percent from entry`}
               onChange={(e) => {
                 setPlaying(false);
                 setShock(BigInt(e.target.value));
@@ -201,7 +198,7 @@ export function HeroDemo() {
   );
 }
 
-function FlowBar({
+function ConsoleBar({
   label,
   value,
   width,
@@ -210,28 +207,25 @@ function FlowBar({
   label: string;
   value: string;
   width: number;
-  tone: "down" | "up" | "cobalt";
+  tone: "loss" | "gain" | "amber";
 }) {
-  const bar = tone === "down" ? "bg-down" : tone === "up" ? "bg-up" : "bg-cobalt";
-  const glow = tone === "down" ? "bg-down-dim" : tone === "up" ? "bg-up-dim" : "bg-cobalt-dim";
+  const bar =
+    tone === "loss"
+      ? "bg-down-bright"
+      : tone === "gain"
+        ? "bg-up-bright"
+        : "bg-console-amber";
   return (
     <div className="flex items-center gap-3">
-      <span className="w-24 shrink-0 text-[11px] uppercase tracking-wide text-muted">
-        {label}
-      </span>
-      <div className="relative h-[14px] min-w-0 flex-1 overflow-hidden rounded-full bg-surface-raised">
-        <div
-          aria-hidden="true"
-          className={`absolute inset-y-0 left-0 rounded-full ${glow}`}
-          style={{ width: "100%" }}
-        />
+      <span className="w-20 shrink-0 text-[11px] text-surface/55">{label}</span>
+      <div className="relative h-[12px] min-w-0 flex-1 overflow-hidden rounded-full bg-surface/10">
         <div
           aria-hidden="true"
           className={`absolute inset-y-0 left-0 rounded-full ${bar}`}
-          style={{ width: `${width}%` }}
+          style={{ width: `${width}%`, opacity: 0.9 }}
         />
       </div>
-      <span className="w-24 shrink-0 text-right font-mono text-[12px] tabular-nums text-muted">
+      <span className="w-20 shrink-0 text-right font-mono text-[11px] tabular-nums text-console-text/80">
         {value}
       </span>
     </div>
