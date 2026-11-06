@@ -62,12 +62,14 @@ export function ArkivFeed({ initialEntities }: { initialEntities: Attestation[] 
 
   const sourceLabel =
     state === "loading"
-      ? "checking store"
+      ? "checking Rabdi"
       : state === "error"
-        ? "API unreachable"
-        : feed?.source === "cache"
-          ? "CACHE"
-          : "LOCAL";
+        ? "Rabdi unreachable"
+        : feed?.source === "live"
+          ? "LIVE"
+          : feed?.source === "cache"
+            ? "CACHE"
+            : String(feed?.source ?? "unknown").toUpperCase();
 
   return (
     <div>
@@ -83,30 +85,34 @@ export function ArkivFeed({ initialEntities }: { initialEntities: Attestation[] 
             aria-live="polite"
             className={cn(
               "rounded-chip border px-2 py-0.5 font-mono text-[10px]",
-              state === "error" ? "border-down-dim text-down" : "border-line text-dim",
+              state === "error"
+                ? "border-down-dim text-down"
+                : feed?.source === "live"
+                  ? "border-saffron text-saffron"
+                  : "border-line text-dim",
             )}
           >
             {sourceLabel}
           </span>
-          {state === "error" && (
-            <button
-              type="button"
-              onClick={() => {
-                setState("loading");
-                setAttempt((a) => a + 1);
-              }}
-              className="rounded-[5px] border border-line px-2 py-0.5 font-mono text-[10px] text-muted transition-colors hover:text-text"
-            >
-              Retry
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              setState("loading");
+              setAttempt((a) => a + 1);
+            }}
+            className="rounded-[5px] border border-line px-2 py-0.5 font-mono text-[10px] text-muted transition-colors hover:text-text"
+          >
+            Refresh
+          </button>
           <ModeBadge
             variant="cache"
             title={sourceLabel}
             description={
               state === "error"
-                ? "The attestations endpoint is unreachable; the page falls back to the bundled engine-computed snapshot with a retry."
-                : "Entities from GET /api/arkiv/query. In cache mode the store is the bundled snapshot; the live writer replaces this feed on a funded Rabdi wallet."
+                ? "The Rabdi endpoint is unreachable; the page shows the bundled engine-computed snapshot instead."
+                : feed?.source === "live"
+                  ? "LIVE — entities read from Rabdi through the keeper query just now. Each expires 300 seconds after its write."
+                  : "CACHE — entities from GET /api/arkiv/query in cache mode; the live writer replaces this feed with an access key."
             }
           />
         </div>

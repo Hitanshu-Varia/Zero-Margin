@@ -86,8 +86,12 @@ const arkivRes = await page.evaluate(async () => {
 });
 check(
   "arkiv feed via API",
-  arkivRes.status === 200 && Array.isArray(arkivRes.body?.entities) && arkivRes.body?.entities.length >= 1,
-  `entities in window: ${arkivRes.body?.entities?.length}` || ""
+  arkivRes.status === 200 &&
+    Array.isArray(arkivRes.body?.entities) &&
+    (arkivRes.body?.source === "live"
+      ? arkivRes.body?.ok === true
+      : arkivRes.body?.entities.length >= 3),
+  `source: ${arkivRes.body?.source}, entities: ${arkivRes.body?.entities?.length}`,
 );
 
 // mobile overflow check + positions live-read smoke

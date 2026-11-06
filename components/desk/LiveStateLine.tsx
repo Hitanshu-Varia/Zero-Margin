@@ -5,47 +5,107 @@ import { formatUsdcWhole } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
 /**
- * Live onchain state: one line that reads the deployed app's book for the
- * server wallet (the demo trader) plus the local mark. Read only — the
- * <LiveBookActions> component owns the mutation buttons.
+ * The terminal's live book state, read straight from the deployed app for
+ * the server wallet, plus the local mark. Every label names its source.
  */
 export function LiveStateLine() {
-  const [state, setState] = useState<string | null>(null);
-  const timer = useRef<number | null>(null);
+  const [state, setState] = useState<{
+    kind: "book" | "empty" | "error";
+    text: string;
+    equityUsdc?: string;
+    lp?: string;
+    short?: string;
+    posted?: string;
+    mark?: string;
+  } | null>(null);
+  const loadRef = useRef<() => void>(() => {});
 
   useEffect(() => {
-    const load = () => {
-      fetch("/api/app/state", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({}),
-      })
-        .then(async (res) => {
-          const body = await res.json();
-          if (!body.ok) {
-            setState(`onchain read unavailable: ${body.problems?.join(", ").slice(0, 110)}`);
-            return;
-          }
-          const on = body.onchain;
-          setState(
-            on.isActive
-              ? `live book onchain — LP ${formatUsdcWhole(BigInt(on.lpNotionalUsdc))}, hedge ${formatUsdcWhole(BigInt(on.shortNotionalUsdc))}, posted ${formatUsdcWhole(BigInt(on.postedMarginUsdc))}`
-              : "no active book onchain; open one below",
-          );
-        })
-        .catch(() => setState("onchain read unavailable"));
+    let alive = true;
+    const load = async () => {
+      try {
+        const res = await fetch("/api/app/state", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({}),
+        });
+        const body = await res.json();
+        if (!alive) return;
+        if (!body.ok) {
+          setState({ kind: "error", text: `onchain read unavailable: ${body.problems?.join(", ").slice(0, 110)}` });
+          return;
+        }
+        const on = body.onchain;
+        if (on.isActive) {
+          setState({
+            kind: "book",
+            text: `live book onchain — engine at mark ${formatUsdcWhole(BigInt(on.markPriceUsdc))}`,
+            lp: on.lpNotionalUsdc,
+            short: on.shortNotionalUsdc,
+            posted: on.postedMarginUsdc,
+            equityUsdc: on.postedMarginUsdc,
+            mark: on.markPriceUsdc,
+          });
+        } else {
+          setState({ kind: "empty", text: "no active book onchain; open one below" });
+        }
+      } catch (err) {
+        if (alive) setState({ kind: "error", text: "onchain read unavailable" });
+      }
     };
+    loadRef.current = load;
     load();
-    timer.current = window.setInterval(load, 20_000);
+    const timer = window.setInterval(load, 20_000);
     return () => {
-      if (timer.current) clearInterval(timer.current);
+      alive = false;
+      clearInterval(timer);
     };
   }, []);
 
   if (state === null) return null;
+
+  if (state.kind === "book") {
+    return (
+      <div className="mb-3 rounded-panel border border-line bg-surface px-4 py-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1.5">
+          <p className="flex items-center gap-2 text-[13px]">
+            <span aria-hidden="true" className="size-1.5 rounded-full bg-saffron" />
+            <span className="font-medium">Live book on Base Sepolia</span>
+            <span className="font-mono text-[11px] text-dim">
+              deployed app reads, span engine pricing
+            </span>
+          </p>
+          <p className="font-mono text-[12px] tabular-nums text-text">
+            {formatUsdcWhole(BigInt(state.equityUsdc ?? "0"))} posted
+          </p>
+        </div>
+        <dl className="mt-2 grid grid-cols-3 gap-x-6 gap-y-1 font-mono text-[11px] tabular-nums">
+          <div className="flex justify-between gap-3">
+            <dt className="text-dim">LP notional</dt>
+            <dd>{formatUsdcWhole(BigInt(state.lp ?? "0"))}</dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="text-dim">Hedge</dt>
+            <dd>{formatUsdcWhole(BigInt(state.short ?? "0"))}</dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="text-dim">Mark (chain)</dt>
+            <dd>{formatUsdcWhole(BigInt(state.mark ?? "3000000000"))}</dd>
+          </div>
+        </dl>
+      </div>
+    );
+  }
+
   return (
-    <p aria-live="polite" className={cn("mb-3 font-mono text-[11px] leading-relaxed text-dim")}>
-      {state}
+    <p
+      aria-live="polite"
+      className={cn(
+        "mb-3 font-mono text-[11px] leading-relaxed",
+        state.kind === "error" ? "text-down" : "text-dim",
+      )}
+    >
+      {state.text}
     </p>
   );
 }

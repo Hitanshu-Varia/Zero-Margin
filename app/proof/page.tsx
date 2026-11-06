@@ -7,7 +7,7 @@ import {
   evaluateSpan16,
   previewWithdrawal,
 } from "@/lib/spanMath";
-import { formatPercentFromBps, formatUsdcWhole } from "@/lib/format";
+import { formatBps, formatPercentFromBps, formatUsdcWhole } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Proof",
@@ -88,8 +88,7 @@ export default function ProofPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Num tone="cobalt" size="xs">
-                        formatBps(s.capitalSavingsBps),{" "}
-                        {formatPercentFromBps(s.capitalSavingsBps)}
+                        {`${formatBps(s.capitalSavingsBps)}, ${formatPercentFromBps(s.capitalSavingsBps)}`}
                       </Num>
                     </td>
                   </tr>
