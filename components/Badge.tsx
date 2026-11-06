@@ -55,10 +55,12 @@ export function StatusChip({
   children: ReactNode;
   tone?: "status" | "up" | "down" | "amber";
 }) {
+  const toneKey: BadgeVariant =
+    tone === "up" ? "fork" : tone === "down" ? "error" : tone === "amber" ? "local" : "status";
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[11px] tracking-[0.06em] uppercase ${
-        variantClass[tone === "status" ? "status" : tone]
+        variantClass[toneKey]
       }`}
     >
       <span aria-hidden="true" className="h-[5px] w-[5px] rounded-full bg-current" />
