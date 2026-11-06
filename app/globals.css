@@ -79,6 +79,7 @@ body {
 /* Ambient glow reserved for the dashboard hero region only */
 .ambient-glow {
   position: relative;
+  overflow-x: clip;
 }
 .ambient-glow::before {
   content: "";

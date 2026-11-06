@@ -5,16 +5,20 @@ against an offsetting short hedge inside one 1inch Aqua virtual balance,
 and settles a flash crash in a single transaction with no liquidation
 penalty inside the tested envelope.
 
-This repository is the web terminal. It computes every number on screen
-from the same deterministic `BigInt` fixed-point spec the contracts use:
-a 16-scenario SPAN-style risk grid, a `500 bps` cross-venue basis haircut,
+This repository is the web application: a sidebar dashboard and trading
+terminal in the MetEngine lineage — a dashboardctl overview page, a
+split-screen settlement terminal, a basis replay, an attestation
+inspector, and a proof sheet. Every number on screen is computed from
+the same deterministic `BigInt` fixed-point spec the contracts use: a
+16-scenario SPAN-style risk grid, a `500 bps` cross-venue basis haircut,
 and a cross-leg settlement waterfall.
 
 ## Pages
 
 | Route | What it shows |
 | :--- | :--- |
-| `/` | Split-screen terminal: isolated account versus the ZeroMargin book under the same price shock. |
+| `/` | Dashboard: KPI rail, equity-under-stress sweep, risk monitor, books table, activity feed. |
+| `/terminal` | Split-screen terminal: isolated account versus the ZeroMargin book under the same price shock. Deep-link with `?shock=-3000`. |
 | `/replay` | Basis statistics and the three named crash windows. |
 | `/arkiv` | Wallet-owned risk attestations with a `300`-second expiration. |
 | `/proof` | Sponsor proof points, golden vectors, and stated limitations. |
