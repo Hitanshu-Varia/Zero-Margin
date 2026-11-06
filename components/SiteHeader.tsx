@@ -18,8 +18,8 @@ export function SiteHeader() {
   const pathname = usePathname();
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-background/90 backdrop-blur">
-      <div className="mx-auto flex h-12 w-full max-w-[1240px] items-center gap-6 px-4 md:px-6">
-        <a href="/" className="flex items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-ring">
+      <div className="mx-auto flex h-12 w-full max-w-[1240px] items-center gap-3 px-4 md:gap-6 md:px-6">
+        <a href="/" className="flex shrink-0 items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-ring">
           <span
             aria-hidden="true"
             className="grid h-[22px] w-[22px] place-items-center rounded-field bg-amber text-background"
@@ -34,7 +34,10 @@ export function SiteHeader() {
           </span>
         </a>
 
-        <nav aria-label="Primary" className="flex items-center gap-0.5">
+        <nav
+          aria-label="Primary"
+          className="no-scrollbar flex items-center gap-0.5 overflow-x-auto"
+        >
           {links.map((l) => (
             <a
               key={l.href}
@@ -51,7 +54,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex shrink-0 items-center gap-3">
           <span className="hidden items-center gap-1.5 font-mono text-[11px] tracking-[0.06em] text-dim md:flex">
             <span aria-hidden="true" className="h-[6px] w-[6px] rounded-full bg-chain" />
             BASE·8453

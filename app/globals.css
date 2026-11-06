@@ -82,6 +82,15 @@ body {
   border-radius: 2px;
 }
 
+/* Hide scrollbar on horizontally scrollable strips (mobile nav) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 input[type="range"] {
   appearance: none;
   height: 2px;
