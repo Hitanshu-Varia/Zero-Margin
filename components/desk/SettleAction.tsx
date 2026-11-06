@@ -1,4 +1,14 @@
 "use client";
+/** guarded BigInt: an unexpected shape degrades to 0 instead of crashing */
+function asBig(v: unknown): bigint {
+  try {
+    const n = typeof v === "string" ? v : String(v ?? "0");
+    return BigInt(n === "" || n === "undefined" || n === "null" ? "0" : n);
+  } catch {
+    return 0n;
+  }
+}
+
 
 import { useCallback, useState } from "react";
 import { formatUsdcWhole } from "@/lib/format";
@@ -97,7 +107,7 @@ export function SettleAction({
           {pending ? "Settling" : "Settle this book"}
         </button>
         <p className="font-mono text-[11px] text-dim">
-          {formatUsdcWhole(BigInt(input.postedMarginUsdc))} on the virtual balance settles
+          {formatUsdcWhole(asBig(input.postedMarginUsdc))} on the virtual balance settles
           both legs
         </p>
       </div>
@@ -136,7 +146,7 @@ export function SettleAction({
             ].map(([label, value]) => (
               <div key={label} className="flex items-baseline justify-between gap-4 py-1">
                 <dt className="text-[12px] text-dim">{label}</dt>
-                <dd className="font-mono text-[12px] tabular-nums">{formatUsdcWhole(BigInt(value))}</dd>
+                <dd className="font-mono text-[12px] tabular-nums">{formatUsdcWhole(asBig(value))}</dd>
               </div>
             ))}
           </dl>

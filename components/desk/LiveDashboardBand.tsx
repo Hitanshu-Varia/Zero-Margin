@@ -6,12 +6,13 @@ import { cn } from "@/lib/cn";
 
 /**
  * The dashboard's live band: the server wallet's real book state read from
- * the deployed app, plus the settled-book line the engine confirms, plus
- * live Rabdi row count. Every value names its source onchain/live.
+ * the deployed app, plus live Rabdi row count. Every BigInt conversion is
+ * guarded — an unexpected shape degrades to `unavailable` for that field
+ * instead of crashing the page.
  */
 export function LiveDashboardBand() {
   const [state, setState] = useState<{
-    app: { isActive: boolean; mark: string; lp?: string; short?: string; posted?: string; strategy?: string };
+    app: { isActive: boolean; mark: string; lp?: string; short?: string; posted?: string };
     arkiv: { source: string; rows: number };
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +32,7 @@ export function LiveDashboardBand() {
         }
         setError(null);
         setState({ app: a.onchain, arkiv: { source: k.source, rows: k.entities?.length ?? 0 } });
-      } catch (err) {
+      } catch {
         if (alive) setError("live reads unavailable");
       }
     };
@@ -43,6 +44,16 @@ export function LiveDashboardBand() {
     };
   }, []);
 
+  // every displayed number passes through here: undefined/NaN → 0n
+  const asBig = (v: unknown): bigint => {
+    try {
+      const n = typeof v === "string" ? v : String(v ?? "0");
+      return BigInt(n === "" || n === "undefined" || n === "null" ? "0" : n);
+    } catch {
+      return 0n;
+    }
+  };
+
   if (state === null && !error) {
     return <p className="mt-3 font-mono text-[11px] text-dim">reading live state from Base Sepolia…</p>;
   }
@@ -50,7 +61,9 @@ export function LiveDashboardBand() {
     return <p aria-live="polite" className="mt-3 font-mono text-[11px] text-down">{error}</p>;
   }
 
-  const active = state!.app.isActive;
+  const active = state!.app.isActive === true;
+  const mark = asBig(state!.app.mark);
+
   return (
     <div className="mt-4 rounded-panel border border-line bg-surface px-4 py-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1.5">
@@ -60,28 +73,28 @@ export function LiveDashboardBand() {
           <span className="font-mono text-[11px] text-dim">every value: eth_call to the deployed app</span>
         </p>
         <p className="font-mono text-[12px] tabular-nums">
-          mark {formatUsdcWhole(BigInt(state!.app.mark))} · Rabdi {state!.arkiv.source} rows {state!.arkiv.rows}
+          mark {formatUsdcWhole(mark)} · Rabdi {state!.arkiv.source} rows {state!.arkiv.rows}
         </p>
       </div>
       {active && (
         <dl className="mt-2 grid grid-cols-3 gap-x-6 gap-y-1 font-mono text-[11px] tabular-nums">
           <div className="flex justify-between gap-3">
             <dt className="text-dim">LP notional</dt>
-            <dd>{formatUsdcWhole(BigInt(state!.app.lp ?? "0"))}</dd>
+            <dd>{formatUsdcWhole(asBig(state!.app.lp))}</dd>
           </div>
           <div className="flex justify-between gap-3">
             <dt className="text-dim">Hedge</dt>
-            <dd>{formatUsdcWhole(BigInt(state!.app.short ?? "0"))}</dd>
+            <dd>{formatUsdcWhole(asBig(state!.app.short))}</dd>
           </div>
           <div className="flex justify-between gap-3">
             <dt className="text-dim">Posted</dt>
-            <dd>{formatUsdcWhole(BigInt(state!.app.posted ?? "0"))}</dd>
+            <dd>{formatUsdcWhole(asBig(state!.app.posted))}</dd>
           </div>
         </dl>
       )}
       {!active && (
         <p className="mt-2 text-[12px] text-muted">
-          the demo buyer book is settled (the keeper unwound it live from the
+          the demo book is settled (the keeper unwound it live from the
           positions page); open a fresh one on the terminal in one click
         </p>
       )}

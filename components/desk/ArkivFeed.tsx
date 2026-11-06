@@ -1,4 +1,14 @@
 "use client";
+/** guarded BigInt: an unexpected shape degrades to 0 instead of crashing */
+function asBig(v: unknown): bigint {
+  try {
+    const n = typeof v === "string" ? v : String(v ?? "0");
+    return BigInt(n === "" || n === "undefined" || n === "null" ? "0" : n);
+  } catch {
+    return 0n;
+  }
+}
+
 
 import { useEffect, useState } from "react";
 import { KEEPER_QUERY, type Attestation } from "@/lib/attestations";

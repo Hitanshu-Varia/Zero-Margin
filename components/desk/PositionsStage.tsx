@@ -1,4 +1,14 @@
 "use client";
+/** guarded BigInt: an unexpected shape degrades to 0 instead of crashing */
+function asBig(v: unknown): bigint {
+  try {
+    const n = typeof v === "string" ? v : String(v ?? "0");
+    return BigInt(n === "" || n === "undefined" || n === "null" ? "0" : n);
+  } catch {
+    return 0n;
+  }
+}
+
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatUsdcWhole } from "@/lib/format";
@@ -191,7 +201,7 @@ export function PositionsStage() {
               </div>
               <div className="flex items-baseline gap-5 font-mono text-[15px] tabular-nums">
                 <span>{eth(row.ethBalanceWei)}</span>
-                <span className="text-saffron">{formatUsdcWhole(BigInt(row.usdcBalance))}</span>
+                <span className="text-saffron">{formatUsdcWhole(asBig(row.usdcBalance))}</span>
               </div>
             </div>
 
@@ -199,15 +209,15 @@ export function PositionsStage() {
               <dl className="mt-4 grid gap-x-8 gap-y-1 border-t border-line pt-3 text-[12px] sm:grid-cols-2">
                 <div className="flex justify-between gap-4">
                   <dt className="text-dim">LP notional</dt>
-                  <dd className="font-mono tabular-nums">{formatUsdcWhole(BigInt(row.lpNotionalUsdc))}</dd>
+                  <dd className="font-mono tabular-nums">{formatUsdcWhole(asBig(row.lpNotionalUsdc))}</dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-dim">Short notional</dt>
-                  <dd className="font-mono tabular-nums">{formatUsdcWhole(BigInt(row.shortNotionalUsdc ?? "0"))}</dd>
+                  <dd className="font-mono tabular-nums">{formatUsdcWhole(asBig(row.shortNotionalUsdc))}</dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-dim">Posted margin</dt>
-                  <dd className="font-mono tabular-nums">{formatUsdcWhole(BigInt(row.postedMarginUsdc ?? "0"))}</dd>
+                  <dd className="font-mono tabular-nums">{formatUsdcWhole(asBig(row.postedMarginUsdc))}</dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-dim">Status</dt>

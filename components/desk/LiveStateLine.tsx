@@ -39,7 +39,7 @@ export function LiveStateLine() {
         if (on.isActive) {
           setState({
             kind: "book",
-            text: `live book onchain — engine at mark ${formatUsdcWhole(BigInt(on.markPriceUsdc))}`,
+            text: `live book onchain — engine at mark ${formatUsdcWhole(asBig(on.markPriceUsdc))}`,
             lp: on.lpNotionalUsdc,
             short: on.shortNotionalUsdc,
             posted: on.postedMarginUsdc,
@@ -62,6 +62,16 @@ export function LiveStateLine() {
     };
   }, []);
 
+  // guarded BigInt: any unexpected shape degrades to 0 instead of crashing
+  const asBig = (v: unknown): bigint => {
+    try {
+      const n = typeof v === "string" ? v : String(v ?? "0");
+      return BigInt(n === "" || n === "undefined" || n === "null" ? "0" : n);
+    } catch {
+      return 0n;
+    }
+  };
+
   if (state === null) return null;
 
   if (state.kind === "book") {
@@ -76,21 +86,21 @@ export function LiveStateLine() {
             </span>
           </p>
           <p className="font-mono text-[12px] tabular-nums text-text">
-            {formatUsdcWhole(BigInt(state.equityUsdc ?? "0"))} posted
+            {formatUsdcWhole(asBig(state.equityUsdc))} posted
           </p>
         </div>
         <dl className="mt-2 grid grid-cols-3 gap-x-6 gap-y-1 font-mono text-[11px] tabular-nums">
           <div className="flex justify-between gap-3">
             <dt className="text-dim">LP notional</dt>
-            <dd>{formatUsdcWhole(BigInt(state.lp ?? "0"))}</dd>
+            <dd>{formatUsdcWhole(asBig(state.lp))}</dd>
           </div>
           <div className="flex justify-between gap-3">
             <dt className="text-dim">Hedge</dt>
-            <dd>{formatUsdcWhole(BigInt(state.short ?? "0"))}</dd>
+            <dd>{formatUsdcWhole(asBig(state.short))}</dd>
           </div>
           <div className="flex justify-between gap-3">
             <dt className="text-dim">Mark (chain)</dt>
-            <dd>{formatUsdcWhole(BigInt(state.mark ?? "3000000000"))}</dd>
+            <dd>{formatUsdcWhole(asBig(state.mark))}</dd>
           </div>
         </dl>
       </div>
