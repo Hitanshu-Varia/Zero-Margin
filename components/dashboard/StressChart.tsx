@@ -72,7 +72,7 @@ const firstLiquidation = SWEEP.findIndex((s) => s.liquidated);
 
 const Y_TICKS = [26_000, 20_000, 15_000, 10_000, 5_000].map((v) => ({
   v: e6(v),
-  label: `$${v}k`,
+  label: `$${v / 1000}k`,
 }));
 
 /**
