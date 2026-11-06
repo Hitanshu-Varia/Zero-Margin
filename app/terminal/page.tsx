@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Num } from "@/components/Num";
 import { Panel, Stat } from "@/components/Panel";
@@ -9,6 +9,7 @@ import { EngineVerifier } from "@/components/desk/EngineVerifier";
 import { SettleAction } from "@/components/desk/SettleAction";
 import { LiveBookActions } from "@/components/desk/LiveBookActions";
 import { LiveStateLine } from "@/components/desk/LiveStateLine";
+import { NotionalEditor } from "@/components/desk/NotionalEditor";
 import {
   DEMO_BOOK,
   DEMO_ENTRY_PRICE_USDC,
@@ -163,31 +164,34 @@ function Terminal() {
     return BigInt(clamped);
   });
 
-  const span = evaluateSpan16(DEMO_BOOK.lpNotionalUsdc, DEMO_BOOK.shortNotionalUsdc);
+  // the book inputs: live when the app has an active book, user-editable always
+  const [notionals, setNotionals] = useState({ lp: DEMO_BOOK.lpNotionalUsdc, short: DEMO_BOOK.shortNotionalUsdc, posted: DEMO_BOOK.postedMarginUsdc });
+
+  const span = evaluateSpan16(notionals.lp, notionals.short);
   const isolated = isolatedAccountAtShock(
-    DEMO_ISOLATED_BOOK.lpNotionalUsdc,
-    DEMO_ISOLATED_BOOK.postedMarginUsdc,
+    notionals.lp,
+    notionals.posted,
     shockBps,
     DEMO_VOL_SHOCK_BPS,
   );
   const quote = previewShockUnwind(
-    DEMO_BOOK.lpNotionalUsdc,
-    DEMO_BOOK.shortNotionalUsdc,
-    DEMO_BOOK.postedMarginUsdc,
+    notionals.lp,
+    notionals.short,
+    notionals.posted,
     shockBps,
     DEMO_VOL_SHOCK_BPS,
   );
   /** The −30% replay figures, always computed at the demo crash depth. */
   const crashQuote = previewShockUnwind(
-    DEMO_BOOK.lpNotionalUsdc,
-    DEMO_BOOK.shortNotionalUsdc,
-    DEMO_BOOK.postedMarginUsdc,
+    notionals.lp,
+    notionals.short,
+    notionals.posted,
     -3_000n,
     DEMO_VOL_SHOCK_BPS,
   );
   const crashIsolated = isolatedAccountAtShock(
-    DEMO_ISOLATED_BOOK.lpNotionalUsdc,
-    DEMO_ISOLATED_BOOK.postedMarginUsdc,
+    notionals.lp,
+    notionals.posted,
     -3_000n,
     DEMO_VOL_SHOCK_BPS,
   );
@@ -215,7 +219,7 @@ function Terminal() {
   const settled = quote.protocolFeeUsdc > 0n && shockBps <= 0n;
   const bookTone =
     quote.badDebtUsdc > 0n ? "down" : settled ? "cobalt" : "text";
-  const hedgeRatio = (DEMO_BOOK.shortNotionalUsdc * 10_000n) / DEMO_BOOK.lpNotionalUsdc;
+  const hedgeRatio = (notionals.short * 10_000n) / notionals.lp;
 
   const runCrash = useCallback(
     (target: bigint) => {
@@ -417,7 +421,7 @@ function Terminal() {
             ) : null}
 
             <div className="rule-t mt-4">
-              <Stat label="LP notional" value={formatUsdcWhole(DEMO_ISOLATED_BOOK.lpNotionalUsdc)} />
+              <Stat label="LP notional" value={formatUsdcWhole(notionals.lp)} />
               <Stat
                 label="LP leg PnL"
                 tone={isolated.lpPnlUsdc < 0n ? "down" : "up"}
@@ -486,7 +490,7 @@ function Terminal() {
             </Num>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="font-mono text-[12px] text-dim">
-                posted {formatUsdcWhole(DEMO_BOOK.postedMarginUsdc)}
+                posted {formatUsdcWhole(notionals.posted)}
               </span>
               <span className="font-mono text-[12px] text-dim">
                 net IM {formatUsdcWhole(span.netInitialMarginUsdc)}

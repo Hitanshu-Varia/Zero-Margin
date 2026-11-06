@@ -65,8 +65,8 @@ export default function ReplayPage() {
         </div>
         <ModeBadge
           variant="local"
-          title="DEMO DATASET"
-          description="A deterministic, seeded series built by lib/replayData.ts — the seed and generator are committed in this repo. The submission pipeline replaces it with exchange candles whose SHA-256 is printed on each run."
+          title="COMMITTED DATASET"
+          description="A reproducible series built by lib/replayData.ts with the seed and generator committed in this repo (spec §6.8: determinism over a private candle feed). Every figure derives from those rows at build; the pipeline can swap in exchange candles without touching this page."
         />
       </div>
 

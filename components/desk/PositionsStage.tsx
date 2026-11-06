@@ -116,6 +116,17 @@ export function PositionsStage() {
     save(STOPS_KEY, next);
   };
 
+  const removeWallet = (address: string) => {
+    setWallets((w) => w.filter((a) => a !== address));
+    setRows((rows_) => rows_.filter((r) => r.address !== address));
+    setStops((st) => {
+      const next = { ...st };
+      delete next[address];
+      save(STOPS_KEY, next);
+      return next;
+    });
+  };
+
   const runKeeperNow = async () => {
     setMonitor("keeper running…");
     const stopsList = Object.entries(stops).map(([address, floorUsdc]) => ({ address, floorUsdc }));
@@ -251,6 +262,18 @@ export function PositionsStage() {
                   {stops[row.address] ? `fires when equity < $${Number(stops[row.address]).toLocaleString("en-US")}` : "off"}
                 </span>
               </div>
+            </div>
+
+            {/* remove this wallet from the tracked set */}
+            <div className="mt-3 flex justify-end border-t border-line pt-3">
+              <button
+                type="button"
+                onClick={() => removeWallet(row.address)}
+                className="flex h-9 items-center rounded-field border border-line px-3 text-[12px] text-muted transition-colors duration-100 hover:border-down hover:text-down"
+                aria-label={`Remove ${row.address} from tracked wallets`}
+              >
+                Remove tracked wallet
+              </button>
             </div>
           </div>
         ))}

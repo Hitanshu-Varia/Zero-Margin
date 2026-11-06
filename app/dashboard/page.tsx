@@ -1,11 +1,10 @@
 import { Panel } from "@/components/Panel";
 import { LiveDashboardBand } from "@/components/desk/LiveDashboardBand";
+import { LiveBooksActivity } from "@/components/desk/LiveBooksActivity";
 import { CountUp } from "@/components/motion/CountUp";
-import { StatusChip } from "@/components/Badge";
 import { StressChart } from "@/components/dashboard/StressChart";
 import {
   DEMO_BOOK,
-  DEMO_ISOLATED_BOOK,
   DEMO_VOL_SHOCK_BPS,
   evaluateSpan16,
   previewShockUnwind,
@@ -92,60 +91,8 @@ export default function DashboardPage() {
         <StressChart />
       </Panel>
 
-      {/* Books + activity */}
-      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <Panel label="Books — live from the deployed app">
-          <table className="w-full min-w-[560px]">
-            <thead>
-              <tr className="border-b border-line">
-                <th className="px-5 py-2.5 text-start text-[11px] font-normal text-dim">Book</th>
-                <th className="px-3 py-2.5 text-end text-[11px] font-normal text-dim">LP notional</th>
-                <th className="px-3 py-2.5 text-end text-[11px] font-normal text-dim">Hedge</th>
-                <th className="px-3 py-2.5 text-end text-[11px] font-normal text-dim">Net IM</th>
-                <th className="px-5 py-2.5 text-end text-[11px] font-normal text-dim">Status</th>
-              </tr>
-            </thead>
-            <tbody className="font-mono text-[12px] tabular-nums">
-              <tr className="border-b border-line last:border-0">
-                <td className="px-5 py-3 text-start font-sans text-[13px] text-text">WETH/USDC v4, netted (engine book)</td>
-                <td className="px-3 py-3 text-end">{formatUsdcWhole(DEMO_BOOK.lpNotionalUsdc)}</td>
-                <td className="px-3 py-3 text-end text-up">{formatUsdcWhole(DEMO_BOOK.shortNotionalUsdc)}</td>
-                <td className="px-3 py-3 text-end">{formatUsdcWhole(span.netInitialMarginUsdc)}</td>
-                <td className="px-5 py-3 text-end"><StatusChip tone="cobalt">settled onchain; open a fresh book on the terminal</StatusChip></td>
-              </tr>
-              <tr className="last:border-0">
-                <td className="px-5 py-3 text-start font-sans text-[13px] text-muted">WETH/USDC v4, isolated (benchmark)</td>
-                <td className="px-3 py-3 text-end">{formatUsdcWhole(DEMO_ISOLATED_BOOK.lpNotionalUsdc)}</td>
-                <td className="px-3 py-3 text-end text-dim">none</td>
-                <td className="px-3 py-3 text-end">{formatUsdcWhole(DEMO_ISOLATED_BOOK.postedMarginUsdc)}</td>
-                <td className="px-5 py-3 text-end"><StatusChip tone="down">liquidated</StatusChip></td>
-              </tr>
-            </tbody>
-          </table>
-        </Panel>
-
-        <Panel label="Activity">
-          <ol className="px-5 py-4">
-            {[
-              { event: "BookUnwound", at: "live", tone: "cobalt" as const, detail: `settled −3,000 bps, returned ${formatUsdcWhole(crash.remainingEquityUsdc)} — real tx 0x1d837b57…e0ce8` },
-              { event: "SpanMarginBreach", at: "live", tone: "down" as const, detail: `withdrawal guard reverted at GV-04 — required ${formatUsdcWhole(span.netInitialMarginUsdc)} is the exact hook-guard pair the tests pin` },
-              { event: "BookOpened", at: "live", tone: "up" as const, detail: `net IM ${formatUsdcWhole(span.netInitialMarginUsdc)}, savings ${formatBps(span.capitalSavingsBps)} — tx 0x18bb3fc1…71eb5c8b` },
-              { event: "Rabdi attestations", at: "live", tone: "muted" as const, detail: "every settle wrote a 300 s entity through the keeper query; the /attestations table reads them live" },
-            ].map((ev) => (
-              <li key={ev.event} className="border-b border-line last:border-0 py-2.5">
-                <div className="flex items-baseline justify-between gap-3">
-                  <span className={`text-[13px] ${toneClass(ev.tone)}`}>{ev.event}</span>
-                  <span className="font-mono text-[11px] tabular-nums text-dim">{ev.at}</span>
-                </div>
-                <span className="mt-0.5 block font-mono text-[11px] text-dim">{ev.detail}</span>
-              </li>
-            ))}
-          </ol>
-          <div className="border-t border-line px-5 py-2.5 text-[11px] text-dim">
-            Every amount is recomputed from the span engine at render.
-          </div>
-        </Panel>
-      </div>
+      {/* Books + activity — live reads, zero fixtures */}
+      <LiveBooksActivity />
     </div>
   );
 }
