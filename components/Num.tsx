@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-type Tone = "text" | "muted" | "dim" | "up" | "down" | "gold";
+type Tone = "text" | "muted" | "dim" | "up" | "down" | "cobalt";
 type Size = "xs" | "sm" | "md" | "lg" | "hero";
 
 const toneClass: Record<Tone, string> = {
@@ -9,7 +9,7 @@ const toneClass: Record<Tone, string> = {
   dim: "text-dim",
   up: "text-up",
   down: "text-down",
-  gold: "text-gold",
+  cobalt: "text-cobalt",
 };
 
 const sizeClass: Record<Size, string> = {
@@ -17,12 +17,12 @@ const sizeClass: Record<Size, string> = {
   sm: "text-[13px]",
   md: "text-[14px]",
   lg: "text-[18px] font-medium",
-  hero: "text-[34px] md:text-[38px] leading-none tracking-tight font-medium",
+  hero: "text-[32px] md:text-[38px] leading-none tracking-tight font-medium",
 };
 
 /**
- * A mono figure. Every monetary value, ratio, and basis point in the
- * product renders through this so columns align on tabular numerals.
+ * Mono numerals only. Every monetary value, ratio, and basis point
+ * renders through this; labels never touch it.
  */
 export function Num({
   children,
@@ -36,9 +36,7 @@ export function Num({
   className?: string;
 }) {
   return (
-    <span
-      className={`font-mono tabular-nums ${toneClass[tone]} ${sizeClass[size]} ${className}`}
-    >
+    <span className={`font-mono tabular-nums ${toneClass[tone]} ${sizeClass[size]} ${className}`}>
       {children}
     </span>
   );

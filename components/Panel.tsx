@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 
 /**
- * Data card: surface step, hairline border, optional header row with a
- * gold index dot. No shadows and no glass — depth comes from the
- * background ladder and borders.
+ * Data sheet: white card on porcelain, hairline frame, heavier top rule
+ * when the card opens a document section. Radius stays at the paper
+ * scale (3px). No shadows.
  */
 export function Panel({
   label,
@@ -22,15 +22,11 @@ export function Panel({
 }) {
   return (
     <section
-      className={`rounded-panel border border-line bg-surface overflow-hidden ${className}`}
+      className={`overflow-hidden rounded-panel border border-line bg-surface ${className}`}
     >
       {(label || meta) && (
-        <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-line px-5 py-3">
-          <h2 className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.08em] text-muted">
-            <span
-              aria-hidden="true"
-              className={`h-[6px] w-[6px] shrink-0 ${accent ? "bg-gold" : "bg-line-strong"}`}
-            />
+        <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-line px-5 py-3">
+          <h2 className="text-[13px] font-medium text-text">
             {label}
           </h2>
           {meta && <div className="text-[12px] text-dim">{meta}</div>}
@@ -41,7 +37,7 @@ export function Panel({
   );
 }
 
-/** A labeled figure row inside a card. */
+/** A labeled figure row. Labels are sans; values are always mono. */
 export function Stat({
   label,
   value,
@@ -50,7 +46,7 @@ export function Stat({
 }: {
   label: string;
   value: ReactNode;
-  tone?: "text" | "muted" | "up" | "down" | "gold";
+  tone?: "text" | "muted" | "up" | "down" | "cobalt";
   hint?: string;
 }) {
   const toneClass =
@@ -58,14 +54,14 @@ export function Stat({
       ? "text-up"
       : tone === "down"
         ? "text-down"
-        : tone === "gold"
-          ? "text-gold"
+        : tone === "cobalt"
+          ? "text-cobalt"
           : tone === "muted"
             ? "text-muted"
             : "text-text";
   return (
     <div className="flex items-baseline justify-between gap-4 px-5 py-2.5 rule-b last:border-b-0">
-      <span className="text-[12px] uppercase tracking-wide text-muted flex items-center gap-1.5">
+      <span className="text-[13px] text-muted flex items-center gap-1.5">
         {label}
         {hint && (
           <span
@@ -81,10 +77,7 @@ export function Stat({
   );
 }
 
-/**
- * KPI tile for the dashboard: oversized mono figure on a card, with an
- * optional dim caption row beneath.
- */
+/** KPI figure block: mono numerals on a white sheet. */
 export function KpiCard({
   label,
   value,
@@ -104,10 +97,8 @@ export function KpiCard({
     <section
       className={`rounded-panel border border-line bg-surface p-5 ${className}`}
     >
-      <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-muted">
-        {label}
-      </p>
-      <div className={`mt-2 font-mono tabular-nums text-[26px] leading-none tracking-tight ${valueClass}`}>
+      <p className="text-[13px] font-medium text-muted">{label}</p>
+      <div className={`mt-2.5 font-mono tabular-nums text-[24px] leading-none tracking-tight ${valueClass}`}>
         {value}
       </div>
       {(caption || children) && (
