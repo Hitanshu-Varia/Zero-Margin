@@ -242,8 +242,8 @@ export default function DashboardPage() {
                 </thead>
                 <tbody>
                   <tr className="border-b border-line last:border-b-0 transition-colors duration-120 hover:bg-surface-raised/60">
-                    <td className="px-4 py-3.5">
-                      <div className="text-[13px] font-medium">WETH/USDC v4 · hooked</div>
+                    <td className="px-4 py-3.5 whitespace-nowrap">
+                      <div className="text-[13px] font-medium whitespace-nowrap">WETH/USDC v4 · hooked</div>
                       <div className="mt-0.5 font-mono text-[11px] text-dim">
                         0.7fa3…c41d · demo burner
                       </div>
@@ -262,7 +262,7 @@ export default function DashboardPage() {
                         pctBps={(crash.remainingEquityUsdc * 10_000n) / span.netInitialMarginUsdc}
                       />
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <StatusChip tone="cobalt">settled</StatusChip>
                     </td>
                     <td className="px-4 py-3.5 text-right">
@@ -275,8 +275,8 @@ export default function DashboardPage() {
                     </td>
                   </tr>
                   <tr className="border-b border-line last:border-b-0 transition-colors duration-120 hover:bg-surface-raised/60">
-                    <td className="px-4 py-3.5">
-                      <div className="text-[13px] font-medium text-muted">WETH/USDC v4 · isolated</div>
+                    <td className="px-4 py-3.5 whitespace-nowrap">
+                      <div className="text-[13px] font-medium text-muted whitespace-nowrap">WETH/USDC v4 · isolated</div>
                       <div className="mt-0.5 font-mono text-[11px] text-dim">
                         benchmark account · no hedge
                       </div>
@@ -293,7 +293,7 @@ export default function DashboardPage() {
                     <td className="px-4 py-3.5 text-right">
                       <MarginRatioBar pctBps={0n} liquidated />
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <StatusChip tone="down">liquidated</StatusChip>
                     </td>
                     <td className="px-4 py-3.5 text-right">

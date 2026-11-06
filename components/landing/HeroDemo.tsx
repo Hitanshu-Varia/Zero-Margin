@@ -99,14 +99,14 @@ export function HeroDemo() {
           <span aria-hidden="true" className="pulse-dot h-[6px] w-[6px] rounded-full bg-up" />
           Settlement console
         </span>
-        <span className="ml-auto font-mono text-[11px] tabular-nums text-surface/60">
+        <span className="ml-auto font-mono text-[11px] tabular-nums text-dim">
           {formatUsdcWhole(DEMO_ENTRY_PRICE_USDC)} →{" "}
           <span className="text-console-amber">{formatUsdcWhole(mark)}</span> / WETH
         </span>
         <button
           type="button"
           onClick={() => setPlaying((v) => !v)}
-          className="rounded-chip border border-console-line px-2.5 py-1 font-mono text-[11px] text-console-text/70 transition-colors duration-100 hover:border-console-amber hover:text-console-amber"
+          className="rounded-chip border border-console-line px-2.5 py-1 font-mono text-[11px] text-dim transition-colors duration-100 hover:border-console-amber hover:text-console-amber"
         >
           {playing ? "pause" : "play"}
         </button>
@@ -116,7 +116,7 @@ export function HeroDemo() {
         {/* the two accounts */}
         <div className="flex flex-row justify-between gap-6 md:flex-col md:justify-start md:gap-5">
           <div>
-            <p className="text-[12px] text-surface/55">Isolated desk</p>
+            <p className="text-[12px] text-dim">Isolated desk</p>
             <p
               className={`mt-1 font-mono text-[24px] leading-none tabular-nums tracking-tight settle ${
                 isolated.liquidated ? "text-down-bright" : "text-console-text"
@@ -124,18 +124,18 @@ export function HeroDemo() {
             >
               {formatUsdcWhole(isolated.equityUsdc)}
             </p>
-            <p className="mt-1.5 text-[11px] leading-snug text-surface/50">
+            <p className="mt-1.5 text-[11px] leading-snug text-dim">
               4× leverage, no hedge
             </p>
           </div>
           <div>
-            <p className="text-[12px] text-surface/55">ZeroMargin book</p>
+            <p className="text-[12px] text-dim">ZeroMargin book</p>
             <p
               className={`mt-1 font-mono text-[24px] leading-none tabular-nums tracking-tight text-console-amber settle`}
             >
               {formatUsdcWhole(quote.remainingEquityUsdc)}
             </p>
-            <p className="mt-1.5 text-[11px] leading-snug text-surface/50">
+            <p className="mt-1.5 text-[11px] leading-snug text-dim">
               one transaction, netted
             </p>
           </div>
@@ -168,7 +168,7 @@ export function HeroDemo() {
             <div className="mb-2 flex items-baseline justify-between gap-3">
               <label
                 htmlFor="hero-shock"
-                className="text-[12px] text-surface/60"
+                className="text-[12px] text-dim"
               >
                 shock (bps)
               </label>
@@ -217,15 +217,15 @@ function ConsoleBar({
         : "bg-console-amber";
   return (
     <div className="flex items-center gap-3">
-      <span className="w-20 shrink-0 text-[11px] text-surface/55">{label}</span>
-      <div className="relative h-[12px] min-w-0 flex-1 overflow-hidden rounded-full bg-surface/10">
+      <span className="w-20 shrink-0 text-[11px] text-dim">{label}</span>
+      <div className="relative h-[12px] min-w-0 flex-1 overflow-hidden rounded-full bg-line">
         <div
           aria-hidden="true"
           className={`absolute inset-y-0 left-0 rounded-full ${bar}`}
           style={{ width: `${width}%`, opacity: 0.9 }}
         />
       </div>
-      <span className="w-20 shrink-0 text-right font-mono text-[11px] tabular-nums text-console-text/80">
+      <span className="w-20 shrink-0 text-right font-mono text-[11px] tabular-nums text-muted">
         {value}
       </span>
     </div>
