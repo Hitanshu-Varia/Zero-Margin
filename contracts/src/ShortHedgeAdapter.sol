@@ -53,9 +53,9 @@ contract ShortHedgeAdapter {
             revert ZeroAddress();
         AQUA = aqua;
         USDC = usdc;
-        APP = app; // allow address(0) here for the pre-bind deploy; bindApp is required before use
+        APP = app;
+        appBound = app != address(0);
         OWNER = owner_;
-        if (app != address(0)) appBound = true;
     }
 
     function previewShortGainUsdc(uint256 shortNotionalUsdc, int256 priceShockBps)

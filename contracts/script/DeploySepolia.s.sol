@@ -51,7 +51,7 @@ contract DeploySepolia is Script {
         require(address(hook) == hookAddress, "CREATE2 mismatch: mined args drifted");
 
         // 3. adapter (placeholder app at address(1) until bindApp), then the app
-        ShortHedgeAdapter adapter = new ShortHedgeAdapter(IAqua(address(aqua)), address(demoUsdc), address(1), broadcaster);
+        ShortHedgeAdapter adapter = new ShortHedgeAdapter(IAqua(address(aqua)), address(demoUsdc), address(0), broadcaster);
         ClearingAquaApp app = new ClearingAquaApp(
             IAqua(address(aqua)),
             address(demoUsdc),
@@ -61,7 +61,7 @@ contract DeploySepolia is Script {
             3_000e6
         );
 
-        // 4. one-time bindings, then ownership is renounced
+        // 4. one-time bindings, then the app + hook owner renounces
         app.setHook(address(hook));
         hook.setEngine(IClearingMarginEngine(address(app)));
         adapter.bindApp(address(app));
