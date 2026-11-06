@@ -1,42 +1,33 @@
-# Brand — ZeroMargin (v5 · the risk surface)
+# Brand — ZeroMargin (v7 · settlement console)
 
 ## Picks
 
-- **Shape** · Instrument-panel hero. The product itself is the first
-  screen, large and live, the way an exchange terminal boots up.
-- **Theme** · v4 deep-neutral platform (kept), re-choreographed around
-  one object: the risk surface. Signal blue, PnL green/red only.
-- **Signature** · the 16-scenario SPAN-style grid rendered as an
-  interactive isometric risk surface: eight price-shock columns by two
-  volatility states, each cell extruded by that scenario's net PnL. The
-  crash column sits lit red at the edge; hovering or scrubbing sweeps a
-  scanner across the surface and the settlement figure answers beside it.
-  This is the product's own mathematics drawn as its own picture — a
-  choice that could only belong to a risk engine.
-- **Sections** · Hero (headline, one sentence, two actions, the surface,
-  all visible at 1280×800) · the settlement receipt (the ledger table as
-  an instrument readout, with the same cell bars) · the mechanism in
-  three ordered steps · questions · closing band.
-- **Material** · real: every figure comes from the committed engine
-  (golden vectors, the settlement waterfall, the sweep), the demo
-  replay. pictures: none invented — the surface is the product's math
-  drawn to scale. absent: logos, testimonials, case-study counts; none
-  are invented, ever.
+- **Canvas** · true black `#0A0B0D` with near-black surfaces `#101215`
+  and `#17191D`; hairlines `#23262B`. No gradients anywhere on the
+  page — depth comes from surface steps only.
+- **Accent** · exactly one: amber `#EFA94A`, the desk's own signal
+  fill. It carries the primary action, the live readings, and
+  selected states. PnL keeps its conventional green `#3FCF8E` /
+  red `#F26354` pairs and everything else stays bone `#E8EAEC`
+  over gray text steps.
+- **Type** · Inter for words; Geist Mono with `tabular-nums` for
+  every number. Headlines are short, medium-weight, balanced with
+  `text-balance`; no tracked caps, no eyebrow labels.
+- **The one memorable object** · the **shock compass** on the
+  landing page: the eight price shocks arranged as spokes whose
+  length is equity returned, with an amber spring needle and a
+  mono readout in the hub. The dashboard keeps the same discipline
+  with stat bands, an interactive sweep, and a 16-cell grid map.
+- **Motion** · one ambient drift layer (offscreen-paused), one
+  orchestrated `rise` entrance, spring needle, `scale(0.97)`
+  press feedback, all flattened under `prefers-reduced-motion`.
+- **Layout rules** · 1128px content column, generous section
+  spacing, one primary action per view, short copy, footer carries
+  the honest disclaimer (tested, not audited; demo adapter).
 
-## Principles (the one bold thing)
+## Why this reads professional
 
-1. Boldness is spent on the risk surface alone. Everything around it is
-   quiet, ruled, and near-silent.
-2. Structure is information. Column ticks, cell heights, and the
-   scanner line all encode real values; nothing is ornamental.
-3. Motion answers action (scrub, hover) and runs one entrance sweep.
-   Nothing animates on the slider's high-frequency path.
-4. The Hallmark floor holds as written in `.skills/README.md`: tokens
-   only, no eyebrows, no middle-dot strings, no arrows glued to links,
-   one primary button style, hero fits 1280×800, words stay scarce.
-
-## What this fixes (self-critique of v4)
-
-v4 was a competent production dashboard — the kind any good studio ships
-for any trading product. v5 keeps its legibility discipline but gives the
-page a memory: you will remember the surface, not the cards.
+Black canvas + mono figures + one metal accent is the language of
+the trading terminal; restraint in chrome (single header row, no
+sidebar, no fake wallet or search) keeps the engine's numbers in
+the foreground.

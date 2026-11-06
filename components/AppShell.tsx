@@ -42,11 +42,27 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-20 border-b border-line bg-background/88">
-        <div className="mx-auto flex h-14 w-full max-w-[1128px] items-center gap-4 px-4 pr-[calc(1rem+env(safe-area-inset-right))] pl-[calc(1rem+env(safe-area-inset-left))] pt-[env(safe-area-inset-top)] md:px-6">
-          <Brand />
+        <div className="mx-auto w-full max-w-[1128px] px-4 pt-[env(safe-area-inset-top)] md:px-6">
+          <div className="flex h-14 items-center gap-3">
+            <Brand />
+            <span
+              title="LOCAL — every figure is computed from the deterministic span engine in this browser; no node is connected."
+              className="ml-auto hidden cursor-help items-center gap-1.5 rounded-field border border-line bg-surface px-2 py-1 font-mono text-[10px] text-dim sm:flex"
+            >
+              <span aria-hidden="true" className="size-1.5 rounded-full bg-saffron" />
+              LOCAL
+            </span>
+            <Link
+              href="/dashboard"
+              className="ml-auto flex h-9 shrink-0 items-center rounded-field bg-paper px-3.5 text-[13px] font-medium transition-transform duration-100 ease-out active:scale-[0.97] sm:ml-3"
+              style={{ color: "var(--ink)" }}
+            >
+              Open the desk
+            </Link>
+          </div>
           <nav
             aria-label="Primary"
-            className="no-scrollbar ml-auto flex min-w-0 items-center gap-1 self-stretch overflow-x-auto pb-[env(safe-area-inset-bottom)] md:mx-auto md:justify-center"
+            className="no-scrollbar flex items-center gap-1 overflow-x-auto pb-1 md:mx-auto md:max-w-max md:justify-center md:pb-0"
           >
             {nav.map((item) => {
               const active = pathname === item.href;
@@ -56,38 +72,15 @@ export function AppShell({ children }: { children: ReactNode }) {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "relative flex h-14 shrink-0 items-center px-3 text-[13px] transition-colors duration-100 hover:text-text",
-                    active ? "text-text" : "text-muted",
+                    "relative flex h-10 shrink-0 items-center rounded-field px-3 text-[13px] transition-colors duration-100 hover:text-text",
+                    active ? "bg-surface-raised text-text" : "text-muted",
                   )}
                 >
                   {item.label}
-                  <span
-                    aria-hidden="true"
-                    className={cn(
-                      "absolute inset-x-2 bottom-0 h-[2px] -translate-y-1/3 rounded-full transition-opacity duration-100",
-                      active ? "bg-saffron opacity-100" : "opacity-0",
-                    )}
-                  />
                 </Link>
               );
             })}
           </nav>
-          <div className="ml-auto flex items-center gap-3 md:ml-3">
-            <span
-              title="LOCAL — every figure is computed from the deterministic span engine in this browser; no node is connected."
-              className="hidden cursor-help items-center gap-1.5 rounded-field border border-line bg-surface px-2 py-1 font-mono text-[10px] text-dim sm:flex"
-            >
-              <span aria-hidden="true" className="size-1.5 rounded-full bg-saffron" />
-              LOCAL
-            </span>
-            <Link
-              href="/dashboard"
-              className="flex h-9 shrink-0 items-center rounded-field bg-paper px-3.5 text-[13px] font-medium transition-transform duration-100 ease-out active:scale-[0.97]"
-              style={{ color: "var(--ink)" }}
-            >
-              Open the desk
-            </Link>
-          </div>
         </div>
       </header>
 

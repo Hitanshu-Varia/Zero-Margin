@@ -23,9 +23,9 @@ interface VectorRow {
 }
 
 const VECTORS: VectorRow[] = [
-  { id: "GV-01", book: "$100,000 LP · $95,000 short (the demo book)", lp: e6(100_000), short: e6(95_000) },
-  { id: "GV-02", book: "$100,000 LP · $80,000 short", lp: e6(100_000), short: e6(80_000) },
-  { id: "GV-03", book: "$100,000 LP · unhedged", lp: e6(100_000), short: e6(0) },
+  { id: "GV-01", book: "$100,000 LP, $95,000 short (the demo book)", lp: e6(100_000), short: e6(95_000) },
+  { id: "GV-02", book: "$100,000 LP, $80,000 short", lp: e6(100_000), short: e6(80_000) },
+  { id: "GV-03", book: "$100,000 LP, unhedged", lp: e6(100_000), short: e6(0) },
 ];
 
 /** GV-04 — the post-withdrawal state the hook guard protects. */
@@ -88,7 +88,7 @@ export default function ProofPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Num tone="cobalt" size="xs">
-                        {formatBps(s.capitalSavingsBps)} ·{" "}
+                        formatBps(s.capitalSavingsBps),{" "}
                         {formatPercentFromBps(s.capitalSavingsBps)}
                       </Num>
                     </td>
@@ -99,8 +99,8 @@ export default function ProofPage() {
           </table>
         </div>
         <div className="border-t border-line px-4 py-2.5 font-mono text-[11px] text-dim">
-          parameters: γ 5,000 bps · basis h 500 bps · maintenance ratio
-          7,500 bps · isolated short α 5,000 bps · fee φ 5 bps
+          parameters: γ 5,000 bps, basis h 500 bps, maintenance ratio
+          7,500 bps, isolated short α 5,000 bps, fee φ 5 bps
         </div>
       </Panel>
 
@@ -117,7 +117,7 @@ export default function ProofPage() {
               <div className="flex items-center justify-between gap-3">
                 <StatusChip tone="down">span margin breach</StatusChip>
                 <span className="font-mono text-[11px] text-dim">
-                  tx reverted · pool state unchanged
+                  tx reverted, pool state unchanged
                 </span>
               </div>
               <pre className="mt-2 overflow-x-auto font-mono text-[12px] leading-relaxed text-muted">
@@ -161,10 +161,10 @@ export default function ProofPage() {
           <Panel label="Sponsor proof points">
             <div className="rule-t">
               <Stat
-                label="1inch · Aqua"
+                label="1inch Aqua"
                 value={
                   <span className="text-muted">
-                    ship 25,000e6 · push 28,500e6 · pull 33,800e6
+                    ship 25,000e6, push 28,500e6, pull 33,800e6
                   </span>
                 }
               />
@@ -172,15 +172,15 @@ export default function ProofPage() {
                 label="Uniswap v4"
                 value={
                   <span className="text-muted">
-                    mined hook address · PoolManager call
+                    mined hook address, PoolManager call
                   </span>
                 }
               />
               <Stat
-                label="Arkiv · Rabdi"
+                label="Arkiv Rabdi"
                 value={
                   <span className="text-muted">
-                    live entity · 300 s ttl · runnable query
+                    live entity, 300 s ttl, runnable query
                   </span>
                 }
               />
@@ -234,7 +234,7 @@ export default function ProofPage() {
       </div>
 
       <p className="mt-5 font-mono text-[11px] text-dim">
-        observed ν = {Number(DEMO_VOL_SHOCK_BPS)} bps across every vector ·
+        observed ν = {Number(DEMO_VOL_SHOCK_BPS)} bps across every vector,
         vectors recomputed at build time from lib/spanMath.ts
       </p>
     </main>

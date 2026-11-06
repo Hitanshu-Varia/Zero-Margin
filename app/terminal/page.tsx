@@ -421,11 +421,11 @@ function Terminal() {
                   <span className="text-down">
                     {formatUsdcWhole(isolated.lpPnlUsdc < 0n ? -isolated.lpPnlUsdc : isolated.lpPnlUsdc)}
                   </span>{" "}
-                  · penalty{" "}
+                  , penalty{" "}
                   <span className="text-down">
                     {formatUsdcWhole(isolated.liquidationPenaltyUsdc)}
                   </span>{" "}
-                  · returned{" "}
+                  , returned{" "}
                   <span className="text-down">{formatUsdc(isolated.returnedToTraderUsdc)}</span>
                 </p>
               </div>
@@ -512,11 +512,11 @@ function Terminal() {
               <p className="font-mono text-[12px] leading-relaxed text-muted">
                 short leg nets{" "}
                 <span className="text-up">{formatUsdc(quote.shortGainUsdc)}</span> against{" "}
-                <span className="text-down">{formatUsdc(quote.lpLossUsdc)}</span> LP loss ·
+                <span className="text-down">{formatUsdc(quote.lpLossUsdc)}</span> LP loss,
                 offset{" "}
                 <span className="text-cobalt">{formatUsdc(quote.nettedOffsetUsdc)}</span>
                 {quote.badDebtUsdc === 0n && (
-                  <span className="text-dim"> · no liquidation penalty</span>
+                  <span className="text-dim">, no liquidation penalty</span>
                 )}
               </p>
             </div>
@@ -531,7 +531,7 @@ function Terminal() {
               <Stat
                 label="Capital savings"
                 tone="cobalt"
-                value={`${formatBps(span.capitalSavingsBps)} · ${formatPercentFromBps(span.capitalSavingsBps)}`}
+                value={`${formatBps(span.capitalSavingsBps)}, ${formatPercentFromBps(span.capitalSavingsBps)}`}`.replace('}}}`','}}}`')
               />
               <Stat label="Hedge ratio" value={formatPercentFromBps(hedgeRatio, 0)} />
             </div>
@@ -568,7 +568,7 @@ function Terminal() {
                     rule
                   />
                   <WaterfallRow
-                    label="Unwind fee · 5 bps"
+                    label="Unwind fee, 5 bps"
                     sign={quote.protocolFeeUsdc === 0n ? "" : "−"}
                     tone="muted"
                     value={formatUsdc(quote.protocolFeeUsdc)}
@@ -633,7 +633,7 @@ function Terminal() {
                   SPAN-grid net PnL
                 </span>
                 <span className="font-mono text-[11px] text-dim">
-                  16 scenarios · ν 0 / 150 bps
+                  16 scenarios, ν 0 / 150 bps
                 </span>
               </div>
               <ScenarioGrid

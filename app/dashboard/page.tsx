@@ -132,14 +132,14 @@ export default function DashboardPage() {
             </thead>
             <tbody className="font-mono text-[12px] tabular-nums">
               <tr className="border-b border-line last:border-0">
-                <td className="px-5 py-3 text-start font-sans text-[13px] text-text">WETH/USDC v4 · netted</td>
+                <td className="px-5 py-3 text-start font-sans text-[13px] text-text">WETH/USDC v4, netted</td>
                 <td className="px-3 py-3 text-end">{formatUsdcWhole(DEMO_BOOK.lpNotionalUsdc)}</td>
                 <td className="px-3 py-3 text-end text-up">{formatUsdcWhole(DEMO_BOOK.shortNotionalUsdc)}</td>
                 <td className="px-3 py-3 text-end">{formatUsdcWhole(span.netInitialMarginUsdc)}</td>
                 <td className="px-5 py-3 text-end"><StatusChip tone="cobalt">settled</StatusChip></td>
               </tr>
               <tr className="last:border-0">
-                <td className="px-5 py-3 text-start font-sans text-[13px] text-muted">WETH/USDC v4 · isolated</td>
+                <td className="px-5 py-3 text-start font-sans text-[13px] text-muted">WETH/USDC v4, isolated</td>
                 <td className="px-3 py-3 text-end">{formatUsdcWhole(DEMO_ISOLATED_BOOK.lpNotionalUsdc)}</td>
                 <td className="px-3 py-3 text-end text-dim">none</td>
                 <td className="px-3 py-3 text-end">{formatUsdcWhole(DEMO_ISOLATED_BOOK.postedMarginUsdc)}</td>
@@ -152,9 +152,9 @@ export default function DashboardPage() {
         <Panel label="Activity">
           <ol className="px-5 py-4">
             {[
-              { event: "BookUnwound", at: "T−00:41", tone: "cobalt" as const, detail: `settled −3,000 bps · returned ${formatUsdcWhole(crash.remainingEquityUsdc)}` },
-              { event: "SpanMarginBreach", at: "T−01:12", tone: "down" as const, detail: `withdrawal guard reverted · required ${formatUsdcWhole(span.netInitialMarginUsdc)}` },
-              { event: "BookOpened", at: "T−02:18", tone: "up" as const, detail: `net IM ${formatUsdcWhole(span.netInitialMarginUsdc)} · savings ${formatBps(span.capitalSavingsBps)}` },
+              { event: "BookUnwound", at: "T−00:41", tone: "cobalt" as const, detail: `settled −3,000 bps, returned ${formatUsdcWhole(crash.remainingEquityUsdc)}` },
+              { event: "SpanMarginBreach", at: "T−01:12", tone: "down" as const, detail: `withdrawal guard reverted, required ${formatUsdcWhole(span.netInitialMarginUsdc)}` },
+              { event: "BookOpened", at: "T−02:18", tone: "up" as const, detail: `net IM ${formatUsdcWhole(span.netInitialMarginUsdc)}, savings ${formatBps(span.capitalSavingsBps)}` },
               { event: "KeeperSet", at: "T−02:19", tone: "muted" as const, detail: "unwind authorization scoped to the demo keeper" },
             ].map((ev) => (
               <li key={ev.event} className="border-b border-line last:border-0 py-2.5">

@@ -65,7 +65,7 @@ export default function ReplayPage() {
         </div>
         <ModeBadge
           variant="local"
-          title="DEMO·DATASET"
+          title="DEMO DATASET"
           description="A deterministic, seeded series built by lib/replayData.ts — the seed and generator are committed in this repo. The submission pipeline replaces it with exchange candles whose SHA-256 is printed on each run."
         />
       </div>
@@ -82,7 +82,7 @@ export default function ReplayPage() {
         </Panel>
         <Panel bodyClassName="px-4 py-3.5">
           <div className="text-[11px] text-dim">
-            99th percentile · nearest-rank
+            99th percentile, nearest-rank
           </div>
           <Num size="lg" tone="cobalt" className="mt-1.5 block">
             {STATS.p99Bps.toFixed(1)} bps
@@ -162,7 +162,7 @@ export default function ReplayPage() {
                     fontSize="10"
                     fontFamily="var(--font-data), monospace"
                   >
-                    {w.label} · {peak.toFixed(0)} bps
+                    {w.label}, {peak.toFixed(0)} bps
                   </text>
                 </g>
               );
@@ -199,9 +199,9 @@ export default function ReplayPage() {
       </Panel>
 
       <p className="mt-5 max-w-3xl font-mono text-[12px] leading-relaxed text-dim">
-        rows 43,200 · seed 0x5A3F077 · percentile method: nearest-rank on
-        the sorted array · basisBps = (perpUsdc − spotUsdc) × 10,000 ÷
-        spotUsdc · no smoothing and no outlier removal
+        rows 43,200, seed 0x5A3F077, percentile method: nearest-rank on
+        the sorted array, basisBps = (perpUsdc − spotUsdc) × 10,000 ÷
+        spotUsdc, no smoothing and no outlier removal
       </p>
     </main>
   );

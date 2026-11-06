@@ -127,9 +127,9 @@ export default function ArkivPage() {
       </Panel>
 
       <p className="mt-5 max-w-3xl font-mono text-[12px] leading-relaxed text-dim">
-        schema fields: portfolioId str · trader addr · status str ·
-        marginRatioBps i32 · notionals dec · equityUsdc dec · ttl
-        ExpirationTime.fromMinutes(5) · the cobalt tick marks 100%
+        schema fields: portfolioId str, trader addr, status str,
+        marginRatioBps i32, notionals dec, equityUsdc dec, ttl
+        ExpirationTime.fromMinutes(5). the amber tick marks 100%
         coverage; left of it, the book is UNWIND_ELIGIBLE
       </p>
     </main>
