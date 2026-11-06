@@ -67,7 +67,8 @@ contract PortfolioMarginHookTest is Test {
         adapter.fundReserve(100_000e6);
 
         // hook now, engine binding to the predicted app address, then the app
-        address hookAddress = vm.computeCreateAddress(address(this), vm.getNonce(address(this)) + 1);
+        uint256 n0 = vm.getNonce(address(this));
+        address hookAddress = vm.computeCreateAddress(address(this), n0);
         PoolKey memory finalKey = poolKeyForHookAt(hookAddress);
         bytes32 poolId = keccak256(abi.encode(finalKey));
         hook = new PortfolioMarginHook(IClearingMarginEngine(appAddress), IPoolManager(address(this)), poolId, volatileToken);
@@ -239,9 +240,9 @@ contract PortfolioMarginHookTest is Test {
     }
 
     /// StateLibrary routes through extsload; the state word carries sqrtP
-    /// in the top 160 bits (24+24+24+24|160 layout).
+    /// in the LOW 160 bits (24|24|24|24|160 from the most-significant end).
     function extsload(bytes32) public view returns (bytes32) {
-        return bytes32(uint256(uint160(currentSqrtP)) << 96);
+        return bytes32(uint256(currentSqrtP));
     }
 
     // ── key ────────────────────────────────────────────────────────
