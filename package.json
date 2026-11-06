@@ -7,13 +7,17 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "e2e": "node scripts/e2e.mjs",
     "lint:claims": "python3 scripts/lint_claims.py"
   },
   "dependencies": {
+    "clsx": "^2.1.1",
     "motion": "^14.10.0",
     "next": "16.4.5",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
