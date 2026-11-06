@@ -24,10 +24,9 @@ contract PortfolioMarginHook is IHooks {
     IClearingMarginEngine public immutable ENGINE;
     /// token0/token1 ordering: the volatile leg (WETH-ish) at deploy time.
     address public immutable VOLATILE_TOKEN;
+    /// The demo pool the hook guards; supplied at deploy because the pool
+    /// itself is initialized with this hook's mined address afterward.
     PoolId public immutable POOL_ID;
-    /// @dev Immutables cannot hold structs; the key's identity is pinned via
-    /// POOL_ID and the equality checks, and the key layout is re-verified per call.
-    PoolKey internal key;
 
     uint256 internal constant Q96 = 2 ** 96;
     uint64 internal constant MIN_MARK_PRICE_USDC = 1e6;
@@ -40,18 +39,11 @@ contract PortfolioMarginHook is IHooks {
     error InvalidLiquidityDelta();
     error PriceOutOfBounds(uint64 price);
 
-    constructor(IClearingMarginEngine engine_, IPoolManager poolManager, PoolKey memory poolKey_, address volatileToken) {
+    constructor(IClearingMarginEngine engine_, IPoolManager manager, bytes32 poolId_, address volatileToken) {
         ENGINE = engine_;
-        POOL_MANAGER = poolManager;
-        POOL_ID = poolKey_.toId();
+        POOL_MANAGER = manager;
+        POOL_ID = PoolId.wrap(poolId_);
         VOLATILE_TOKEN = volatileToken;
-        key = PoolKey({
-            currency0: poolKey_.currency0,
-            currency1: poolKey_.currency1,
-            fee: poolKey_.fee,
-            tickSpacing: poolKey_.tickSpacing,
-            hooks: IHooks(address(this))
-        });
     }
 
     // ── guard ──────────────────────────────────────────────────────
@@ -68,7 +60,7 @@ contract PortfolioMarginHook is IHooks {
         // Never trust hookData for the trader unless it is exactly the
         // 20-byte address equal to the sender (§4.11).
         address trader = sender;
-        if (hookData.length > 0) {
+        if (hookData.length != 0) {
             if (hookData.length != 20) revert InvalidHookData();
             if (address(bytes20(hookData)) != sender) revert InvalidHookData();
         }
@@ -123,10 +115,14 @@ contract PortfolioMarginHook is IHooks {
         revert("unsupported");
     }
 
-    function afterAddLiquidity(address, PoolKey calldata, IPoolManager.ModifyLiquidityParams calldata, BalanceDelta, BalanceDelta, bytes calldata)
-        external
-        returns (bytes4, BalanceDelta)
-    {
+    function afterAddLiquidity(
+        address,
+        PoolKey calldata,
+        IPoolManager.ModifyLiquidityParams calldata,
+        BalanceDelta,
+        BalanceDelta,
+        bytes calldata
+    ) external returns (bytes4, BalanceDelta) {
         revert("unsupported");
     }
 

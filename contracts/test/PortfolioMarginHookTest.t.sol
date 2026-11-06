@@ -67,8 +67,12 @@ contract PortfolioMarginHookTest is Test {
         adapter.fundReserve(100_000e6);
 
         // hook now, engine binding to the predicted app address, then the app
-        hook = new PortfolioMarginHook(IClearingMarginEngine(appAddress), IPoolManager(address(this)), poolKey(), volatileToken);
-        app = new ClearingAquaApp(IAqua(address(aqua)), address(token), address(adapter), feeKeeper, PoolId.unwrap(hook.POOL_ID()), ENTRY_PRICE);
+        address hookAddress = vm.computeCreateAddress(address(this), vm.getNonce(address(this)) + 1);
+        PoolKey memory finalKey = poolKeyForHookAt(hookAddress);
+        bytes32 poolId = keccak256(abi.encode(finalKey));
+        hook = new PortfolioMarginHook(IClearingMarginEngine(appAddress), IPoolManager(address(this)), poolId, volatileToken);
+        require(address(hook) == hookAddress, "nonce prediction drifted");
+        app = new ClearingAquaApp(IAqua(address(aqua)), address(token), address(adapter), feeKeeper, poolId, ENTRY_PRICE);
         app.setHook(address(hook));
 
         // GV-04 prestate: trader ships 12,000e6 and opens the book
@@ -234,26 +238,27 @@ contract PortfolioMarginHookTest is Test {
         tick = TickMath.getTickAtSqrtPrice(sqrtPriceX96);
     }
 
-    /// StateLibrary routes through extsload; the stand-in answers with the
-    /// configured sqrt on the lower 160 bits (the state word layout).
+    /// StateLibrary routes through extsload; the state word carries sqrtP
+    /// in the top 160 bits (24+24+24+24|160 layout).
     function extsload(bytes32) public view returns (bytes32) {
-        return bytes32(uint256(uint160(currentSqrtP)));
+        return bytes32(uint256(uint160(currentSqrtP)) << 96);
     }
 
     // ── key ────────────────────────────────────────────────────────
+    /// the pool key with the demo hook pinned; app and hook agree on it
     function poolKey() internal view returns (PoolKey memory) {
         return PoolKey({
             currency0: Currency.wrap(address(usdc)),
             currency1: Currency.wrap(volatileToken),
             fee: uint24(0x800000 | 500),
             tickSpacing: int24(60),
-            hooks: IHooks(address(this))
+            hooks: IHooks(address(hook))
         });
     }
 
-    function poolKeyForHook() internal view returns (PoolKey memory) {
+    function poolKeyForHookAt(address hookAddress) internal view returns (PoolKey memory) {
         PoolKey memory k = poolKey();
-        k.hooks = IHooks(address(hook));
+        k.hooks = IHooks(hookAddress);
         return k;
     }
 
