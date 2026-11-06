@@ -156,6 +156,7 @@ button.bg-paper,
 .drift-field {
   position: relative;
   isolation: isolate;
+  overflow: clip;
 }
 .drift-field::before {
   content: "";

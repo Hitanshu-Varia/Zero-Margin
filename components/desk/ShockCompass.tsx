@@ -85,7 +85,7 @@ export function ShockCompass({ className = "", initialIndex = 3 }: { className?:
 
         {/* the needle: the only motion on this instrument */}
         <motion.div
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[42%] w-[2px]"
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[27%] w-[2px]"
           style={{
             transformOrigin: "50% 100%",
             x: "-50%",

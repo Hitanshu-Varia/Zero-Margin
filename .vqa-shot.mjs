@@ -1,0 +1,16 @@
+import { chromium } from "playwright-core";
+const b = await chromium.launch({ executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" });
+const p = await b.newPage({ viewport: { width: 1280, height: 800 } });
+await p.goto("http://localhost:3123/", { waitUntil: "networkidle" });
+await p.waitForTimeout(1200);
+await p.screenshot({ path: "/tmp/v7-landing.png" });
+await p.goto("http://localhost:3123/dashboard", { waitUntil: "networkidle" });
+await p.waitForTimeout(1200);
+await p.screenshot({ path: "/tmp/v7-dashboard.png" });
+await p.setViewportSize({ width: 390, height: 844 });
+await p.goto("http://localhost:3123/", { waitUntil: "networkidle" });
+await p.waitForTimeout(1000);
+const m = await p.evaluate(() => ({ sx: window.scrollX, w: document.documentElement.scrollWidth, d: document.body.scrollWidth }));
+console.log("mobile:", JSON.stringify(m));
+await p.screenshot({ path: "/tmp/v7-mobile.png" });
+await b.close();
