@@ -1,26 +1,28 @@
 @import "tailwindcss";
 
-/* ── ZeroMargin design tokens ──────────────────────────────────
-   Industrial trading terminal. Amber-on-black. See brand.md.   */
+/* ── ZeroMargin design tokens v2 ───────────────────────────────
+   Precision trading dashboard. Gold-on-charcoal. See brand.md. */
 
 :root {
-  --background: #0b0c0e;
-  --surface: #121316;
-  --surface-raised: #17191d;
-  --line: #23262b;
-  --line-strong: #33373e;
-  --text: #e8eaed;
-  --text-muted: #9ba0a8;
-  --text-dim: #6b7178;
-  --amber: #f0b429;
-  --amber-dim: #8a6a1d;
-  --green: #41c98e;
-  --green-dim: #1d3b2f;
-  --red: #f26d5b;
-  --red-dim: #3b2320;
-  --blue: #6aaef0;
-  --blue-dim: #1c2a3a;
-  --ring: #f0b429;
+  --background: #0a0b0d;
+  --surface: #101114;
+  --surface-raised: #15171b;
+  --line: #1e2126;
+  --line-strong: #2a2e34;
+  --text: #edeef0;
+  --text-muted: #a2a7ae;
+  --text-dim: #6e747c;
+  --gold: #e9c176;
+  --gold-soft: #f3dda6;
+  --gold-dim: #3a3020;
+  --green: #45d48d;
+  --green-dim: #173226;
+  --red: #f0654f;
+  --red-dim: #341f1c;
+  --blue: #7fb5f5;
+  --blue-dim: #1b2734;
+  --paper: #f5f5f3;
+  --ring: #e9c176;
 }
 
 @theme inline {
@@ -32,19 +34,22 @@
   --color-text: var(--text);
   --color-muted: var(--text-muted);
   --color-dim: var(--text-dim);
-  --color-amber: var(--amber);
-  --color-amber-dim: var(--amber-dim);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-gold-dim: var(--gold-dim);
   --color-up: var(--green);
   --color-up-dim: var(--green-dim);
   --color-down: var(--red);
   --color-down-dim: var(--red-dim);
   --color-chain: var(--blue);
   --color-chain-dim: var(--blue-dim);
+  --color-paper: var(--paper);
   --color-ring: var(--ring);
   --font-sans: var(--font-display);
   --font-mono: var(--font-data);
-  --radius-panel: 10px;
-  --radius-field: 6px;
+  --radius-card: 16px;
+  --radius-field: 10px;
+  --radius-chip: 999px;
 }
 
 html {
@@ -54,35 +59,122 @@ html {
 body {
   background: var(--background);
   color: var(--text);
-  font-family: var(--font-sans), "Space Grotesk", sans-serif;
+  font-family: var(--font-sans), "Instrument Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: var(--amber);
-  color: #0b0c0e;
+  background: var(--gold);
+  color: #0a0b0d;
 }
 
-/* Data in transit between panels: hairline grid utilities */
+/* Hairline utilities kept from v1 */
 .rule-t {
   border-top: 1px solid var(--line);
 }
 .rule-b {
   border-bottom: 1px solid var(--line);
 }
-.rule-r {
-  border-right: 1px solid var(--line);
+
+/* Ambient glow reserved for the dashboard hero region only */
+.ambient-glow {
+  position: relative;
+}
+.ambient-glow::before {
+  content: "";
+  position: absolute;
+  inset: -80px -20% auto -20%;
+  height: 220px;
+  background: radial-gradient(
+    50% 120px at 50% 0%,
+    rgba(233, 193, 118, 0.07),
+    transparent 70%
+  );
+  pointer-events: none;
 }
 
-/* Terminal focus ring: amber, offset, unmissable */
+/* Gold gradient — brand wordmark and hero figures only */
+.gold-gradient {
+  background: linear-gradient(180deg, var(--gold-soft), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Focus: gold ring, 2px, offset — unmissable */
 *:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
-  border-radius: 2px;
 }
 
-/* Hide scrollbar on horizontally scrollable strips (mobile nav) */
+/* Range slider */
+input[type="range"] {
+  appearance: none;
+  height: 3px;
+  background: var(--line-strong);
+  border-radius: 2px;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 4px solid var(--gold);
+  box-shadow: 0 0 0 1px var(--line-strong);
+  transition: transform 120ms ease-out;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 4px solid var(--gold);
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+input[type="range"]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+}
+
+/* Nav rail item */
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--text-muted);
+  transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+.nav-item:hover {
+  background: var(--surface-raised);
+  color: var(--text);
+}
+.nav-item[aria-current="page"] {
+  background: var(--surface-raised);
+  color: var(--text);
+  font-weight: 500;
+}
+.nav-item[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--gold);
+}
+
+/* Hide scrollbar utility for mobile strips */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -91,40 +183,18 @@ body {
   scrollbar-width: none;
 }
 
-input[type="range"] {
-  appearance: none;
-  height: 2px;
-  background: var(--line-strong);
-  border-radius: 1px;
-  cursor: pointer;
+/* Live pulse dot for status chips */
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
 }
-input[type="range"]::-webkit-slider-thumb {
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--amber);
-  border: 3px solid var(--background);
-  box-shadow: 0 0 0 1px var(--line-strong);
-  transition: transform 100ms ease-out;
-}
-input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-}
-input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--amber);
-  border: 3px solid var(--background);
-  box-shadow: 0 0 0 1px var(--line-strong);
-}
-input[type="range"]:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 4px;
-}
-input[type="range"]::-webkit-slider-thumb:active {
-  transform: scale(0.95);
+.pulse-dot {
+  animation: pulse-dot 2.4s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -138,19 +208,15 @@ input[type="range"]::-webkit-slider-thumb:active {
   }
 }
 
-/* Number flicker used by the terminal while it computes —
-   subtle, short, and skipped entirely under reduced motion */
+/* Soft settle for value updates, skipped under reduced motion */
 @keyframes settle {
   from {
-    opacity: 0.35;
+    opacity: 0.4;
   }
   to {
     opacity: 1;
   }
 }
 .settle {
-  animation: settle 140ms ease-out;
-}
-.settle-once {
-  animation: settle 140ms ease-out 1;
+  animation: settle 160ms ease-out;
 }
