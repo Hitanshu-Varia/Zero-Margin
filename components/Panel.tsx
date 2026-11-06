@@ -25,7 +25,7 @@ export function Panel({
       className={`rounded-panel border border-line bg-surface overflow-hidden ${className}`}
     >
       {(label || meta) && (
-        <header className="flex items-center justify-between gap-4 border-b border-line px-4 py-2.5">
+        <header className="flex flex-wrap items-center justify-between gap-2 gap-x-4 border-b border-line px-4 py-2.5">
           <h2 className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.08em] text-muted">
             <span
               aria-hidden="true"

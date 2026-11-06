@@ -447,7 +447,7 @@ function Terminal() {
               <div className="mb-2 rule-t pt-3 text-[12px] uppercase tracking-wide text-muted">
                 Cost of the −30% replay
               </div>
-              <div className="grid grid-cols-3 gap-px overflow-hidden rounded-field border border-line bg-line">
+              <div className="grid grid-cols-1 gap-px sm:grid-cols-3 sm:gap-px overflow-hidden rounded-field border border-line bg-line">
                 {[
                   {
                     label: "Isolated penalty",
