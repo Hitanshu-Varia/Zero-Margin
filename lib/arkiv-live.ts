@@ -126,24 +126,45 @@ export async function queryAttestations(): Promise<Attestation[]> {
     params: [
       `arkiv.schema = str('${ARKIV_SCHEMA}') AND status = str('UNWIND_ELIGIBLE') AND marginRatioBps < i32(10000) ORDER BY $key ASC`,
     ],
-  })) as { data?: Array<Record<string, unknown>> };
+  })) as { data?: Array<{ key?: string }> };
+  // the query returns keys only; per-entity fetches fill the annotations
   for (const row of response?.data ?? []) {
-    const ann = (row.annotations ?? {}) as Record<string, string | number>;
-    const num = (k: string) => ann[k] ?? 0;
+    const key = row.key;
+    if (typeof key !== "string") continue;
+    const full = (await publicClient().getEntity(key as `0x${string}`)) as {
+      $createdAt?: string | number;
+      $expiresAt?: string | number;
+      $attributes?: Record<string, { type?: string; value?: string | number }>;
+    };
+    const attr = (full.$attributes ?? {}) as Record<string, { type?: string; value?: string | number }>;
+    const str = (name: string, fallback = ""): string => {
+      const v = attr[name]?.value;
+      return v === undefined || v === null ? fallback : String(v);
+    };
+    const decs = (name: string): bigint => {
+      const v = attr[name]?.value;
+      if (typeof v !== "string") return 0n;
+      try {
+        return BigInt(v);
+      } catch {
+        return 0n;
+      }
+    };
+    const ratio = attr["marginRatioBps"]?.value;
     rows.push({
-      portfolioId: String(ann.portfolioId ?? String(row.key).slice(0, 18)),
-      trader: String(ann.trader ?? "unknown"),
-      status: String(ann.status ?? "UNKNOWN") as Attestation["status"],
-      marginRatioBps: BigInt(num("marginRatioBps")),
-      lpNotionalUsdc: BigInt(num("lpNotionalUsdc")),
-      shortNotionalUsdc: BigInt(num("shortNotionalUsdc")),
-      postedMarginUsdc: BigInt(num("postedMarginUsdc")),
-      netInitialMarginUsdc: BigInt(num("netInitialMarginUsdc")),
-      netMaintenanceMarginUsdc: BigInt(num("netMaintenanceMarginUsdc")),
-      equityUsdc: BigInt(num("equityUsdc")),
-      updatedAtLabel: String(ann.updatedAt ?? new Date().toISOString().slice(11, 19)),
-      remainingTtlSeconds: Number(ann.remainingTtlSeconds ?? 0),
-      aquaStrategyHash: String(ann.aquaStrategyHash ?? ""),
+      portfolioId: str("portfolioId", String(key).slice(0, 18)),
+      trader: str("trader", "unknown"),
+      status: str("status", "UNKNOWN") as Attestation["status"],
+      marginRatioBps: typeof ratio === "number" ? BigInt(ratio) : BigInt(String(ratio ?? "0")),
+      lpNotionalUsdc: decs("lpNotionalUsdc"),
+      shortNotionalUsdc: decs("shortNotionalUsdc"),
+      postedMarginUsdc: decs("postedMarginUsdc"),
+      netInitialMarginUsdc: decs("netInitialMarginUsdc"),
+      netMaintenanceMarginUsdc: decs("netMaintenanceMarginUsdc"),
+      equityUsdc: decs("equityUsdc"),
+      updatedAtLabel: `block ${String(full.$createdAt ?? "")}`,
+      remainingTtlSeconds: Math.max(0, Number(full.$expiresAt ?? 0) - Math.floor(Date.now() / 1000)),
+      aquaStrategyHash: str("aquaStrategyHash"),
     });
   }
   return rows;
