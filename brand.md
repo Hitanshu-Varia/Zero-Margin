@@ -1,67 +1,42 @@
-# Brand — ZeroMargin (v4, production revision)
+# Brand — ZeroMargin (v5 · the risk surface)
 
-The user rejected v2 (amber-on-black: tropical, skip) and v3 (paper memo:
-wrong mood for a trading product). v4 commits to what top operational
-trading products (Hyperliquid-class terminals, Linear-class app chrome)
-actually ship: a deep neutral dark theme, dense information layout, and
-chrome that looks like software someone runs eight hours a day.
+## Picks
 
-## Color (base palette)
+- **Shape** · Instrument-panel hero. The product itself is the first
+  screen, large and live, the way an exchange terminal boots up.
+- **Theme** · v4 deep-neutral platform (kept), re-choreographed around
+  one object: the risk surface. Signal blue, PnL green/red only.
+- **Signature** · the 16-scenario SPAN-style grid rendered as an
+  interactive isometric risk surface: eight price-shock columns by two
+  volatility states, each cell extruded by that scenario's net PnL. The
+  crash column sits lit red at the edge; hovering or scrubbing sweeps a
+  scanner across the surface and the settlement figure answers beside it.
+  This is the product's own mathematics drawn as its own picture — a
+  choice that could only belong to a risk engine.
+- **Sections** · Hero (headline, one sentence, two actions, the surface,
+  all visible at 1280×800) · the settlement receipt (the ledger table as
+  an instrument readout, with the same cell bars) · the mechanism in
+  three ordered steps · questions · closing band.
+- **Material** · real: every figure comes from the committed engine
+  (golden vectors, the settlement waterfall, the sweep), the demo
+  replay. pictures: none invented — the surface is the product's math
+  drawn to scale. absent: logos, testimonials, case-study counts; none
+  are invented, ever.
 
-| Token | Hex | Role |
-| :--- | :--- | :--- |
-| `background` | `#0D0F12` | App canvas. Deep neutral charcoal, cool cast. |
-| `surface` | `#13161A` | Cards, panels, sidebar. |
-| `surface-raised` | `#171B21` | Wells, inputs, hover fills, table headers. |
-| `line` | `#23282E` | Hairline borders (white at 8%). |
-| `line-strong` | `#31383F` | Emphatic frames, active borders. |
-| `text` | `#E9ECEF` | Primary text. |
-| `muted` | `#98A1AB` | Secondary text. |
-| `dim` | `#68727D` | Metadata, large numbers of small size forbidden below 4.5:1 exceptions. |
-| `accent` | `#4D8DF6` | The product accent (calm signal blue). Links, primary actions, charts, active nav. |
-| `accent-dim` | `#1B2740` | Accent wash for chips and fills. |
-| `up` | `#3FCF8E` | Gains only. |
-| `down` | `#F26354` | Losses, breaches, liquidation only. |
+## Principles (the one bold thing)
 
-The accent is blue because the product is an instrument (data, links,
-positions) — not decoration. Green/red remain strictly PnL semantics.
+1. Boldness is spent on the risk surface alone. Everything around it is
+   quiet, ruled, and near-silent.
+2. Structure is information. Column ticks, cell heights, and the
+   scanner line all encode real values; nothing is ornamental.
+3. Motion answers action (scrub, hover) and runs one entrance sweep.
+   Nothing animates on the slider's high-frequency path.
+4. The Hallmark floor holds as written in `.skills/README.md`: tokens
+   only, no eyebrows, no middle-dot strings, no arrows glued to links,
+   one primary button style, hero fits 1280×800, words stay scarce.
 
-## Type
+## What this fixes (self-critique of v4)
 
-- `Inter` 400/500/600 for every readable string, headings included.
-  Set deliberately: `-0.01em` tracking on headings; `tabular` numerals
-  everywhere data appears. This is the production default face precisely
-  because Linear/Hyperliquid-grade products choose it and then set it
-  properly — weights carry hierarchy, tracking tightens at display sizes.
-- `Geist Mono` 400/500 for data: monetary values, bps, addresses, table
-  numerics, console readouts. Mono never styles buttons or captions.
-- Scale: 11px metadata, 13px data, 14px body, 15px sidebar, 17px panel
-  titles (sentence case), 30–34px dashboard title, hero display 40/48.
-
-## Shape
-
-- Cards 12px, fields 8px, chips full. Shadows near-zero; elevation from
-  surface steps and hairlines. One exception: dropdown-style overlays
-  get a soft 16px shadow for separation.
-- Tables: header row with a raised fill, 13px numerics, row hover,
-  right-aligned numerics.
-
-## Chrome (the part that failed before)
-
-Sidebar: `surface` column, one small-caps group label ("Trading"), 40px
-rows with 16px icons and a 3px accent rail on the active item, hover fills
-on rows, network + version pinned to the bottom.
-
-Topbar: 52px, contains (a) the page breadcrumb, (b) command bar with `/`
-hint, (c) network chip, (d) accent-filled primary action, (e) wallet pill
-with avatar dot. Height consistent, no giant gaps.
-
-## Landing
-
-Full dark throughout. The hero console is a panel of the same system, not
-a foreign inset; the accent moment is the `$147,500 → $10,000` figure.
-
-## Motion
-
-120ms standard, 200ms max for panels; motion answers actions. Live
-figures get the 160ms settle. Reduced motion: instant.
+v4 was a competent production dashboard — the kind any good studio ships
+for any trading product. v5 keeps its legibility discipline but gives the
+page a memory: you will remember the surface, not the cards.
