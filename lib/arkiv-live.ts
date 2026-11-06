@@ -116,9 +116,9 @@ export async function writeAttestation(fields: {
   };
 }
 
-/** The keeper's read: UNWIND_ELIGIBLE inside its own margin envelope. The
- *  read is access-key key-only: no writer key is needed, so a read works
- *  even when the burner has no Rabdi gas or a zero placeholder key. */
+/** The keeper's read: UNWIND_ELIGIBLE inside its own margin envelope.
+ *  The read only needs the access key, so it works even when the burner is
+ *  unfunded on Rabdi. */
 export async function queryAttestations(): Promise<Attestation[]> {
   const rows: Attestation[] = [];
   // the SDK's typed select wraps the same raw arkiv_query; keep the raw
