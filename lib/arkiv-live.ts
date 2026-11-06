@@ -43,7 +43,9 @@ function chain() {
 }
 
 function transport() {
-  return http(process.env.ARKIV_RPC_URL ?? RABDI_RPC);
+  // http() with no URL sends to the chain's RPC entry — and on rabdi() the
+  // access key is baked into that URL, so the keyed entry always wins.
+  return http();
 }
 
 function publicClient() {

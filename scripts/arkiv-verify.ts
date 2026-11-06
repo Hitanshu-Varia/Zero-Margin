@@ -5,7 +5,7 @@
  * row. Honest failure names the problem; it never exits 0 on a lie.
  *
  * Run through tsx so the project's `@/` path aliases resolve:
- *   ARKIV_MODE=live npx tsx scripts/arkiv-verify.ts
+ *   npx tsx --env-file=.env.local scripts/arkiv-verify.ts
  */
 import { arkivEnabled, queryAttestations, writeAttestation, ARKIV_SCHEMA } from "@/lib/arkiv-live";
 import { privateKeyToAccount } from "viem/accounts";
@@ -15,7 +15,6 @@ async function main() {
     console.error("ARKIV_OFFLINE: no ARKIV_ACCESS_KEY in .env.local; nothing was written.");
     process.exit(1);
   }
-
   const writerKey = process.env.ARKIV_WRITER_PRIVATE_KEY ?? "";
   if (!/^0x[0-9a-fA-F]{64}$/.test(writerKey) || /^0x0{64}$/.test(writerKey)) {
     console.error("WRITER_KEY_MISSING: paste a Rabdi-funded testnet private key into");
@@ -40,20 +39,35 @@ async function main() {
   };
 
   console.log("→ writing", ARKIV_SCHEMA, "entity", fields.portfolioId, "as", writer.address);
-  const write = await writeAttestation(fields);
-  console.log("  key      ", write.key);
-  console.log("  expiresAt", write.expiresAt, `(+${Math.max(0, write.expiresAt - Math.floor(Date.now() / 1000))}s)`);
-
-  const rows = await queryAttestations();
-  const mine = rows.filter((r) => r.portfolioId === fields.portfolioId);
-  console.log("keeper query returned", rows.length, "rows;");
-  if (mine.length === 0) {
-    console.error("VERIFY_FAIL: the written row did not come back through the keeper query.");
+  try {
+    const write = await writeAttestation(fields);
+    console.log("  key      ", write.key);
+    console.log("  expires  ", write.expiresAt);
+    const rows = await queryAttestations();
+    const mine = rows.filter((r) => r.portfolioId === fields.portfolioId);
+    console.log("keeper query returned", rows.length, "rows;");
+    if (mine.length === 0) {
+      console.error("VERIFY_FAIL: the written row did not come back through the keeper query.");
+      process.exit(1);
+    }
+    console.log("✅ VERIFY_OK — the written attestation is live, queryable, and expiring:");
+    for (const row of mine) {
+      console.log("  ", row.portfolioId, row.status, "ratio", Number(row.marginRatioBps), "bps");
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (/insufficient|gas|balance/i.test(message)) {
+      console.error("WRITER_UNFUNDED: the writer address has no Rabdi gas to write with.");
+      console.error("  Fund it at https://hub.arkiv.network/faucet, then re-run this script.");
+      console.error("  Writer address:", writer.address);
+      process.exit(1);
+    }
+    if (/reject|payment|cost|limit/i.test(message)) {
+      console.error("RABDI_LIMITED:", message.slice(0, 160));
+      process.exit(1);
+    }
+    console.error("VERIFY_FAIL:", message.slice(0, 300));
     process.exit(1);
-  }
-  console.log("✅ VERIFY_OK — the written attestation is live, queryable, and expiring:");
-  for (const row of mine) {
-    console.log("  ", row.portfolioId, row.status, "ratio", Number(row.marginRatioBps), "bps");
   }
 }
 
