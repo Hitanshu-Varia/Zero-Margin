@@ -1,26 +1,145 @@
 @import "tailwindcss";
 
+/* ── ZeroMargin design tokens ──────────────────────────────────
+   Industrial trading terminal. Amber-on-black. See brand.md.   */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0b0c0e;
+  --surface: #121316;
+  --surface-raised: #17191d;
+  --line: #23262b;
+  --line-strong: #33373e;
+  --text: #e8eaed;
+  --text-muted: #9ba0a8;
+  --text-dim: #6b7178;
+  --amber: #f0b429;
+  --amber-dim: #8a6a1d;
+  --green: #41c98e;
+  --green-dim: #1d3b2f;
+  --red: #f26d5b;
+  --red-dim: #3b2320;
+  --blue: #6aaef0;
+  --blue-dim: #1c2a3a;
+  --ring: #f0b429;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-dim: var(--text-dim);
+  --color-amber: var(--amber);
+  --color-amber-dim: var(--amber-dim);
+  --color-up: var(--green);
+  --color-up-dim: var(--green-dim);
+  --color-down: var(--red);
+  --color-down-dim: var(--red-dim);
+  --color-chain: var(--blue);
+  --color-chain-dim: var(--blue-dim);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-data);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: dark;
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text);
+  font-family: var(--font-sans), "Space Grotesk", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--amber);
+  color: #0b0c0e;
+}
+
+/* Data in transit between panels: hairline grid utilities */
+.rule-t {
+  border-top: 1px solid var(--line);
+}
+.rule-b {
+  border-bottom: 1px solid var(--line);
+}
+.rule-r {
+  border-right: 1px solid var(--line);
+}
+
+/* Terminal focus ring: amber, offset, unmissable */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+input[type="range"] {
+  appearance: none;
+  height: 2px;
+  background: var(--line-strong);
+  border-radius: 1px;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--amber);
+  border: 3px solid var(--background);
+  box-shadow: 0 0 0 1px var(--line-strong);
+  transition: transform 100ms ease-out;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--amber);
+  border: 3px solid var(--background);
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+input[type="range"]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+}
+input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(0.95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Number flicker used by the terminal while it computes —
+   subtle, short, and skipped entirely under reduced motion */
+@keyframes settle {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.settle {
+  animation: settle 140ms ease-out;
+}
+.settle-once {
+  animation: settle 140ms ease-out 1;
 }
