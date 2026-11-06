@@ -26,6 +26,7 @@ export interface Attestation {
   netInitialMarginUsdc: bigint;
   netMaintenanceMarginUsdc: bigint;
   equityUsdc: bigint;
+  aquaStrategyHash: string;
   updatedAtLabel: string;
   remainingTtlSeconds: number;
 }
@@ -55,6 +56,7 @@ export const ATTESTATIONS: Attestation[] = [
   {
     portfolioId: "GV-01-OPEN",
     trader: "0x7fa3…c41d (demo burner)",
+    aquaStrategyHash: "0x" + "a3c41d".padStart(64, "0"),
     status: "ACTIVE_HEDGED",
     marginRatioBps: marginRatioBps(DEMO_BOOK.postedMarginUsdc, span.netInitialMarginUsdc),
     lpNotionalUsdc: DEMO_BOOK.lpNotionalUsdc,
@@ -69,6 +71,7 @@ export const ATTESTATIONS: Attestation[] = [
   {
     portfolioId: "UNWIND-01-SETTLED",
     trader: "0x7fa3…c41d (demo burner)",
+    aquaStrategyHash: "0x" + "b41d00".padStart(64, "0"),
     status: "ACTIVE_HEDGED",
     marginRatioBps: marginRatioBps(settledAt.remainingEquityUsdc, span.netInitialMarginUsdc),
     lpNotionalUsdc: DEMO_BOOK.lpNotionalUsdc,
@@ -83,6 +86,7 @@ export const ATTESTATIONS: Attestation[] = [
   {
     portfolioId: "GV-04-WITHDRAWAL-GUARD",
     trader: "0x7fa3…c41d (demo burner)",
+    aquaStrategyHash: "0x" + "c4d04".padStart(64, "0"),
     status:
       marginRatioBps(guardStateEquity, guardStateRequired) < 10_000n
         ? "UNWIND_ELIGIBLE"
