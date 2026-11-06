@@ -117,7 +117,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="flex flex-1 flex-col gap-6 px-3 py-4">
           <div>
             <p className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.1em] text-dim">
-              Engine
+              Sections
             </p>
             <NavLinks pathname={pathname} />
           </div>
@@ -196,7 +196,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <footer className="border-t border-line">
           <div className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-5 md:px-6">
             <span className="font-mono text-[11px] text-dim">
-              hackathon prototype · not audited · demo hedge adapter
+              A hackathon prototype, not audited; settle against the demo adapter
             </span>
             <span className="ml-auto font-mono text-[11px] text-dim">
               USDC base units · 1e6 = $1.00

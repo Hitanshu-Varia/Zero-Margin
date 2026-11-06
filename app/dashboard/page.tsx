@@ -120,7 +120,7 @@ export default function DashboardPage() {
             value={<span className="cobalt-lead">{formatUsdc(crash.remainingEquityUsdc)}</span>}
             caption={
               <span className="text-dim">
-                −30% replay · no liquidation penalty
+                no liquidation penalty at the −30% replay
               </span>
             }
           />
@@ -149,7 +149,7 @@ export default function DashboardPage() {
             valueClass="text-up"
             caption={
               <span className="text-dim">
-                shocks [−3,000, +2,000] bps · hedged 80–100%
+                shocks [−3,000, +2,000] bps on books hedged 80–100%
               </span>
             }
           />
@@ -162,7 +162,7 @@ export default function DashboardPage() {
             accent
             meta={
               <span className="font-mono text-[11px]">
-                sweep +2,000 → −3,000 bps · ν 150
+                sweep +2,000 to −3,000 bps, ν 150
               </span>
             }
           >
@@ -201,7 +201,7 @@ export default function DashboardPage() {
               />
               <div className="rule-t mt-4">
                 <Stat
-                  label="Worst-case loss L_SPAN"
+                  label="Worst-case grid loss"
                   value={formatUsdcWhole(span.worstScenarioLossUsdc)}
                   tone="down"
                 />
@@ -310,7 +310,7 @@ export default function DashboardPage() {
             </div>
           </Panel>
 
-          <Panel label="Engine activity — demo burner">
+          <Panel label="Engine activity (demo burner)">
             <ol className="px-5 py-2">
               {EVENTS.map((ev) => (
                 <li key={ev.ts} className="flex gap-3 rule-b last:border-b-0 py-3">
