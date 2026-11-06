@@ -5,6 +5,7 @@ component, decision, and reason. Newest first.
 
 | When | Component | Decision | Reason |
 | :--- | :--- | :--- | :--- |
+| 2026-11-07 | fork tests | `AquaForkTest` gates on `BASE_MAINNET_RPC_URL` and skips plain runs | foundry 1.7.1's op-revm panics on post-Isthmus Base forks ("Missing operator fee scalar for isthmus L1 Block"); the onchain assertions stand ready and every other test runs fork-free |
 | 2026-11-06 | `PortfolioMarginHook` | implemented `IHooks` directly instead of inheriting `BaseHook` | the installed `v4-periphery` `main` branch no longer ships `BaseHook` in `src/`; implementing `IHooks` keeps rule fidelity (onlyPoolManager via immutable check) and avoids depending on a moving base class |
 | 2026-11-06 | `PortfolioMarginHook` | `poolId` constructor argument instead of deriving from a `PoolKey` | the pool is initialized after the hook is mined (`DEMO_POOL_ID` comes from env); mining with a struct ctor arg whose `hooks` field is the unknown mined address would be circular |
 | 2026-11-06 | `PortfolioMarginHook` | inline `_removedAmounts` using `FullMath` and the canonical formulas | the installed periphery's `LiquidityAmounts` lacks the `getAmountNForLiquidity` direction on this branch; the formulas match the canonical release |
