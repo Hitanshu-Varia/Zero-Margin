@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
  * when the card opens a document section. Radius stays at the paper
  * scale (3px). No shadows.
  */
-export function Panel({
+ export function Panel({
   label,
   meta,
   accent = false,
@@ -22,7 +22,7 @@ export function Panel({
 }) {
   return (
     <section
-      className={`overflow-hidden rounded-panel border border-line bg-surface ${className}`}
+      className={`overflow-hidden rounded-panel border border-line bg-surface ${accent ? "shadow-[inset_0_2px_0_var(--saffron)]" : ""} ${className}`}
     >
       {(label || meta) && (
         <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-line px-5 py-3">

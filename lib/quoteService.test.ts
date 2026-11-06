@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { parseQuoteInput, quote, settle } from "@/lib/quoteService";
-import { DEMO_BOOK, DEMO_VOL_SHOCK_BPS } from "@/lib/spanMath";
+import { parseQuoteInput, quote, settle } from "./quoteService";
+import { DEMO_BOOK, DEMO_VOL_SHOCK_BPS } from "./spanMath";
 
 const GV01 = {
   lpNotionalUsdc: DEMO_BOOK.lpNotionalUsdc,

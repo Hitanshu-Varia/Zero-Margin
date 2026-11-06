@@ -7,7 +7,7 @@ import {
   evaluateSpan16,
   previewWithdrawal,
 } from "@/lib/spanMath";
-import { formatBps, formatPercentFromBps, formatUsdcWhole } from "@/lib/format";
+import { formatPercentFromBps, formatUsdcWhole } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Proof",

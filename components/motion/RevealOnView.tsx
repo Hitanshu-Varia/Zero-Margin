@@ -18,14 +18,11 @@ export function RevealOnView({
   className?: string;
 }) {
   const node = useRef<HTMLDivElement>(null);
-  const [seen, setSeen] = useState(false);
   const reduce = useReducedMotion();
+  const [seen, setSeen] = useState(reduce);
 
   useEffect(() => {
-    if (reduce) {
-      setSeen(true);
-      return;
-    }
+    if (reduce) return;
     const el = node.current;
     if (!el) return;
     const io = new IntersectionObserver(

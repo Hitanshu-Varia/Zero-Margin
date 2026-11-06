@@ -11,7 +11,7 @@ import {
   evaluateSpan16,
   isolatedAccountAtShock,
   previewShockUnwind,
-} from "@/lib/spanMath";
+} from "./spanMath";
 import { createHash } from "node:crypto";
 
 export interface QuoteInput {
@@ -29,8 +29,9 @@ export interface ParseResult {
 }
 
 const MAX_INT = 2_000_000n * 1_000_000n; // $2,000,000 as a sanity ceiling
+const SIGNED_FIELDS = new Set<keyof QuoteInput & string>(["priceShockBps"]);
 
-/** Parse and validate a quote request. Rejects negatives, over-hedged books and out-of-envelope shocks with the variable name, not a stack trace. */
+/** Parse and validate a quote request. Rejects negatives where senseless, over-hedged books and out-of-envelope shocks — with the variable name, not a stack trace. */
 export function parseQuoteInput(body: Record<string, unknown>): ParseResult {
   const problems: string[] = [];
   const read = (key: keyof QuoteInput & string): bigint | null => {
@@ -41,8 +42,14 @@ export function parseQuoteInput(body: Record<string, unknown>): ParseResult {
     }
     try {
       const value = BigInt(raw);
-      if (value < 0n || value > MAX_INT * 100n) {
-        problems.push(`${key} must be a non-negative integer within the tested range`);
+      const signed = SIGNED_FIELDS.has(key);
+      const min = signed ? -4_000_000n : 0n;
+      if (value < min || value > MAX_INT * 100n) {
+        problems.push(
+          signed
+            ? `${key} must be an integer within the tested envelope`
+            : `${key} must be a non-negative integer within the tested range`,
+        );
         return null;
       }
       return value;

@@ -33,8 +33,7 @@ export async function POST(request: Request) {
   });
 }
 
-function ints(o: Record<string, bigint>) {
-  return Object.fromEntries(Object.entries(o).map(([k, v]) => [k, v.toString()]));
+function ints(o: object) {
+  return Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === "bigint" ? v.toString() : v]));
 }
 
-export const dynamic = "force-dynamic";

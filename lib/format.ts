@@ -5,7 +5,6 @@
  */
 
 const USDC_UNIT = 1_000_000n;
-const BPS = 10_000n;
 
 function groupThousands(digits: bigint): string {
   return Number(digits).toLocaleString("en-US", {

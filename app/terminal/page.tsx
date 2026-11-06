@@ -1,10 +1,12 @@
 "use client";
 
-import { Suspense, useCallback, useMemo, useState } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Num } from "@/components/Num";
 import { Panel, Stat } from "@/components/Panel";
 import { StatusChip } from "@/components/Badge";
+import { EngineVerifier } from "@/components/desk/EngineVerifier";
+import { SettleAction } from "@/components/desk/SettleAction";
 import {
   DEMO_BOOK,
   DEMO_ENTRY_PRICE_USDC,
@@ -150,67 +152,47 @@ export default function TerminalPage() {
 
 function Terminal() {
   const params = useSearchParams();
-  const initialShock = useMemo(() => {
+  const [shockBps, setShockBps] = useState<bigint>(() => {
     const raw = params.get("shock");
     if (raw === null) return 0n;
     const parsed = Number(raw);
     if (!Number.isFinite(parsed)) return 0n;
     const clamped = Math.max(-3000, Math.min(2000, Math.round(parsed / 10) * 10));
     return BigInt(clamped);
-  }, [params]);
-  const [shockBps, setShockBps] = useState<bigint>(initialShock);
+  });
 
-  const span = useMemo(
-    () => evaluateSpan16(DEMO_BOOK.lpNotionalUsdc, DEMO_BOOK.shortNotionalUsdc),
-    [],
+  const span = evaluateSpan16(DEMO_BOOK.lpNotionalUsdc, DEMO_BOOK.shortNotionalUsdc);
+  const isolated = isolatedAccountAtShock(
+    DEMO_ISOLATED_BOOK.lpNotionalUsdc,
+    DEMO_ISOLATED_BOOK.postedMarginUsdc,
+    shockBps,
+    DEMO_VOL_SHOCK_BPS,
   );
-  const isolated = useMemo(
-    () =>
-      isolatedAccountAtShock(
-        DEMO_ISOLATED_BOOK.lpNotionalUsdc,
-        DEMO_ISOLATED_BOOK.postedMarginUsdc,
-        shockBps,
-        DEMO_VOL_SHOCK_BPS,
-      ),
-    [shockBps],
-  );
-  const quote = useMemo(
-    () =>
-      previewShockUnwind(
-        DEMO_BOOK.lpNotionalUsdc,
-        DEMO_BOOK.shortNotionalUsdc,
-        DEMO_BOOK.postedMarginUsdc,
-        shockBps,
-        DEMO_VOL_SHOCK_BPS,
-      ),
-    [shockBps],
+  const quote = previewShockUnwind(
+    DEMO_BOOK.lpNotionalUsdc,
+    DEMO_BOOK.shortNotionalUsdc,
+    DEMO_BOOK.postedMarginUsdc,
+    shockBps,
+    DEMO_VOL_SHOCK_BPS,
   );
   /** The −30% replay figures, always computed at the demo crash depth. */
-  const crashQuote = useMemo(
-    () =>
-      previewShockUnwind(
-        DEMO_BOOK.lpNotionalUsdc,
-        DEMO_BOOK.shortNotionalUsdc,
-        DEMO_BOOK.postedMarginUsdc,
-        -3_000n,
-        DEMO_VOL_SHOCK_BPS,
-      ),
-    [],
+  const crashQuote = previewShockUnwind(
+    DEMO_BOOK.lpNotionalUsdc,
+    DEMO_BOOK.shortNotionalUsdc,
+    DEMO_BOOK.postedMarginUsdc,
+    -3_000n,
+    DEMO_VOL_SHOCK_BPS,
   );
-  const crashIsolated = useMemo(
-    () =>
-      isolatedAccountAtShock(
-        DEMO_ISOLATED_BOOK.lpNotionalUsdc,
-        DEMO_ISOLATED_BOOK.postedMarginUsdc,
-        -3_000n,
-        DEMO_VOL_SHOCK_BPS,
-      ),
-    [],
+  const crashIsolated = isolatedAccountAtShock(
+    DEMO_ISOLATED_BOOK.lpNotionalUsdc,
+    DEMO_ISOLATED_BOOK.postedMarginUsdc,
+    -3_000n,
+    DEMO_VOL_SHOCK_BPS,
   );
 
   const mark = markPriceUsdc(shockBps);
 
-  const activeScenarioIndex = useMemo(() => {
+  const activeScenarioIndex = (() => {
     let k = 0;
     let best = 1_000_000n;
     PRICE_SHOCKS_BPS.forEach((candidate, idx) => {
@@ -221,7 +203,7 @@ function Terminal() {
       }
     });
     return k * 2 + 1; // ν = 150 row
-  }, [shockBps]);
+  })();
 
   const isolatedTone = isolated.liquidated
     ? "down"
@@ -626,6 +608,20 @@ function Terminal() {
               </div>
             </div>
 
+            {/* ── Engine parity check: the API verifies these figures ── */}
+            <div className="mt-4">
+              <EngineVerifier
+                input={{
+                  lpNotionalUsdc: DEMO_BOOK.lpNotionalUsdc.toString(),
+                  shortNotionalUsdc: DEMO_BOOK.shortNotionalUsdc.toString(),
+                  postedMarginUsdc: DEMO_BOOK.postedMarginUsdc.toString(),
+                  priceShockBps: shockBps.toString(),
+                  volShockBps: DEMO_VOL_SHOCK_BPS.toString(),
+                }}
+                expectedRemainingEquityUsdc={quote.remainingEquityUsdc.toString()}
+              />
+            </div>
+
             {/* ── 16-scenario grid ──────────────────────────── */}
             <div className="rule-t mt-4 pt-3">
               <div className="mb-2 flex items-baseline justify-between">
@@ -645,6 +641,17 @@ function Terminal() {
         </Panel>
         </div>
       </div>
+
+      {/* ── Settlement action ─────────────────────────────────── */}
+      <SettleAction
+        input={{
+          lpNotionalUsdc: DEMO_BOOK.lpNotionalUsdc.toString(),
+          shortNotionalUsdc: DEMO_BOOK.shortNotionalUsdc.toString(),
+          postedMarginUsdc: DEMO_BOOK.postedMarginUsdc.toString(),
+          priceShockBps: shockBps.toString(),
+          volShockBps: DEMO_VOL_SHOCK_BPS.toString(),
+        }}
+      />
 
       <p className="mt-5 max-w-3xl font-mono text-[12px] leading-relaxed text-dim">
         Both panels evaluate the identical price shock through the identical

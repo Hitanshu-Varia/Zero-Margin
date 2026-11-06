@@ -43,7 +43,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, problems: ["settlement failed"] }, { status: 500 });
   }
   recordUnwind(receipt);
-  return NextResponse.json({ ok: true, receipt, mode: "LOCAL" });
+  const serialized = {
+    ok: true,
+    mode: "LOCAL",
+    receipt: {
+      state: receipt.state,
+      reason: receipt.reason,
+      tx: receipt.tx,
+      quote: Object.fromEntries(Object.entries(receipt.quote).map(([k, v]) => [k, v.toString()])),
+      balancesDuringSettlement: Object.fromEntries(
+        Object.entries(receipt.balancesDuringSettlement).map(([k, v]) => [k, BigInt(v).toString()]),
+      ),
+    },
+  };
+  return NextResponse.json(serialized);
 }
 
-export const dynamic = "force-dynamic";

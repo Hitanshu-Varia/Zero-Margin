@@ -41,7 +41,9 @@ export function CountUp({
 
   useEffect(() => {
     if (reduce || final === 0n) {
-      setDisplay(final);
+      // reduced motion lands on the final value without a tick loop;
+      // scheduled off the render so state changes never cascade
+      requestAnimationFrame(() => setDisplay(final));
       return;
     }
     const start = performance.now();

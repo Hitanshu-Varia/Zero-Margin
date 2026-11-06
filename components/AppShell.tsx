@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
@@ -12,6 +12,67 @@ const nav = [
   { href: "/arkiv", label: "Attestations" },
   { href: "/proof", label: "Proof" },
 ] as const;
+
+interface Health {
+  status: string;
+  mode: string;
+  chainId: number;
+  problems: string[];
+}
+
+/** The mode chip is the product's honesty layer: it names what is live. */
+function ModeChip() {
+  const [health, setHealth] = useState<Health | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    const load = () => {
+      fetch("/api/health")
+        .then(async (res) => {
+          if (!res.ok) throw new Error(`api ${res.status}`);
+          const body = await res.json();
+          if (!alive) return;
+          setHealth(body as Health);
+        })
+        .catch(() => {
+          if (alive) setHealth(null);
+        });
+    };
+    load();
+    const timer = setInterval(load, 30_000);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
+  }, []);
+
+  const mode = health?.mode ?? "SELF";
+  const title =
+    health === null
+      ? "SELF — the API layer has not answered yet; the page runs figures from the local deterministic engine."
+      : health.problems.length > 0
+        ? `DEGRADED — ${health.problems.join("; ")}`
+        : `${mode} — every figure is computed from the deterministic span engine in this deployment; chain id ${health.chainId}. No node is connected in this mode.`;
+
+  return (
+    <span
+      title={title}
+      className={cn(
+        "hidden cursor-help items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] sm:flex",
+        health === null ? "border-line text-dim" : health.problems.length > 0 ? "border-down-dim bg-down-dim/30 text-down" : "border-line bg-surface text-muted",
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className={cn(
+          "size-1.5 rounded-full",
+          health === null ? "bg-dim" : health.problems.length > 0 ? "bg-down" : "bg-saffron",
+        )}
+      />
+      {mode}
+    </span>
+  );
+}
 
 function Brand() {
   return (
@@ -69,13 +130,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-2.5">
-            <span
-              title="LOCAL — every figure is computed from the deterministic span engine in this browser; no node is connected."
-              className="hidden cursor-help items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-1 font-mono text-[10px] text-dim sm:flex"
-            >
-              <span aria-hidden="true" className="size-1.5 rounded-full bg-saffron" />
-              LOCAL
-            </span>
+            <ModeChip />
             <Link
               href="/dashboard"
               className="flex h-9 shrink-0 items-center rounded-full bg-paper px-4 text-[13px] font-medium transition-transform duration-100 ease-out active:scale-[0.97]"

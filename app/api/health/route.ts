@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { resolveEnv, type EnvState } from "@/lib/env";
-import { DEMO_INPUT, quote as engineQuote, type QuoteInput } from "@/lib/quoteService";
+import { resolveEnv } from "@/lib/env";
+import { DEMO_INPUT } from "@/lib/quoteService";
 
 /**
  * GET /api/health — mode badge, chain id, and engine identity.
@@ -24,9 +24,3 @@ export function GET(): NextResponse {
   });
 }
 
-export const dynamic = "force-dynamic";
-
-// (kept close to the route so the served contract and the core stay together)
-export type { EnvState };
-export const __quoteForTests = engineQuote;
-export type { QuoteInput };
