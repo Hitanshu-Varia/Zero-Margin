@@ -1,33 +1,36 @@
 @import "tailwindcss";
 
-/* ── ZeroMargin design tokens v3 ───────────────────────────────
-   Settlement memo: porcelain paper, ink, cobalt. See brand.md.  */
+/* ── ZeroMargin design tokens v4 ───────────────────────────────
+   Production trading platform. Inter + Geist Mono on deep neutral.
+   See brand.md. */
 
 :root {
-  --background: #fbfbf9;
-  --surface: #ffffff;
-  --surface-raised: #f1f2ef;
-  --line: #e5e6e2;
-  --line-strong: #cdd0ca;
-  --text: #1a1d21;
-  --text-muted: #4a4f55;
-  --text-dim: #6e747c;
-  --cobalt: #2c55a0;
-  --cobalt-dim: #e5ecf7;
-  --green: #177b4b;
-  --green-dim: #e2f1e9;
-  --red: #c2412f;
-  --red-dim: #f8e7e2;
-  --blue: #2c55a0;
-  --blue-dim: #e5ecf7;
-  --paper: #1a1d21; /* primary buttons: ink fill, paper text */
-  --ring: #2c55a0;
-  --console: #14161a; /* the one dark element: hero console */
-  --console-line: #26282c;
-  --console-text: #e8e9ea;
-  --console-amber: #e6b75c;
-  --up-bright: #3ecf8e;
-  --down-bright: #ff7a63;
+  --background: #0d0f12;
+  --surface: #13161a;
+  --surface-raised: #171b21;
+  --line: #23282e;
+  --line-strong: #31383f;
+  --text: #e9ecef;
+  --text-muted: #98a1ab;
+  --text-dim: #68727d;
+  --cobalt: #4d8df6;
+  --cobalt-dim: #1b2740;
+  --green: #3fcf8e;
+  --green-dim: #152b21;
+  --red: #f26354;
+  --red-dim: #33201d;
+  --blue: #4d8df6;
+  --blue-dim: #1b2740;
+  --paper: #4d8df6; /* primary action fill */
+  --ring: #4d8df6;
+  /* console = a well of the same system */
+  --console: #171b21;
+  --console-line: #23282e;
+  --console-text: #e9ecef;
+  --console-amber: #4d8df6;
+  --console-amber-dim: #1b2740;
+  --down-bright: #f26354;
+  --up-bright: #3fcf8e;
 }
 
 @theme inline {
@@ -43,8 +46,10 @@
   --color-cobalt-dim: var(--cobalt-dim);
   --color-up: var(--green);
   --color-up-dim: var(--green-dim);
+  --color-up-bright: var(--up-bright);
   --color-down: var(--red);
   --color-down-dim: var(--red-dim);
+  --color-down-bright: var(--down-bright);
   --color-chain: var(--blue);
   --color-chain-dim: var(--blue-dim);
   --color-paper: var(--paper);
@@ -53,115 +58,88 @@
   --color-console-text: var(--console-text);
   --color-console-amber: var(--console-amber);
   --color-ring: var(--ring);
-  /* legacy aliases — mapped, not used in new code */
-  --color-gold: var(--cobalt);
-  --color-gold-dim: var(--cobalt-dim);
-  --color-amber: var(--cobalt);
-  --color-amber-dim: var(--cobalt-dim);
-  --color-down-bright: var(--down-bright);
-  --color-up-bright: var(--up-bright);
-  --color-surface-dim: var(--background);
   --font-sans: var(--font-display);
   --font-mono: var(--font-data);
-  --radius-panel: 3px;
+  --radius-panel: 12px;
   --radius-field: 8px;
 }
 
 html {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
   background: var(--background);
   color: var(--text);
-  font-family: var(--font-sans), "IBM Plex Sans", sans-serif;
+  font-family: var(--font-sans), Inter, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  font-size: 15px;
+  font-size: 14px;
+  letter-spacing: 0;
 }
 
 ::selection {
-  background: var(--ink, #1a1d21);
-  background: #1a1d21;
-  color: #fbfbf9;
+  background: var(--cobalt);
+  color: #ffffff;
 }
 
-/* Document hairlines */
 .rule-t {
   border-top: 1px solid var(--line);
 }
 .rule-b {
   border-bottom: 1px solid var(--line);
 }
-/* Emphatic rule that opens a document section */
-.section-rule {
-  border-top: 2px solid var(--text);
-}
 
-/* Clause marker: right-hung number in the left margin */
-.clause {
-  display: flex;
-  gap: 28px;
-  align-items: baseline;
-}
-.clause > .clause-no {
-  font-family: var(--font-data), monospace;
-  font-size: 12px;
-  color: var(--text-dim);
-  min-width: 34px;
-  flex-shrink: 0;
-}
-
-/* Focus */
 *:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
-/* Range slider: ink gauge */
+/* Slider: accent thumb */
 input[type="range"] {
   appearance: none;
-  height: 2px;
+  height: 3px;
   background: var(--line-strong);
-  border-radius: 1px;
+  border-radius: 2px;
   cursor: pointer;
 }
 input[type="range"]::-webkit-slider-thumb {
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: var(--text);
-  border: 3px solid var(--background);
-  box-shadow: 0 0 0 1px var(--line-strong);
-  transition: background 120ms ease-out, transform 120ms ease-out;
-}
-input[type="range"]:hover::-webkit-slider-thumb {
   background: var(--cobalt);
+  border: 3px solid #0d1218;
+  box-shadow: 0 0 0 1px var(--line-strong);
+  transition: transform 120ms ease-out, background 120ms ease-out;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
 }
 input[type="range"]::-moz-range-thumb {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: var(--text);
-  border: 3px solid var(--background);
+  background: var(--cobalt);
+  border: 3px solid #0d1218;
 }
 input[type="range"]:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 4px;
 }
 
-/* Nav rail item (application shell) */
+/* App chrome */
 @layer components {
   .nav-item {
     position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
-    border-radius: 6px;
-    padding: 8px 12px;
+    border-radius: 8px;
+    padding: 9px 12px;
     font-size: 14px;
-    color: var(--text-muted);
+    font-weight: 500;
+    color: var(--text-dim);
     transition: background-color 120ms ease-out, color 120ms ease-out;
   }
   .nav-item:hover {
@@ -182,6 +160,70 @@ input[type="range"]:focus-visible {
     width: 3px;
     border-radius: 2px;
     background: var(--cobalt);
+  }
+
+  .group-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    padding: 0 12px;
+    margin-bottom: 6px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 8px;
+    background: var(--cobalt);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color 120ms ease-out, transform 120ms ease-out;
+  }
+  .btn-primary:hover {
+    background: #3d7ae4;
+  }
+  .btn-primary:active {
+    transform: translateY(1px);
+  }
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line-strong);
+    background: var(--surface-raised);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 120ms ease-out, border-color 120ms ease-out;
+  }
+  .btn-secondary:hover {
+    color: var(--text);
+    border-color: var(--text-dim);
+  }
+  .chip-list {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 12px;
+    color: var(--text-muted);
+    transition: border-color 120ms ease-out, color 120ms ease-out;
+  }
+  .chip-list:hover {
+    border-color: var(--line-strong);
+    color: var(--text);
   }
 }
 
@@ -229,12 +271,7 @@ input[type="range"]:focus-visible {
   animation: settle 160ms ease-out;
 }
 
-/* Accent figure: cobalt text, no gradient anywhere */
-.cobalt-lead {
-  color: var(--cobalt);
-}
-
-/* Ambient tint for the overview top region */
+/* Ambient top glow for the overview, subtle and cool */
 .ambient-glow {
   position: relative;
   overflow-x: clip;
@@ -242,11 +279,11 @@ input[type="range"]:focus-visible {
 .ambient-glow::before {
   content: "";
   position: absolute;
-  inset: -60px -20% auto -20%;
-  height: 200px;
+  inset: -70px -20% auto -20%;
+  height: 230px;
   background: radial-gradient(
     50% 120px at 50% 0%,
-    rgba(44, 85, 160, 0.06),
+    rgba(77, 141, 246, 0.09),
     transparent 70%
   );
   pointer-events: none;

@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/AppShell";
 
-const display = IBM_Plex_Sans({
+const display = Inter({
   variable: "--font-display",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
 });
 
-const data = IBM_Plex_Mono({
+const data = Geist_Mono({
   variable: "--font-data",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
