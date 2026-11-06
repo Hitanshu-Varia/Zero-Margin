@@ -139,7 +139,8 @@ function ScenarioGrid({
         </div>
       ))}
       <p className="font-mono text-[10px] text-dim">
-        net PnL in USDC per scenario; the cobalt ring marks the current shock band
+        profit/loss in USDC per scenario; columns are price moves (−30% to
+        +20%), rows are calm vs volatile; the amber ring is the selected shock
       </p>
     </div>
   );
@@ -251,7 +252,7 @@ function Terminal() {
       <LiveStateLine />
       {/* ── Shock console ─────────────────────────────────────── */}
       <Panel
-        label="Price shock console"
+        label="Crash console — sweep the shock, preview the settle"
         accent
         meta={
           <span className="flex items-center gap-2">
@@ -271,7 +272,7 @@ function Terminal() {
                 htmlFor="shock"
                 className="text-[13px] text-muted"
               >
-                WETH spot shock — both books observe the same move
+                How far the price moves — both accounts see the same crash
               </label>
               <Num tone={shockBps > 0n ? "up" : shockBps < 0n ? "down" : "text"} size="lg">
                 {formatShock(shockBps)}
@@ -326,26 +327,32 @@ function Terminal() {
         <div className="grid gap-5 lg:grid-cols-[5fr_6fr]">
         {/* Left: isolated account */}
         <Panel
-          label="Isolated LP account"
+          label="Isolated LP account — margin practice today"
           className="flex flex-col"
           bodyClassName="flex flex-1 flex-col"
           meta={<StatusChip tone={isolated.liquidated ? "down" : "status"}>
             {isolated.liquidated ? "liquidated" : "open"}
           </StatusChip>}
         >
+          <p className="px-4 pt-3 text-pretty text-[12px] leading-relaxed text-dim">
+            A standard exchange account: the LP sits alone, no hedge. It must
+            post margin for its own worst case, so a crash liquidates it and
+            charges a penalty. This is the baseline the engine is measured
+            against.
+          </p>
           <div className="flex h-full flex-col px-4 pb-4 pt-4">
             <div className="text-[13px] text-muted">
-              Current equity
+              Equity right now (deposit plus profit or loss)
             </div>
             <Num key={shockBps} tone={isolatedTone} size="hero" className="settle">
               {formatUsdc(isolated.equityUsdc)}
             </Num>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="font-mono text-[12px] text-dim">
-                posted {formatUsdcWhole(isolated.postedMarginUsdc)}
+                your deposit: {formatUsdcWhole(isolated.postedMarginUsdc)}
               </span>
               <span className="font-mono text-[12px] text-dim">
-                maint. {formatUsdcWhole(isolated.maintenanceMarginUsdc)}
+                minimum required: {formatUsdcWhole(isolated.maintenanceMarginUsdc)}
               </span>
             </div>
 
@@ -398,7 +405,7 @@ function Terminal() {
               </div>
             </div>
             <div className="mt-1 flex justify-between font-mono text-[10px] text-dim">
-              <span>equity {formatPercentFromBps(isolated.breachMarginBps, 0)} of maint.</span>
+              <span>current equity vs minimum: {formatPercentFromBps(isolated.breachMarginBps, 0)}</span>
               <span>breach liquidates at 50%</span>
             </div>
 
@@ -470,7 +477,7 @@ function Terminal() {
         {/* Right: ZeroMargin book */}
         <Panel
           accent
-          label="ZeroMargin book"
+          label="ZeroMargin book — the netted account"
           meta={
             <StatusChip tone={quote.badDebtUsdc > 0n ? "down" : shockBps < 0n ? "cobalt" : "status"}>
               {quote.badDebtUsdc > 0n
@@ -483,14 +490,14 @@ function Terminal() {
         >
           <div className="px-4 pb-4 pt-4">
             <div className="text-[13px] text-muted">
-              Equity after settlement
+              Equity you keep after the crash settles
             </div>
             <Num key={shockBps} tone={bookTone} size="hero" className="settle">
               {formatUsdc(quote.remainingEquityUsdc)}
             </Num>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="font-mono text-[12px] text-dim">
-                posted {formatUsdcWhole(notionals.posted)}
+                your deposit: {formatUsdcWhole(notionals.posted)}
               </span>
               <span className="font-mono text-[12px] text-dim">
                 net IM {formatUsdcWhole(span.netInitialMarginUsdc)}
@@ -499,11 +506,11 @@ function Terminal() {
 
             <div className="mt-4 rounded-field border border-cobalt/40 bg-cobalt-dim/20 px-3 py-2.5">
               <p className="font-mono text-[12px] leading-relaxed text-muted">
-                short leg nets{" "}
-                <span className="text-up">{formatUsdc(quote.shortGainUsdc)}</span> against{" "}
+                the hedge pays in{" "}
+                <span className="text-up">{formatUsdc(quote.shortGainUsdc)}</span> against the{" "}
                 <span className="text-down">{formatUsdc(quote.lpLossUsdc)}</span> LP loss,
-                offset{" "}
-                <span className="text-cobalt">{formatUsdc(quote.nettedOffsetUsdc)}</span>
+                covering{" "}
+                <span className="text-cobalt">{formatUsdc(quote.nettedOffsetUsdc)}</span> of it
                 {quote.badDebtUsdc === 0n && (
                   <span className="text-dim">, no liquidation penalty</span>
                 )}
@@ -518,12 +525,15 @@ function Terminal() {
                 tone="muted"
               />
               <Stat
-                label="Capital savings"
+                label="Collateral saved"
                 tone="cobalt"
-                value={`${formatBps(span.capitalSavingsBps)}, ${formatPercentFromBps(span.capitalSavingsBps)}`}
+                value={`${formatPercentFromBps(span.capitalSavingsBps)}`}
               />
-              <Stat label="Hedge ratio" value={formatPercentFromBps(hedgeRatio, 0)} />
+              <Stat label="Hedge ratio" value={`${formatPercentFromBps(hedgeRatio, 0)} of LP covered`} />
             </div>
+            <p className="px-4 py-1 font-mono text-[10px] text-dim">
+              collateral saved: {formatBps(span.capitalSavingsBps)} ({formatBps(span.capitalSavingsBps)} ÷ 10,000 = {formatPercentFromBps(span.capitalSavingsBps)}); a basis point is one hundredth of a percent
+            </p>
 
             {/* ── Settlement waterfall ──────────────────────── */}
             <div className="rule-t mt-4 pt-3">
@@ -538,32 +548,32 @@ function Terminal() {
               <table className="w-full border-separate border-spacing-0">
                 <tbody>
                   <WaterfallRow
-                    label="LP leg loss"
+                    label="LP leg loss (what the liquidity position lost)"
                     sign={quote.lpLossUsdc === 0n ? "" : "−"}
                     tone="down"
                     value={formatUsdc(quote.lpLossUsdc)}
                   />
                   <WaterfallRow
-                    label="Short gain"
+                    label="Short gain (the hedge pays in)"
                     sign="+"
                     tone="up"
                     value={formatUsdc(quote.shortGainUsdc)}
                   />
                   <WaterfallRow
-                    label="Netted offset"
+                    label="Netted: the hedge covers the loss"
                     sign="="
                     tone="cobalt"
                     value={formatUsdc(quote.nettedOffsetUsdc)}
                     rule
                   />
                   <WaterfallRow
-                    label="Unwind fee, 5 bps"
+                    label="Unwind fee (0.05%, one-time)"
                     sign={quote.protocolFeeUsdc === 0n ? "" : "−"}
                     tone="muted"
                     value={formatUsdc(quote.protocolFeeUsdc)}
                   />
                   <WaterfallRow
-                    label="Margin spent"
+                    label="Margin spent (your deposit used)"
                     sign={quote.traderMarginUsedUsdc === 0n ? "" : "−"}
                     tone="text"
                     value={formatUsdc(quote.traderMarginUsedUsdc)}
@@ -594,23 +604,23 @@ function Terminal() {
             {/* ── Aqua transfer ledger ──────────────────────── */}
             <div className="rule-t mt-4 pt-3">
               <div className="mb-2 text-[13px] text-muted">
-                Aqua virtual balance
+                The settle, step by step (one transaction)
               </div>
               <div className="flex flex-wrap items-center gap-1.5 font-mono text-[11px]">
                 <span className="rounded-field border border-line bg-surface-raised px-2 py-1 text-muted">
-                  <span className="text-cobalt">ship</span> {formatUsdcWhole(DEMO_BOOK.postedMarginUsdc)}
+                  <span className="text-cobalt">ship</span> {formatUsdcWhole(notionals.posted)} <span className="text-dim">(deposit in)</span>
                 </span>
                 <span aria-hidden="true" className="text-dim">→</span>
                 <span className="rounded-field border border-line bg-surface-raised px-2 py-1 text-muted">
-                  <span className="text-up">push</span> {formatUsdcWhole(quote.nettedOffsetUsdc)}
+                  <span className="text-up">push</span> {formatUsdcWhole(quote.nettedOffsetUsdc)} <span className="text-dim">(hedge in)</span>
                 </span>
                 <span aria-hidden="true" className="text-dim">→</span>
                 <span className="rounded-field border border-line bg-surface-raised px-2 py-1 text-muted">
-                  <span className="text-down">pull</span> {formatUsdcWhole(quote.nettedOffsetUsdc + quote.traderMarginUsedUsdc)}
+                  <span className="text-down">pull</span> {formatUsdcWhole(quote.nettedOffsetUsdc + quote.traderMarginUsedUsdc)} <span className="text-dim">(loss + fee out)</span>
                 </span>
                 <span aria-hidden="true" className="text-dim">=</span>
                 <span className="rounded-field border border-cobalt/40 bg-cobalt-dim/20 px-2 py-1 text-cobalt">
-                  {formatUsdcWhole(quote.remainingEquityUsdc)} equity
+                  {formatUsdcWhole(quote.remainingEquityUsdc)} equity (yours)
                 </span>
               </div>
             </div>
@@ -633,10 +643,10 @@ function Terminal() {
             <div className="rule-t mt-4 pt-3">
               <div className="mb-2 flex items-baseline justify-between">
                 <span className="text-[13px] text-muted">
-                  SPAN-grid net PnL
+                  Profit or loss across every tested scenario
                 </span>
                 <span className="font-mono text-[11px] text-dim">
-                  16 scenarios, ν 0 / 150 bps
+                  16 price-and-volatility cases per the spec
                 </span>
               </div>
               <ScenarioGrid
