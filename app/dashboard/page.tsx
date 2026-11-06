@@ -82,8 +82,8 @@ export default function DashboardPage() {
         {/* Page head */}
         <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-dim">
-              Overview
+            <p className="font-mono text-[12px] text-dim">
+              At a glance
             </p>
             <h1 className="mt-1.5 text-[26px] font-semibold tracking-tight">
               <span className="cobalt-lead">One virtual balance</span>, both legs
@@ -130,7 +130,7 @@ export default function DashboardPage() {
             valueClass="text-cobalt"
             caption={
               <span className="text-dim">
-                {formatUsdcWhole(span.isolatedInitialMarginUsdc)} → {formatUsdcWhole(span.netInitialMarginUsdc)} on GV-01
+                from {formatUsdcWhole(span.isolatedInitialMarginUsdc)} down to {formatUsdcWhole(span.netInitialMarginUsdc)} on GV-01
               </span>
             }
           />
@@ -233,7 +233,7 @@ export default function DashboardPage() {
                     ].map((h, i) => (
                       <th
                         key={h}
-                        className={`px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.08em] text-dim ${i > 0 ? "text-right" : ""}`}
+                        className={`px-4 py-2.5 text-[12px] font-medium text-dim ${i > 0 ? "text-right" : ""}`}
                       >
                         {h}
                       </th>
@@ -270,7 +270,7 @@ export default function DashboardPage() {
                         href="/terminal?shock=-3000"
                         className="text-[13px] text-muted transition-colors duration-120 hover:text-cobalt"
                       >
-                        inspect →
+                        inspect
                       </a>
                     </td>
                   </tr>
@@ -301,7 +301,7 @@ export default function DashboardPage() {
                         href="/terminal?shock=-3000"
                         className="text-[13px] text-muted transition-colors duration-120 hover:text-cobalt"
                       >
-                        inspect →
+                        inspect
                       </a>
                     </td>
                   </tr>

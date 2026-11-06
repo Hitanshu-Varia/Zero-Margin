@@ -148,7 +148,7 @@ export default function LandingPage() {
                 {
                   dt: "Settled equity at −30%",
                   dd: formatUsdcWhole(crash.remainingEquityUsdc),
-                  note: "against null for the isolated desk",
+                  note: "after netting the short gain, $50 fee",
                 },
                 {
                   dt: "Savings at an 80% hedge",

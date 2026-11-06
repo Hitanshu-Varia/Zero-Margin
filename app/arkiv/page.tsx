@@ -74,7 +74,7 @@ export default function ArkivPage() {
                   (h, i) => (
                     <th
                       key={h}
-                      className={`px-4 py-2 text-[11px] font-medium uppercase tracking-[0.08em] text-dim ${i > 1 ? "text-right" : ""}`}
+                      className={`px-4 py-2 text-[11px] font-medium text-dim ${i > 1 ? "text-right" : ""}`}
                     >
                       {h}
                     </th>

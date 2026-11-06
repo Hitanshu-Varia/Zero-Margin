@@ -68,7 +68,7 @@ function WaterfallRow({
             : "text-text";
   return (
     <tr className={rule ? "border-b border-line" : ""}>
-      <td className="py-1 text-[12px] uppercase tracking-wide text-muted">{label}</td>
+      <td className="py-1 text-[13px] text-muted">{label}</td>
       <td className="py-1 text-right">
         <span className="font-mono text-[12px] tabular-nums text-dim">
           {sign}
@@ -281,7 +281,7 @@ function Terminal() {
             <div className="mb-2.5 flex items-baseline justify-between gap-4">
               <label
                 htmlFor="shock"
-                className="text-[12px] uppercase tracking-wide text-muted"
+                className="text-[13px] text-muted"
               >
                 WETH spot shock — both books observe the same move
               </label>
@@ -346,7 +346,7 @@ function Terminal() {
           </StatusChip>}
         >
           <div className="flex h-full flex-col px-4 pb-4 pt-4">
-            <div className="text-[12px] uppercase tracking-wide text-muted">
+            <div className="text-[13px] text-muted">
               Current equity
             </div>
             <Num key={shockBps} tone={isolatedTone} size="hero" className="settle">
@@ -444,7 +444,7 @@ function Terminal() {
 
             {/* Cost recap — computed from the engine, never stored */}
             <div className="mt-auto pt-5">
-              <div className="mb-2 rule-t pt-3 text-[12px] uppercase tracking-wide text-muted">
+              <div className="mb-2 rule-t pt-3 text-[13px] text-muted">
                 Cost of the −30% replay
               </div>
               <div className="grid grid-cols-1 gap-px sm:grid-cols-3 sm:gap-px overflow-hidden rounded-field border border-line bg-line">
@@ -466,7 +466,7 @@ function Terminal() {
                   },
                 ].map((cell) => (
                   <div key={cell.label} className="bg-surface-raised px-3 py-2.5">
-                    <div className="text-[10px] uppercase tracking-wide text-dim">
+                    <div className="text-[11px] text-dim">
                       {cell.label}
                     </div>
                     <div className={`mt-1 font-mono text-[13px] tabular-nums ${cell.tone}`}>
@@ -494,7 +494,7 @@ function Terminal() {
           }
         >
           <div className="px-4 pb-4 pt-4">
-            <div className="text-[12px] uppercase tracking-wide text-muted">
+            <div className="text-[13px] text-muted">
               Equity after settlement
             </div>
             <Num key={shockBps} tone={bookTone} size="hero" className="settle">
@@ -540,7 +540,7 @@ function Terminal() {
             {/* ── Settlement waterfall ──────────────────────── */}
             <div className="rule-t mt-4 pt-3">
               <div className="mb-2 flex items-baseline justify-between">
-                <span className="text-[12px] uppercase tracking-wide text-muted">
+                <span className="text-[13px] text-muted">
                   Settlement waterfall
                 </span>
                 <span className="font-mono text-[11px] text-dim">
@@ -590,7 +590,7 @@ function Terminal() {
                     />
                   )}
                   <tr>
-                    <td className="pt-2.5 text-[12px] uppercase tracking-wide text-text">
+                    <td className="pt-2.5 text-[13px] text-text">
                       Remaining equity
                     </td>
                     <td className="pt-2.5 text-right">
@@ -605,7 +605,7 @@ function Terminal() {
 
             {/* ── Aqua transfer ledger ──────────────────────── */}
             <div className="rule-t mt-4 pt-3">
-              <div className="mb-2 text-[12px] uppercase tracking-wide text-muted">
+              <div className="mb-2 text-[13px] text-muted">
                 Aqua virtual balance
               </div>
               <div className="flex flex-wrap items-center gap-1.5 font-mono text-[11px]">
@@ -630,7 +630,7 @@ function Terminal() {
             {/* ── 16-scenario grid ──────────────────────────── */}
             <div className="rule-t mt-4 pt-3">
               <div className="mb-2 flex items-baseline justify-between">
-                <span className="text-[12px] uppercase tracking-wide text-muted">
+                <span className="text-[13px] text-muted">
                   SPAN-grid net PnL
                 </span>
                 <span className="font-mono text-[11px] text-dim">

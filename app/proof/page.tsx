@@ -50,19 +50,19 @@ export default function ProofPage() {
           <table className="w-full min-w-[720px] border-collapse text-[13px]">
             <thead>
               <tr className="border-b border-line bg-surface-raised text-left">
-                <th className="px-4 py-2 text-[11px] font-medium uppercase tracking-[0.08em] text-dim">
+                <th className="px-4 py-2 text-[11px] font-medium text-dim">
                   Vector
                 </th>
-                <th className="px-4 py-2 text-[11px] font-medium uppercase tracking-[0.08em] text-dim">
+                <th className="px-4 py-2 text-[11px] font-medium text-dim">
                   Book
                 </th>
-                <th className="px-4 py-2 text-right text-[11px] font-medium uppercase tracking-[0.08em] text-dim">
+                <th className="px-4 py-2 text-right text-[11px] font-medium text-dim">
                   Isolated IM
                 </th>
-                <th className="px-4 py-2 text-right text-[11px] font-medium uppercase tracking-[0.08em] text-dim">
+                <th className="px-4 py-2 text-right text-[11px] font-medium text-dim">
                   Net IM
                 </th>
-                <th className="px-4 py-2 text-right text-[11px] font-medium uppercase tracking-[0.08em] text-dim">
+                <th className="px-4 py-2 text-right text-[11px] font-medium text-dim">
                   Savings
                 </th>
               </tr>

@@ -228,3 +228,26 @@ input[type="range"]:focus-visible {
 .settle {
   animation: settle 160ms ease-out;
 }
+
+/* Accent figure: cobalt text, no gradient anywhere */
+.cobalt-lead {
+  color: var(--cobalt);
+}
+
+/* Ambient tint for the overview top region */
+.ambient-glow {
+  position: relative;
+  overflow-x: clip;
+}
+.ambient-glow::before {
+  content: "";
+  position: absolute;
+  inset: -60px -20% auto -20%;
+  height: 200px;
+  background: radial-gradient(
+    50% 120px at 50% 0%,
+    rgba(44, 85, 160, 0.06),
+    transparent 70%
+  );
+  pointer-events: none;
+}

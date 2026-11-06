@@ -73,7 +73,7 @@ export default function ReplayPage() {
       {/* Stat rail */}
       <div className="grid gap-3 sm:grid-cols-3">
         <Panel bodyClassName="px-4 py-3.5">
-          <div className="text-[11px] uppercase tracking-[0.08em] text-dim">
+          <div className="text-[11px] text-dim">
             Median basis
           </div>
           <Num size="lg" tone="text" className="mt-1.5 block">
@@ -81,7 +81,7 @@ export default function ReplayPage() {
           </Num>
         </Panel>
         <Panel bodyClassName="px-4 py-3.5">
-          <div className="text-[11px] uppercase tracking-[0.08em] text-dim">
+          <div className="text-[11px] text-dim">
             99th percentile · nearest-rank
           </div>
           <Num size="lg" tone="cobalt" className="mt-1.5 block">
@@ -89,7 +89,7 @@ export default function ReplayPage() {
           </Num>
         </Panel>
         <Panel bodyClassName="px-4 py-3.5">
-          <div className="text-[11px] uppercase tracking-[0.08em] text-dim">
+          <div className="text-[11px] text-dim">
             Worst one-minute spike
           </div>
           <Num size="lg" tone="down" className="mt-1.5 block">
