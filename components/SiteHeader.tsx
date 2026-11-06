@@ -1,17 +1,21 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { ModeBadge } from "@/components/Badge";
 
 const links = [
-  { href: "/", label: "Terminal", current: true },
-  { href: "/replay", label: "Replay", current: false },
-  { href: "/arkiv", label: "Arkiv", current: false },
-  { href: "/proof", label: "Proof", current: false },
+  { href: "/", label: "Terminal" },
+  { href: "/replay", label: "Replay" },
+  { href: "/arkiv", label: "Arkiv" },
+  { href: "/proof", label: "Proof" },
 ];
 
 /**
- * Desktop top bar. The mode badge is deliberately first-class here: the
- * honest state of the session is part of the product, not a footnote.
+ * Top bar. The mode badge is deliberately first-class here: the honest
+ * state of the session is part of the product, not a footnote.
  */
 export function SiteHeader() {
+  const pathname = usePathname();
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-12 w-full max-w-[1240px] items-center gap-6 px-4 md:px-6">
@@ -35,9 +39,9 @@ export function SiteHeader() {
             <a
               key={l.href}
               href={l.href}
-              aria-current={l.current ? "page" : undefined}
+              aria-current={pathname === l.href ? "page" : undefined}
               className={`rounded-field px-2.5 py-1.5 text-[13px] transition-colors duration-100 focus-visible:outline-2 focus-visible:outline-ring ${
-                l.current
+                pathname === l.href
                   ? "bg-surface-raised text-text"
                   : "text-muted hover:text-text hover:bg-surface-raised"
               }`}
