@@ -41,6 +41,106 @@ const CRASH_PRESETS: Array<{ bps: bigint; label: string }> = [
   { bps: -3_000n, label: "−30% CRASH" },
 ];
 
+import { PRICE_SHOCKS_BPS } from "@/lib/spanMath";
+
+function WaterfallRow({
+  label,
+  value,
+  sign,
+  tone,
+  rule = false,
+}: {
+  label: string;
+  value: string;
+  sign: string;
+  tone: "down" | "up" | "amber" | "muted" | "text";
+  rule?: boolean;
+}) {
+  const toneClass =
+    tone === "down"
+      ? "text-down"
+      : tone === "up"
+        ? "text-up"
+        : tone === "amber"
+          ? "text-amber"
+          : tone === "muted"
+            ? "text-muted"
+            : "text-text";
+  return (
+    <tr className={rule ? "border-b border-line" : ""}>
+      <td className="py-1 text-[12px] uppercase tracking-wide text-muted">{label}</td>
+      <td className="py-1 text-right">
+        <span className="font-mono text-[12px] tabular-nums text-dim">
+          {sign}
+        </span>{" "}
+        <span className={`font-mono text-[13px] tabular-nums ${toneClass}`}>
+          {value}
+        </span>
+      </td>
+    </tr>
+  );
+}
+
+function ScenarioGrid({
+  scenarioNetPnlUsdc,
+  activeIndex = -1,
+}: {
+  scenarioNetPnlUsdc: bigint[];
+  activeIndex?: number;
+}) {
+  const maxAbs = scenarioNetPnlUsdc.reduce(
+    (acc, v) => (v < 0n && -v > acc ? -v : v > acc ? v : acc),
+    1n,
+  );
+  const labels = ["−30", "−20", "−10", "−5", "0", "+5", "+10", "+20"];
+
+  return (
+    <div className="space-y-1.5">
+      {[0, 1].map((m) => (
+        <div key={m} className="flex items-end gap-2">
+          <span className="w-12 shrink-0 pt-3 font-mono text-[10px] text-dim">
+            ν {m === 0 ? "0" : "150"}
+          </span>
+          <div className="grid flex-1 grid-cols-8 gap-1">
+            {PRICE_SHOCKS_BPS.map((_, k) => {
+              const i = k * 2 + m;
+              const pnl = scenarioNetPnlUsdc[i];
+              const magnitude = pnl < 0n ? -pnl : pnl;
+              const height = Number((magnitude * 28n) / maxAbs) + 2;
+              const negative = pnl < 0n;
+              const active = i === activeIndex;
+              return (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <div
+                    aria-hidden="true"
+                    style={{ height: `${height}px` }}
+                    className={`w-full rounded-[2px] ${
+                      negative
+                        ? active ? "bg-down" : "bg-down-dim"
+                        : active ? "bg-up" : "bg-up-dim"
+                    } ${active ? "ring-1 ring-amber" : ""}`}
+                  />
+                  <span
+                    className={`font-mono text-[10px] leading-none ${
+                      active ? "text-amber" : "text-dim"
+                    }`}
+                  >
+                    {labels[k]}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+      <p className="font-mono text-[10px] text-dim">
+        net PnL in USDC per scenario · amber highlight marks the current
+        shock band
+      </p>
+    </div>
+  );
+}
+
 export default function TerminalPage() {
   const [shockBps, setShockBps] = useState<bigint>(0n);
 
@@ -71,6 +171,19 @@ export default function TerminalPage() {
   );
 
   const mark = markPriceUsdc(shockBps);
+
+  const activeScenarioIndex = useMemo(() => {
+    let k = 0;
+    let best = 1_000_000n;
+    PRICE_SHOCKS_BPS.forEach((candidate, idx) => {
+      const d = candidate > shockBps ? candidate - shockBps : shockBps - candidate;
+      if (d < best) {
+        best = d;
+        k = idx;
+      }
+    });
+    return k * 2 + 1; // ν = 150 row
+  }, [shockBps]);
 
   const isolatedTone = isolated.liquidated
     ? "down"
@@ -282,6 +395,112 @@ export default function TerminalPage() {
                 value={`${formatBps(span.capitalSavingsBps)} · ${formatPercentFromBps(span.capitalSavingsBps)}`}
               />
               <Stat label="Hedge ratio" value={`${shockPercent((DEMO_BOOK.shortNotionalUsdc * 100n) / DEMO_BOOK.lpNotionalUsdc)}%`} />
+            </div>
+
+            {/* ── Settlement waterfall ──────────────────────── */}
+            <div className="rule-t mt-4 pt-3">
+              <div className="mb-2 flex items-baseline justify-between">
+                <span className="text-[12px] uppercase tracking-wide text-muted">
+                  Settlement waterfall
+                </span>
+                <span className="font-mono text-[11px] text-dim">
+                  quote ≡ execution
+                </span>
+              </div>
+              <table className="w-full border-separate border-spacing-0">
+                <tbody>
+                  <WaterfallRow
+                    label="LP leg loss"
+                    sign={quote.lpLossUsdc === 0n ? "" : "−"}
+                    tone="down"
+                    value={formatUsdc(quote.lpLossUsdc)}
+                  />
+                  <WaterfallRow
+                    label="Short gain"
+                    sign="+"
+                    tone="up"
+                    value={formatUsdc(quote.shortGainUsdc)}
+                  />
+                  <WaterfallRow
+                    label="Netted offset"
+                    sign="="
+                    tone="amber"
+                    value={formatUsdc(quote.nettedOffsetUsdc)}
+                    rule
+                  />
+                  <WaterfallRow
+                    label="Unwind fee · 5 bps"
+                    sign={quote.protocolFeeUsdc === 0n ? "" : "−"}
+                    tone="muted"
+                    value={formatUsdc(quote.protocolFeeUsdc)}
+                  />
+                  <WaterfallRow
+                    label="Margin spent"
+                    sign={quote.traderMarginUsedUsdc === 0n ? "" : "−"}
+                    tone="text"
+                    value={formatUsdc(quote.traderMarginUsedUsdc)}
+                    rule
+                  />
+                  {quote.badDebtUsdc > 0n && (
+                    <WaterfallRow
+                      label="Bad debt"
+                      sign="!"
+                      tone="down"
+                      value={formatUsdc(quote.badDebtUsdc)}
+                    />
+                  )}
+                  <tr>
+                    <td className="pt-2.5 text-[12px] uppercase tracking-wide text-text">
+                      Remaining equity
+                    </td>
+                    <td className="pt-2.5 text-right">
+                      <Num tone={bookTone} size="lg">
+                        {formatUsdc(quote.remainingEquityUsdc)}
+                      </Num>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* ── Aqua transfer ledger ──────────────────────── */}
+            <div className="rule-t mt-4 pt-3">
+              <div className="mb-2 text-[12px] uppercase tracking-wide text-muted">
+                Aqua virtual balance
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5 font-mono text-[11px]">
+                <span className="rounded-field border border-line bg-surface-raised px-2 py-1 text-muted">
+                  <span className="text-amber">ship</span> {formatUsdcWhole(DEMO_BOOK.postedMarginUsdc)}
+                </span>
+                <span aria-hidden="true" className="text-dim">→</span>
+                <span className="rounded-field border border-line bg-surface-raised px-2 py-1 text-muted">
+                  <span className="text-up">push</span> {formatUsdcWhole(quote.nettedOffsetUsdc)}
+                </span>
+                <span aria-hidden="true" className="text-dim">→</span>
+                <span className="rounded-field border border-line bg-surface-raised px-2 py-1 text-muted">
+                  <span className="text-down">pull</span> {formatUsdcWhole(quote.nettedOffsetUsdc + quote.traderMarginUsedUsdc)}
+                </span>
+                <span aria-hidden="true" className="text-dim">=</span>
+                <span className="rounded-field border border-amber-dim bg-amber-dim/20 px-2 py-1 text-amber">
+                  {formatUsdcWhole(quote.remainingEquityUsdc)} equity
+                </span>
+              </div>
+            </div>
+
+            {/* ── 16-scenario grid ──────────────────────────── */}
+            <div className="rule-t mt-4 pt-3">
+              <div className="mb-2 flex items-baseline justify-between">
+                <span className="text-[12px] uppercase tracking-wide text-muted">
+                  SPAN-grid net PnL
+                </span>
+                <span className="font-mono text-[11px] text-dim">
+                  16 scenarios · ν 0 / 150 bps
+                </span>
+              </div>
+              <ScenarioGrid
+                scenarioNetPnlUsdc={span.scenarioNetPnlUsdc}
+                activeIndex={activeScenarioIndex}
+              />
             </div>
           </div>
         </Panel>
