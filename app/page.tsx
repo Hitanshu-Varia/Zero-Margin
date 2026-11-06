@@ -74,7 +74,7 @@ export default function LandingPage() {
           <a href="/" className="flex items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-ring">
             <span
               aria-hidden="true"
-              className="grid h-6 w-6 place-items-center rounded-[3px] bg-text text-background"
+              className="grid h-6 w-6 place-items-center rounded-[7px] bg-cobalt text-white"
             >
               <span className="font-mono text-[13px] font-semibold leading-none">Z</span>
             </span>
@@ -93,7 +93,7 @@ export default function LandingPage() {
           </nav>
           <a
             href="/dashboard"
-            className="ml-auto flex h-9 items-center rounded-field bg-paper px-4 text-[13px] font-medium text-background transition-colors duration-100 hover:bg-text"
+            className="ml-auto flex h-9 items-center rounded-field bg-paper px-4 text-[13px] font-medium text-white transition-colors duration-100 hover:bg-cobalt/90"
           >
             Open the dashboard
           </a>
@@ -131,7 +131,7 @@ export default function LandingPage() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a
                 href="/dashboard"
-                className="flex h-10 items-center rounded-field bg-paper px-4 text-[14px] font-medium text-background transition-colors duration-100 hover:bg-text"
+                className="flex h-10 items-center rounded-field bg-paper px-4 text-[14px] font-medium text-white transition-colors duration-100 hover:bg-text"
               >
                 Open the dashboard
               </a>
@@ -333,19 +333,19 @@ export default function LandingPage() {
 
         {/* ── Closing band, the second dark tie-in ──────────── */}
         <section className="pb-20 pt-2">
-          <div className="flex flex-col items-start justify-between gap-6 rounded-panel bg-text px-8 py-8 text-surface md:flex-row md:items-center md:px-10">
+          <div className="flex flex-col items-start justify-between gap-6 rounded-panel border border-cobalt/30 bg-cobalt-dim px-8 py-8 md:flex-row md:items-center md:px-10">
             <div className="max-w-[52ch]">
-              <h2 className="text-[19px] font-semibold tracking-tight text-surface">
+              <h2 className="text-[19px] font-semibold tracking-[-0.01em] text-text">
                 Open the books and drag the crash yourself
               </h2>
-              <p className="mt-2 text-[14px] leading-[1.6] text-surface/70">
+              <p className="mt-2 text-[14px] leading-[1.6] text-muted">
                 The dashboard replays every shock you care about, and the
                 terminal settles them line by line.
               </p>
             </div>
             <a
               href="/dashboard"
-              className="flex h-10 shrink-0 items-center rounded-field bg-surface px-5 text-[14px] font-medium text-text transition-colors duration-100 hover:bg-surface-raised"
+              className="flex h-10 shrink-0 items-center rounded-field bg-paper px-5 text-[14px] font-medium text-white transition-colors duration-100 hover:bg-cobalt/90"
             >
               Open the dashboard
             </a>

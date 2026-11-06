@@ -5,11 +5,19 @@ import { usePathname } from "next/navigation";
 
 const nav = [
   { href: "/dashboard", label: "Dashboard", icon: "grid" },
-  { href: "/terminal", label: "Terminal", icon: "terminal" },
-  { href: "/replay", label: "Replay", icon: "pulse" },
+  { href: "/terminal", label: "Settlement terminal", icon: "terminal" },
+  { href: "/replay", label: "Basis replay", icon: "pulse" },
   { href: "/arkiv", label: "Attestations", icon: "layers" },
-  { href: "/proof", label: "Proof", icon: "shield" },
+  { href: "/proof", label: "Proof sheet", icon: "shield" },
 ] as const;
+
+const pageTitles: Record<string, string> = {
+  "/dashboard": "Dashboard",
+  "/terminal": "Settlement terminal",
+  "/replay": "Basis replay",
+  "/arkiv": "Attestations",
+  "/proof": "Proof sheet",
+};
 
 function Icon({ name, className = "" }: { name: string; className?: string }) {
   const common = {
@@ -18,7 +26,7 @@ function Icon({ name, className = "" }: { name: string; className?: string }) {
     viewBox: "0 0 16 16",
     fill: "none",
     stroke: "currentColor",
-    strokeWidth: 1.4,
+    strokeWidth: 1.5,
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const,
     "aria-hidden": true,
@@ -27,10 +35,10 @@ function Icon({ name, className = "" }: { name: string; className?: string }) {
     case "grid":
       return (
         <svg {...common} className={className}>
-          <rect x="1.5" y="1.5" width="5" height="5" rx="1.2" />
-          <rect x="9.5" y="1.5" width="5" height="5" rx="1.2" />
-          <rect x="1.5" y="9.5" width="5" height="5" rx="1.2" />
-          <rect x="9.5" y="9.5" width="5" height="5" rx="1.2" />
+          <rect x="1.5" y="1.5" width="5.2" height="5.2" rx="1.4" />
+          <rect x="9.3" y="1.5" width="5.2" height="5.2" rx="1.4" />
+          <rect x="1.5" y="9.3" width="5.2" height="5.2" rx="1.4" />
+          <rect x="9.3" y="9.3" width="5.2" height="5.2" rx="1.4" />
         </svg>
       );
     case "terminal":
@@ -60,6 +68,19 @@ function Icon({ name, className = "" }: { name: string; className?: string }) {
           <path d="M5.8 8l1.6 1.6 3-3.2" />
         </svg>
       );
+    case "search":
+      return (
+        <svg {...common} className={className}>
+          <circle cx="7" cy="7" r="4.5" />
+          <path d="M10.5 10.5L14 14" />
+        </svg>
+      );
+    case "chevron":
+      return (
+        <svg {...common} className={className}>
+          <path d="M6 4l4 4-4 4" />
+        </svg>
+      );
     default:
       return null;
   }
@@ -67,27 +88,48 @@ function Icon({ name, className = "" }: { name: string; className?: string }) {
 
 function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   return (
-    <nav aria-label="Primary" className="flex flex-col gap-1">
-      {nav.map((item) => (
-        <a
-          key={item.href}
-          href={item.href}
-          onClick={onNavigate}
-          aria-current={pathname === item.href ? "page" : undefined}
-          className="nav-item"
-        >
-          <Icon name={item.icon} />
-          {item.label}
-        </a>
-      ))}
+    <nav aria-label="Primary" className="flex flex-col gap-0.5">
+      {nav.map((item) => {
+        const active = pathname === item.href || (pathname === "/" && item.href === "/dashboard");
+        return (
+          <a
+            key={item.href}
+            href={item.href}
+            onClick={onNavigate}
+            aria-current={active ? "page" : undefined}
+            className="nav-item"
+          >
+            <Icon name={item.icon} />
+            {item.label}
+          </a>
+        );
+      })}
     </nav>
   );
 }
 
+function Brand({ compact = false }: { compact?: boolean }) {
+  return (
+    <a href="/" className="flex items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-ring">
+      <span
+        aria-hidden="true"
+        className="grid h-6 w-6 place-items-center rounded-[7px] bg-cobalt text-white"
+      >
+        <span className="font-mono text-[13px] font-semibold leading-none">Z</span>
+      </span>
+      {!compact && (
+        <span className="text-[14px] font-semibold tracking-[-0.01em]">
+          ZeroMargin
+        </span>
+      )}
+    </a>
+  );
+}
+
 /**
- * Application shell: persistent sidebar on desktop, drawer on mobile,
- * and a topbar with the command bar and wallet pill. The landing route
- * renders its own marketing chrome instead of the app frame.
+ * Application chrome: sidebar with grouped sections, a topbar holding
+ * the page breadcrumb, command bar, network chip, primary action, and
+ * wallet pill. Landing (/) renders its own marketing frame.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -97,96 +139,98 @@ export function AppShell({ children }: { children: ReactNode }) {
     return <>{children}</>;
   }
 
+  const title = pageTitles[pathname] ?? "ZeroMargin";
+
   return (
     <div className="min-h-dvh">
-      {/* ── Desktop sidebar ─────────────────────────────────── */}
+      {/* Sidebar */}
       <aside
         aria-label="Sidebar"
-        className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-line bg-surface lg:flex"
+        className="fixed inset-y-0 left-0 z-30 hidden w-[224px] flex-col border-r border-line bg-surface lg:flex"
       >
-        <div className="flex h-14 items-center gap-2.5 border-b border-line px-5">
-          <span
-            aria-hidden="true"
-            className="grid h-6 w-6 place-items-center rounded-[8px] bg-cobalt text-background"
-          >
-            <span className="font-mono text-[13px] font-bold leading-none">Z</span>
+        <div className="flex h-[52px] items-center gap-2 border-b border-line px-4">
+          <Brand />
+          <span className="ml-auto rounded-chip border border-line px-1.5 py-0.5 font-mono text-[10px] text-dim">
+            v0.1.0
           </span>
-          <span className="text-[15px] font-semibold tracking-tight">ZeroMargin</span>
         </div>
 
-        <div className="flex flex-1 flex-col gap-6 px-3 py-4">
-          <div>
-            <p className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.1em] text-dim">
-              Sections
-            </p>
-            <NavLinks pathname={pathname} />
-          </div>
+        <div className="flex flex-1 flex-col px-3 py-4">
+          <p className="group-label">Trading</p>
+          <NavLinks pathname={pathname} />
         </div>
 
-        <div className="border-t border-line px-4 py-3.5">
-          <div className="flex items-center justify-between gap-2">
-            <span className="flex items-center gap-1.5 font-mono text-[11px] tracking-wide text-dim">
-              <span aria-hidden="true" className="pulse-dot h-[6px] w-[6px] rounded-full bg-chain" />
-              BASE·8453
-            </span>
-            <span className="font-mono text-[11px] text-dim">v0.1.0</span>
+        <div className="border-t border-line px-3 py-3">
+          <div className="flex items-center gap-2 rounded-field border border-line bg-surface-raised px-2.5 py-2">
+            <span aria-hidden="true" className="pulse-dot h-[6px] w-[6px] rounded-full bg-up" />
+            <span className="text-[12px] font-medium text-muted">Base mainnet</span>
+            <span className="ml-auto font-mono text-[10px] text-dim">4453</span>
           </div>
-          <p className="mt-1 font-mono text-[10px] leading-relaxed text-dim">
-            simulation · every figure computed locally
+          <p className="px-1 pt-2 text-[11px] leading-snug text-dim">
+            Simulation — every figure is computed locally by the span engine.
           </p>
         </div>
       </aside>
 
-      {/* ── Topbar ──────────────────────────────────────────── */}
-      <div className="lg:pl-60">
+      {/* Topbar + content */}
+      <div className="lg:pl-[224px]">
         <header className="sticky top-0 z-30 border-b border-line bg-background/85 backdrop-blur">
-          <div className="flex h-14 items-center gap-3 px-4 md:px-6">
-            {/* Mobile brand + drawer */}
+          <div className="flex h-[52px] items-center gap-3 px-4 md:px-6">
             <button
               type="button"
               aria-expanded={drawerOpen}
               aria-controls="drawer"
-              onClick={() => setDrawerOpen((v) => !v)}
-              className="nav-item lg:hidden"
+              onClick={() => setDrawerOpen(true)}
+              className="flex h-8 w-8 items-center justify-center rounded-field border border-line text-muted lg:hidden"
             >
-              <Icon name="grid" />
-              <span className="text-[13px]">Menu</span>
+              <span aria-hidden="true" className="text-[14px] leading-none">≡</span>
             </button>
-            <a
-              href="/"
-              className="flex items-center gap-2 lg:hidden focus-visible:outline-2 focus-visible:outline-ring"
-            >
-              <span
-                aria-hidden="true"
-                className="grid h-6 w-6 place-items-center rounded-[8px] bg-cobalt text-background"
-              >
-                <span className="font-mono text-[13px] font-bold leading-none">Z</span>
-              </span>
-              <span className="text-[14px] font-semibold tracking-tight">ZeroMargin</span>
+
+            {/* breadcrumb */}
+            <a href="/dashboard" className="flex items-center gap-1.5 text-[13px] text-dim">
+              <span className="hidden sm:inline">ZeroMargin</span>
+              <Icon name="chevron" className="hidden sm:inline" />
+              <span className="font-medium text-text">{title}</span>
             </a>
 
-            {/* Command bar */}
+            {/* command bar */}
             <button
               type="button"
-              className="group ml-auto hidden h-9 w-72 items-center gap-2 rounded-field border border-line bg-surface px-3 text-left transition-colors duration-120 hover:border-line-strong md:flex xl:w-96"
+              className="group ml-auto hidden h-9 items-center gap-2 rounded-field border border-line bg-surface px-3 text-left transition-colors duration-100 hover:border-line-strong md:flex xl:w-80"
             >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
-                <circle cx="7" cy="7" r="4.5" />
-                <path d="M10.5 10.5L14 14" />
-              </svg>
-              <span className="text-[13px] text-dim group-hover:text-muted">Search books, vectors, scenarios</span>
-              <kbd className="ml-auto rounded-[6px] border border-line bg-surface-raised px-1.5 py-0.5 font-mono text-[10px] text-dim">
+              <Icon name="search" />
+              <span className="text-[13px] text-dim group-hover:text-muted">
+                Search books, vectors, scenarios
+              </span>
+              <kbd className="ml-auto rounded-[5px] border border-line bg-surface-raised px-1.5 py-0.5 font-mono text-[10px] text-dim">
                 /
               </kbd>
             </button>
 
-            {/* Wallet pill */}
             <button
               type="button"
-              className="ml-auto flex h-9 items-center gap-2 rounded-chip border border-line bg-surface-raised px-3 transition-colors duration-120 hover:border-line-strong md:ml-0"
+              className="ml-auto hidden h-9 items-center rounded-field bg-paper px-3.5 text-[13px] font-medium text-white transition-colors duration-100 hover:bg-cobalt/90 md:ml-3 lg:flex"
             >
-              <span aria-hidden="true" className="pulse-dot h-[7px] w-[7px] rounded-full bg-up" />
-              <span className="font-mono text-[12px] text-muted">0.7fa3…c41d</span>
+              New settlement
+            </button>
+
+            {/* wallet pill */}
+            <button
+              type="button"
+              className="flex h-9 shrink-0 items-center gap-2 rounded-field border border-line bg-surface px-2 transition-colors duration-100 hover:border-line-strong"
+            >
+              <span
+                aria-hidden="true"
+                className="grid h-6 w-6 place-items-center rounded-full bg-cobalt-dim font-mono text-[10px] font-medium text-cobalt"
+              >
+                ZM
+              </span>
+              <span className="hidden font-mono text-[12px] text-muted sm:inline">
+                0.7fa3…c41d
+              </span>
+              <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="text-dim">
+                <path d="M4 6.5L8 10.5 12 6.5" />
+              </svg>
             </button>
           </div>
         </header>
@@ -194,18 +238,18 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="min-w-0">{children}</main>
 
         <footer className="border-t border-line">
-          <div className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-5 md:px-6">
-            <span className="font-mono text-[11px] text-dim">
-              A hackathon prototype, not audited; settle against the demo adapter
+          <div className="mx-auto flex w-full max-w-[1240px] flex-wrap items-baseline justify-between gap-2 px-4 py-5 md:px-6">
+            <span className="text-[12px] text-dim">
+              A hackathon prototype, not audited; settle against the demo adapter.
             </span>
-            <span className="ml-auto font-mono text-[11px] text-dim">
-              USDC base units · 1e6 = $1.00
+            <span className="font-mono text-[11px] tabular-nums text-dim">
+              USDC base units (1e6 = $1.00)
             </span>
           </div>
         </footer>
       </div>
 
-      {/* ── Mobile drawer ───────────────────────────────────── */}
+      {/* Mobile drawer */}
       {drawerOpen && (
         <div id="drawer" className="fixed inset-0 z-40 lg:hidden">
           <button
@@ -214,20 +258,27 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="absolute inset-0 bg-black/60"
             onClick={() => setDrawerOpen(false)}
           />
-          <div className="absolute inset-y-0 left-0 w-64 border-r border-line bg-surface p-3">
-            <div className="mb-4 flex items-center justify-between px-2 pt-2">
-              <span className="text-[14px] font-semibold">Navigate</span>
+          <div className="absolute inset-y-0 left-0 w-[260px] border-r border-line bg-surface p-3 shadow-[0_8px_40px_rgba(0,0,0,0.45)]">
+            <div className="mb-3 flex items-center justify-between px-1 pt-1 pb-3 border-b border-line">
+              <Brand />
               <button
                 type="button"
                 onClick={() => setDrawerOpen(false)}
-                className="rounded-[8px] border border-line px-2 py-1 font-mono text-[11px] text-muted"
+                aria-label="Close menu"
+                className="rounded-[6px] border border-line px-2 py-1 font-mono text-[10px] text-muted"
               >
                 esc
               </button>
             </div>
+            <p className="group-label">Trading</p>
             <NavLinks pathname={pathname} onNavigate={() => setDrawerOpen(false)} />
-            <p className="mt-6 px-3 font-mono text-[10px] leading-relaxed text-dim">
-              BASE·8453 · every figure computed locally by the span engine
+            <div className="mt-4 flex items-center gap-2 rounded-field border border-line bg-surface-raised px-2.5 py-2">
+              <span aria-hidden="true" className="pulse-dot h-[6px] w-[6px] rounded-full bg-up" />
+              <span className="text-[12px] font-medium text-muted">Base mainnet</span>
+              <span className="ml-auto font-mono text-[10px] text-dim">4453</span>
+            </div>
+            <p className="px-1 pt-3 text-[11px] leading-snug text-dim">
+              Simulation — every figure is computed locally by the span engine.
             </p>
           </div>
         </div>

@@ -97,7 +97,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2.5">
             <a
               href="/terminal?shock=-3000"
-              className="flex h-10 items-center gap-2 rounded-field bg-paper px-4 text-[14px] font-medium text-background transition-transform duration-120 hover:-translate-y-px"
+              className="flex h-10 items-center gap-2 rounded-field bg-paper px-4 text-[14px] font-medium text-white transition-transform duration-120 hover:-translate-y-px"
             >
               Replay the −30% crash
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
