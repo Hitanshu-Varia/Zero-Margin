@@ -1,18 +1,25 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { AppShell } from "@/components/AppShell";
 
-const display = Inter({
+/*
+ * Self-hosted fonts (committed woff2). next/font/google downloads at
+ * build time and dies on flaky venue wifi; these load from the repo so
+ * a clean build never touches the network for type.
+ */
+const display = localFont({
+  src: "./fonts/inter.woff2",
   variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: "400 600",
+  display: "swap",
 });
 
-const data = Geist_Mono({
+const data = localFont({
+  src: "./fonts/geist-mono.woff2",
   variable: "--font-data",
-  subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: "400 500",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
