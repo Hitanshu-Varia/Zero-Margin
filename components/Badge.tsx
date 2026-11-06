@@ -57,7 +57,9 @@ export function StatusChip({
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-chip border px-2.5 py-0.5 text-[12px] font-medium ${
-        variantClass[tone === "status" ? "status" : tone]
+        variantClass[
+          tone === "up" ? "fork" : tone === "down" ? "error" : tone === "cobalt" ? "local" : "status"
+        ]
       }`}
     >
       <span aria-hidden="true" className="h-[5px] w-[5px] rounded-full bg-current" />
