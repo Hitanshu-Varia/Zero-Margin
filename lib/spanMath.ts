@@ -294,8 +294,11 @@ export function isolatedAccountAtShock(
   const liquidationPenaltyUsdc = breach
     ? floorDiv(lpNotionalUsdc * ISOLATED_LIQ_PENALTY_BPS, BPS)
     : 0n;
+  const netAfterPenalty = rawEquity - liquidationPenaltyUsdc;
   const returnedToTraderUsdc = breach
-    ? rawEquity - liquidationPenaltyUsdc
+    ? netAfterPenalty > 0n
+      ? netAfterPenalty
+      : 0n
     : rawEquity;
   const equityUsdc = breach
     ? returnedToTraderUsdc > 0n
