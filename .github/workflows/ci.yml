@@ -1,0 +1,40 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  claims-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: python3 scripts/lint_claims.py
+
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
+      - run: |
+          cd contracts
+          forge install openzeppelin/openzeppelin-contracts@5.1.0 || true
+          forge install Uniswap/v4-core Uniswap/v4-periphery foundry-rs/forge-std
+          forge build
+          forge test -vvv
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "24" }
+      - run: npm ci || npm install
+      - run: npx next lint || npx eslint .
+      - run: npm run build
+      - run: npm test

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run",
+    "test": "vitest run --exclude '**/contracts/**'",
     "e2e": "node scripts/e2e.mjs",
     "lint:claims": "python3 scripts/lint_claims.py"
   },
