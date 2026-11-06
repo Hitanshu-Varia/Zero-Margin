@@ -1,312 +1,246 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import {
   DEMO_BOOK,
   DEMO_ISOLATED_BOOK,
-  DEMO_VOL_SHOCK_BPS,
   evaluateSpan16,
   isolatedAccountAtShock,
   previewShockUnwind,
 } from "@/lib/spanMath";
-import { RiskSurface } from "@/components/landing/RiskSurface";
-import { BorderBeam } from "@/components/motion/BorderBeam";
 import {
+  formatShock,
   formatPercentFromBps,
+  formatSignedUsdc,
   formatUsdcWhole,
 } from "@/lib/format";
-
-export const metadata: Metadata = {
-  title: {
-    default: "ZeroMargin — the crash settles in one transaction",
-    template: "%s — ZeroMargin",
-  },
-};
+import { cn } from "@/lib/cn";
+import { ShockCompass } from "@/components/desk/ShockCompass";
 
 const span = evaluateSpan16(DEMO_BOOK.lpNotionalUsdc, DEMO_BOOK.shortNotionalUsdc);
+
+/* The crash the demo replays everywhere. */
+const CRASH = -3_000n;
 const crash = previewShockUnwind(
   DEMO_BOOK.lpNotionalUsdc,
   DEMO_BOOK.shortNotionalUsdc,
   DEMO_BOOK.postedMarginUsdc,
-  -3_000n,
-  DEMO_VOL_SHOCK_BPS,
+  CRASH,
+  150n,
 );
 const crashIsolated = isolatedAccountAtShock(
   DEMO_ISOLATED_BOOK.lpNotionalUsdc,
   DEMO_ISOLATED_BOOK.postedMarginUsdc,
-  -3_000n,
-  DEMO_VOL_SHOCK_BPS,
+  CRASH,
+  150n,
 );
 
-const links = [
-  ["Dashboard", "/dashboard"],
-  ["Terminal", "/terminal"],
-  ["Replay", "/replay"],
-  ["Proof", "/proof"],
-];
+/** One crash, both desks rendered side by side. */
+export function LandingStage() {
+  const section = useRef<HTMLElement>(null);
+  const [playing, setPlaying] = useState(true);
 
-const FAQ: Array<[string, string]> = [
-  [
-    "Where do the margin savings come from?",
-    "The two legs lose money in opposite directions, so the grid nets their worst cases instead of charging for each alone. On the 95%-hedged book that is $10,000 where isolated margin wants $147,500.",
-  ],
-  [
-    "Can I withdraw LP liquidity whenever I want?",
-    "Yes, while the surviving book holds its net initial margin. A Uniswap v4 hook checks every removal and reverts with SpanMarginBreach before collateral can leave under-collateralized.",
-  ],
-  [
-    "What happens beyond a −30% crash?",
-    "The tested envelope ends at −3,000 bps. Deeper shocks fall outside the grid, so the engine posts exactly what the grid requires rather than a fixed cushion. The golden vectors pin exact amounts.",
-  ],
-];
+  useEffect(() => {
+    const node = section.current;
+    if (!node) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setPlaying(entry.isIntersecting),
+      { threshold: 0.05 },
+    );
+    io.observe(node);
+    return () => io.disconnect();
+  }, []);
 
-export default function LandingPage() {
+  const waterfall = [
+    { label: "LP loss", value: crash.lpLossUsdc, signed: true },
+    { label: "Short gain, netted", value: -crash.nettedOffsetUsdc, signed: true },
+    { label: "Unwind fee", value: -crash.protocolFeeUsdc, signed: true },
+  ];
+
   return (
-    <div className="min-h-dvh">
-      {/* ── Masthead ─────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 border-b border-line bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-14 w-full max-w-[1240px] items-center gap-8 px-4 md:px-8">
-          <a href="/" className="flex items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-ring">
-            <span
-              aria-hidden="true"
-              className="grid h-6 w-6 place-items-center rounded-[7px] bg-cobalt text-white"
-            >
-              <span className="font-mono text-[13px] font-semibold leading-none">Z</span>
-            </span>
-            <span className="text-[15px] font-semibold tracking-tight">ZeroMargin</span>
-          </a>
-          <nav aria-label="Sections" className="hidden items-center gap-5 md:flex">
-            {links.map(([label, href]) => (
-              <a
-                key={href}
-                href={href}
-                className="text-[13px] text-muted transition-colors duration-100 hover:text-text"
-              >
-                {label}
-              </a>
-            ))}
-          </nav>
-          <a
-            href="/dashboard"
-            className="ml-auto flex h-9 items-center rounded-field bg-paper px-4 text-[13px] font-medium text-white transition-colors duration-100 hover:bg-cobalt/90"
-          >
-            Open the dashboard
-          </a>
-        </div>
-      </header>
-
-      <main className="mx-auto w-full max-w-[1240px] px-4 md:px-8">
-        {/* ── Hero: the risk surface is the first screen ─────── */}
-        <section className="grid gap-8 pb-12 pt-12 md:pt-16 lg:grid-cols-[5fr_7fr] lg:items-center lg:gap-12">
-          <div className="min-w-0">
-            <h1 className="text-[34px] font-medium leading-[1.06] tracking-[-0.01em] md:text-[42px]">
-              The crash settles in one transaction.
-            </h1>
-            <p className="mt-4 max-w-[46ch] text-[15px] leading-[1.6] text-muted">
-              A cross-margined book nets its hedge against its LP and survives
-              the fall.
-            </p>
-
-            <p className="mt-6 flex flex-wrap items-baseline gap-x-3 gap-y-1 font-mono text-[20px] font-medium tabular-nums tracking-tight md:text-[24px]">
-              <span className="text-down line-through decoration-[1.5px] decoration-down/60">
-                $147,500
-              </span>
-              <span className="text-[13px] text-dim">became</span>
-              <span className="text-text">$10,000</span>
-            </p>
-            <p className="mt-1.5 text-[12px] text-dim">
-              locked collateral on GV-01, {formatPercentFromBps(span.capitalSavingsBps)} less
-            </p>
-
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <a
-                href="/dashboard"
-                className="flex h-10 items-center rounded-field bg-paper px-4 text-[14px] font-medium text-white transition-colors duration-100 hover:bg-cobalt/90"
-              >
-                Open the dashboard
-              </a>
-              <a
-                href="/terminal?shock=-3000"
-                className="flex h-10 items-center rounded-field border border-line-strong bg-surface px-4 text-[14px] text-muted transition-colors duration-100 hover:text-text"
-              >
-                Watch the replay
-              </a>
-            </div>
-          </div>
-
-          {/* The signature: the product's own grid, drawn to scale */}
-          <div className="min-w-0">
-            <RiskSurface />
-            <p className="mt-2 text-center text-[11px] text-dim">
-              sixteen scenarios of the demo book, extruded by net PnL; the
-              scanner sweeps on load and answers where you stop it
-            </p>
-          </div>
-        </section>
-
-        {/* ── The settlement receipt ──────────────────────────── */}
-        <section className="border-t border-line pb-14 pt-10">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <h2 className="text-[17px] font-semibold tracking-[-0.01em]">
-              What the same crash pays out
-            </h2>
-            <span className="text-[12px] text-dim">
-              demo book, $100,000 LP hedged with a $95,000 short, $25,000 posted
-            </span>
-          </div>
-
-          <div className="mt-5 overflow-x-auto">
-            <table className="w-full min-w-[620px] border-collapse text-[13px]">
-              <thead>
-                <tr className="border-b-2 border-line-strong text-left">
-                  {["Account", "Margin posted", "Loss at −30%", "Liquidation", "Returned"].map(
-                    (h, i) => (
-                      <th
-                        key={h}
-                        className={`px-3 pb-2 pt-1 text-[12px] font-medium text-dim ${i > 0 ? "text-right" : ""}`}
-                      >
-                        {h}
-                      </th>
-                    ),
-                  )}
-                </tr>
-              </thead>
-              <tbody className="font-mono tabular-nums">
-                {[
-                  {
-                    name: "Isolated desk, unchanged margin practice",
-                    posted: formatUsdcWhole(DEMO_ISOLATED_BOOK.postedMarginUsdc),
-                    loss: formatUsdcWhole(-crashIsolated.lpPnlUsdc),
-                    pen: formatUsdcWhole(crashIsolated.liquidationPenaltyUsdc),
-                    back: formatUsdcWhole(0n),
-                    tone: "text-down",
-                  },
-                  {
-                    name: "ZeroMargin book, hedged and netted",
-                    posted: formatUsdcWhole(DEMO_BOOK.postedMarginUsdc),
-                    loss: formatUsdcWhole(crash.lpLossUsdc),
-                    pen: "none",
-                    back: formatUsdcWhole(crash.remainingEquityUsdc),
-                    tone: "text-up",
-                  },
-                ].map((r) => (
-                  <tr key={r.name} className="border-b border-line">
-                    <td className="px-3 py-3 text-[13px] text-text">{r.name}</td>
-                    <td className="px-3 py-3 text-right">{r.posted}</td>
-                    <td className="px-3 py-3 text-right">{r.loss}</td>
-                    <td className={`px-3 py-3 text-right ${r.tone}`}>{r.pen}</td>
-                    <td className={`px-3 py-3 text-right ${r.tone}`}>{r.back}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-3 text-[12px] text-dim">
-            every row is computed from the engine at render time
+    <div
+      ref={section}
+      className={cn("drift-field", !playing && "drift-paused")}
+    >
+      {/* ── Statement + instrument ─────────────────────────── */}
+      <section className="mx-auto grid w-full max-w-[1128px] items-center gap-10 px-4 pb-10 pt-10 md:grid-cols-[minmax(0,1fr)_minmax(0,380px)] md:gap-12 md:px-6 md:pb-14 md:pt-14">
+        <div className="min-w-0">
+          <h1 className="rise max-w-[24ch] text-balance text-[32px] font-medium leading-[1.05] md:text-[46px]">
+            The crash settles in one transaction.
+          </h1>
+          <p className="mt-4 max-w-[52ch] text-pretty text-[15px] leading-relaxed text-muted">
+            ZeroMargin cross-margins a Uniswap v4 LP with its offsetting short
+            hedge on one SPAN-style grid, so the same book posts a fraction of
+            the collateral and rides out the shock intact.
           </p>
-        </section>
 
-        {/* ── The mechanism ──────────────────────────────────── */}
-        <section className="border-t border-line pb-14 pt-10">
-          <h2 className="text-[17px] font-semibold tracking-[-0.01em]">
-            Three steps, one book
-          </h2>
-          <ol className="mt-6 max-w-[68ch]">
-            {[
-              {
-                t: "Net the legs",
-                b: "The grid nets the worst LP loss against the short gain and charges the difference plus a 500 bps basis haircut.",
-                link: ["The golden vectors", "/proof"],
-              },
-              {
-                t: "Guard the withdrawal",
-                b: "A Uniswap v4 hook checks every liquidity removal against the surviving book and reverts before collateral can leave.",
-                link: ["The guard", "/proof"],
-              },
-              {
-                t: "Settle in one transaction",
-                b: "The unwind pushes the short gain into Aqua, pulls the netted amount, and closes the book. Quote equals execution.",
-                link: ["Run the replay", "/terminal"],
-              },
-            ].map((step, i, arr) => (
-              <li
-                key={step.t}
-                className={`grid gap-x-6 gap-y-1 py-5 md:grid-cols-[24px_1fr_auto] md:items-baseline ${
-                  i < arr.length - 1 ? "border-b border-line" : ""
-                }`}
-              >
-                <span className="font-mono text-[12px] text-dim">{i + 1}.</span>
-                <span className="min-w-0 max-w-[52ch]">
-                  <span className="text-[15px] font-medium">{step.t}</span>
-                  <span className="mt-1 block text-[14px] leading-[1.6] text-muted">
-                    {step.b}
-                  </span>
-                </span>
-                <a href={step.link[1]} className="text-[13px] text-cobalt hover:underline">
-                  {step.link[0]}
-                </a>
-              </li>
-            ))}
-          </ol>
-        </section>
+          <p className="mt-7 flex flex-wrap items-baseline gap-x-3 gap-y-1 font-mono text-[26px] font-medium tabular-nums md:text-[30px]">
+            <span className="text-down line-through decoration-[1.5px] decoration-down/50">
+              {formatUsdcWhole(span.isolatedInitialMarginUsdc)}
+            </span>
+            <span className="text-[13px] font-normal text-dim">becomes</span>
+            <span className="text-[var(--saffron)]">
+              {formatUsdcWhole(span.netInitialMarginUsdc)}
+            </span>
+          </p>
+          <p className="mt-1.5 text-[12px] text-dim">
+            locked initial margin on the 95%-hedged golden vector,{" "}
+            {formatPercentFromBps(span.capitalSavingsBps)} less
+          </p>
 
-        {/* ── Questions ──────────────────────────────────────── */}
-        <section className="border-t border-line pb-14 pt-10">
-          <h2 className="text-[17px] font-semibold tracking-[-0.01em]">
-            Common questions
-          </h2>
-          <div className="mt-4">
-            {FAQ.map(([q, a], i, arr) => (
-              <details
-                key={q}
-                className={`group ${i < arr.length - 1 ? "border-b border-line" : ""}`}
-              >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-3.5 text-[14px] font-medium text-text [&::-webkit-details-marker]:hidden">
-                  {q}
-                  <span
-                    aria-hidden="true"
-                    className="font-mono text-[14px] text-dim transition-transform duration-100 group-open:rotate-45"
-                  >
-                    +
-                  </span>
-                </summary>
-                <p className="max-w-[62ch] pb-4 text-[13px] leading-[1.65] text-muted">{a}</p>
-              </details>
-            ))}
+          <div className="mt-7 flex flex-wrap items-center gap-3">
+            <a
+              href="/dashboard"
+              className="flex h-10 items-center rounded-field bg-paper px-4 text-[14px] font-medium transition-transform duration-100 ease-out active:scale-[0.97]"
+              style={{ color: "var(--ink)" }}
+            >
+              Open the desk
+            </a>
+            <a
+              href="/terminal?shock=-3000"
+              className="flex h-10 items-center rounded-field border border-line-strong bg-surface px-4 text-[14px] text-muted transition-colors duration-100 hover:text-text"
+            >
+              Run the −30% replay
+            </a>
           </div>
-        </section>
+        </div>
 
-        {/* ── Closing band, the one framed object ────────────── */}
-        <section className="pb-16">
-          <BorderBeam duration={9}>
-            <div className="flex flex-col items-start justify-between gap-5 rounded-panel border border-cobalt/30 bg-cobalt-dim px-8 py-7 md:flex-row md:items-center md:px-10">
-              <div className="max-w-[48ch]">
-                <h2 className="text-[17px] font-semibold tracking-[-0.01em]">
-                  Open the books and drag the crash yourself
-                </h2>
-                <p className="mt-1.5 text-[13px] leading-[1.6] text-muted">
-                  The terminal settles every shock line by line.
-                </p>
+        <ShockCompass className="rise justify-self-center" />
+      </section>
+
+      {/* ── One crash, two desks ───────────────────────────── */}
+      <section className="mx-auto w-full max-w-[1128px] px-4 pb-10 md:px-6">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+          {/* netted: the book that comes back */}
+          <div className="lift rounded-panel border border-line bg-surface p-6">
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="text-[13px] text-muted">ZeroMargin book</p>
+              <p className="font-mono text-[11px] tabular-nums text-dim">
+                {formatShock(CRASH)} bps
+              </p>
+            </div>
+            <p className="mt-4 font-mono text-[44px] font-medium leading-none tabular-nums text-up md:text-[52px]">
+              {formatUsdcWhole(crash.remainingEquityUsdc)}
+            </p>
+            <p className="mt-2 text-[13px] text-muted">
+              returned to the trader, no liquidation penalty inside the tested
+              grid
+            </p>
+            <dl className="mt-5 border-t border-line pt-4">
+              {waterfall.map((row) => (
+                <div
+                  key={row.label}
+                  className="flex items-baseline justify-between gap-4 py-1.5"
+                >
+                  <dt className="text-[13px] text-dim">{row.label}</dt>
+                  <dd className="font-mono text-[13px] tabular-nums text-text">
+                    {formatSignedUsdc(row.value)}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+
+          {/* isolated: the same book under standard margin practice */}
+          <div className="lift rounded-panel border border-line bg-surface p-6">
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="text-[13px] text-muted">Isolated desk</p>
+              <p className="font-mono text-[11px] tabular-nums text-dim">
+                margin practice unchanged
+              </p>
+            </div>
+            <p className="mt-4 font-mono text-[44px] font-medium leading-none tabular-nums text-down md:text-[52px]">
+              {formatUsdcWhole(crashIsolated.returnedToTraderUsdc)}
+            </p>
+            <p className="mt-2 text-[13px] text-muted">
+              returned to the trader, the account is liquidated at the same mark
+            </p>
+            <dl className="mt-5 border-t border-line pt-4">
+              <div className="flex items-baseline justify-between gap-4 py-1.5">
+                <dt className="text-[13px] text-dim">LP leg result</dt>
+                <dd className="font-mono text-[13px] tabular-nums text-text">
+                  {formatSignedUsdc(crashIsolated.lpPnlUsdc)}
+                </dd>
               </div>
+              <div className="flex items-baseline justify-between gap-4 py-1.5">
+                <dt className="text-[13px] text-dim">Liquidation penalty</dt>
+                <dd className="font-mono text-[13px] tabular-nums text-down">
+                  −{formatUsdcWhole(crashIsolated.liquidationPenaltyUsdc)}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+        <p className="mt-3 text-center text-[12px] text-dim">
+          both sides carry the same {formatUsdcWhole(DEMO_BOOK.postedMarginUsdc)}{" "}
+          of margin and meet the same {formatShock(CRASH)} bps mark
+        </p>
+      </section>
+
+      {/* ── How the desk holds ─────────────────────────────── */}
+      <section className="mx-auto w-full max-w-[1128px] px-4 pb-6 md:px-6">
+        <div className="grid gap-px overflow-hidden rounded-panel border border-line bg-line sm:grid-cols-3">
+          {[
+            {
+              n: 1,
+              t: "Net the legs",
+              d: "The grid nets the hedge's worst-case gain against the LP's worst-case loss and charges the difference plus a 5% haircut on matched basis.",
+              href: "/proof",
+              link: "Read the vectors",
+            },
+            {
+              n: 2,
+              t: "Guard liquidity",
+              d: "A Uniswap v4 hook re-runs the grid before any withdrawal and reverts with a breach error when collateral could leave underposted.",
+              href: "/proof",
+              link: "See the guard",
+            },
+            {
+              n: 3,
+              t: "Settle in one transaction",
+              d: "The unwind pushes the short's gain into the same virtual balance that pays the LP deficit, so the quote is the execution.",
+              href: "/terminal",
+              link: "Open the terminal",
+            },
+          ].map((step) => (
+            <div key={step.n} className="bg-surface p-6">
+              <p className="font-mono text-[12px] text-dim">{step.n}</p>
+              <h2 className="mt-3 text-[16px] font-medium">{step.t}</h2>
+              <p className="mt-2 text-[13px] leading-relaxed text-muted">
+                {step.d}
+              </p>
               <a
-                href="/dashboard"
-                className="flex h-10 shrink-0 items-center rounded-field bg-paper px-5 text-[14px] font-medium text-white transition-colors duration-100 hover:bg-cobalt/90"
+                href={step.href}
+                className="mt-4 inline-block text-[13px] text-saffron hover:underline"
               >
-                Open the dashboard
+                {step.link}
               </a>
             </div>
-          </BorderBeam>
-        </section>
-      </main>
-
-      <footer className="border-t border-line">
-        <div className="mx-auto flex w-full max-w-[1240px] flex-wrap items-baseline justify-between gap-2 px-4 py-6 md:px-8">
-          <span className="text-[12px] text-dim">
-            A hackathon prototype, not audited; settle against the demo adapter.
-          </span>
-          <span className="font-mono text-[11px] tabular-nums text-dim">
-            USDC base units (1e6 = $1.00)
-          </span>
+          ))}
         </div>
-      </footer>
+      </section>
+
+      {/* ── Closing ───────────────────────────────────────── */}
+      <section className="mx-auto w-full max-w-[1128px] px-4 pb-16 pt-4 md:px-6">
+        <div className="flex flex-col items-start justify-between gap-5 rounded-panel border border-line bg-surface px-6 py-7 md:flex-row md:items-center md:px-8">
+          <div className="max-w-[52ch]">
+            <h2 className="text-[17px] font-medium">
+              Drag the crash yourself
+            </h2>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+              The terminal quotes every shock line by line and settles the
+              −30% replay in one transaction.
+            </p>
+          </div>
+          <a
+            href="/terminal"
+            className="flex h-10 shrink-0 items-center rounded-field bg-paper px-5 text-[14px] font-medium transition-transform duration-100 ease-out active:scale-[0.97]"
+            style={{ color: "var(--ink)" }}
+          >
+            Open the terminal
+          </a>
+        </div>
+      </section>
     </div>
   );
 }
