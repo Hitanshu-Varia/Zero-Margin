@@ -39,7 +39,7 @@ fork-test:
 	(cd contracts && BASE_MAINNET_RPC_URL=$${BASE_MAINNET_RPC_URL} forge test --match-contract AquaForkTest -vv)
 
 arkiv-verify:
-	# live Rabdi write needs ARKIV_ACCESS_KEY + a funded writer
+	# live Rabdi write: needs ARKIV_ACCESS_KEY + a funded ARKIV_WRITER_PRIVATE_KEY in .env.local
 	@test -n "$$ARKIV_ACCESS_KEY" && npm run arkiv:verify || echo "SKIP: Arkiv live keys absent; the CACHE badge flow is the demo default"
 
 replay:

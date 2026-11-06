@@ -26,6 +26,12 @@ interface ReceiptBody {
       balanceLeft: string;
     };
   };
+  attestation?: {
+    ok: boolean;
+    key?: string;
+    tx?: string | null;
+    reason?: string;
+  };
   problems?: string[];
 }
 
@@ -138,6 +144,20 @@ export function SettleAction({
             {receipt.receipt.tx.hash}
           </p>
         </div>
+      )}
+
+      {receipt?.attestation && (
+        <p
+          data-testid="attestation-line"
+          className={cn(
+            "mt-2 font-mono text-[11px] leading-relaxed",
+            receipt.attestation.ok ? "text-up" : "text-dim",
+          )}
+        >
+          {receipt.attestation.ok
+            ? `attestation written to Rabdi testnet — key ${receipt.attestation.key} — expires in 300 s`
+            : `attestation pending: ${receipt.attestation.reason}`}
+        </p>
       )}
 
       {receipt?.receipt?.state === "rejected" && (
