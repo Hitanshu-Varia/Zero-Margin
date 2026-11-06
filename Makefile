@@ -45,6 +45,16 @@ arkiv-verify:
 replay:
 	npm run replay || echo "SKIP: replay dataset scripts live with the web terminal; basis stats derive from lib/replayData.ts"
 
+deploy-testnet:
+	# Deploys MockAqua + demo USDC + trio to Base Sepolia (sepolia.base.org).
+	# Needs DEMO_PRIVATE_KEY funded with Base Sepolia gas; DEMO_TRADER overrides the demo wallet.
+	set -a; . ./.env.local; set +a; \
+	if [ -z "$$DEMO_PRIVATE_KEY" ]; then echo "DEMO_PRIVATE_KEY missing in .env.local"; exit 1; fi; \
+	(pool_manager_addr=$${UNISWAP_V4_POOL_MANAGER_BASE_SEPOLIA:-0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408}; \
+	trader_addr=$${DEMO_TRADER:-0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266}; \
+	cd contracts && POOL_MANAGER_ADDRESS=$$pool_manager_addr DEMO_TRADER=$$trader_addr \
+	forge script script/DeploySepolia.s.sol --fork-url $${BASE_SEPOLIA_RPC_URL:-https://sepolia.base.org} --private-key $$DEMO_PRIVATE_KEY --broadcast -vvv)
+
 snapshot:
 	cd contracts && forge snapshot --check && echo "GAS SNAPSHOT OK"
 

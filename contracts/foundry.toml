@@ -3,7 +3,7 @@ solc_version = "0.8.26"
 evm_version = "cancun"
 optimizer = true
 optimizer_runs = 200
-via_ir = false
+via_ir = true
 fs_permissions = [{ access = "read", path = "./data" }]
 bytecode_hash = "none"
 cbor_metadata = false

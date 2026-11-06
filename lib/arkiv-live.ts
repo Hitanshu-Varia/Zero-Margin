@@ -131,7 +131,7 @@ export async function queryAttestations(): Promise<Attestation[]> {
   for (const row of response?.data ?? []) {
     const key = row.key;
     if (typeof key !== "string") continue;
-    const full = (await publicClient().getEntity(key as `0x${string}`)) as {
+    const full = (await publicClient().getEntity(key as `0x${string}`)) as unknown as {
       $createdAt?: string | number;
       $expiresAt?: string | number;
       $attributes?: Record<string, { type?: string; value?: string | number }>;
