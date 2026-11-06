@@ -20,7 +20,7 @@ function RatioCell({ attestation }: { attestation: Attestation }) {
       <div
         role="img"
         aria-label={`Margin ratio ${formatPercentFromBps(pct, 0)}`}
-        className="relative hidden h-[4px] w-20 overflow-hidden rounded-full bg-surface-raised md:block"
+        className="relative hidden h-[4px] w-20 overflow-hidden rounded-full bg-line md:block"
       >
         <div
           aria-hidden="true"

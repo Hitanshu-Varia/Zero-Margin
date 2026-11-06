@@ -48,14 +48,16 @@ export function formatBps(value: bigint): string {
   return `${negative ? "−" : ""}${Number(abs).toLocaleString("en-US")} bps`;
 }
 
-/** "93.22%" — two decimals from a bps integer. */
+/** "93.22%" — percent from an integer in basis points (1% = 100 bps). */
 export function formatPercentFromBps(value: bigint, decimals = 2): string {
   const negative = value < 0n;
   const abs = negative ? -value : value;
+  const whole = abs / 100n; // 100 bps = 1%
+  const sign = negative ? "−" : "";
+  if (decimals === 0) return `${sign}${whole.toString()}%`;
   const scale = 10n ** BigInt(decimals);
-  const whole = abs / BPS;
-  const frac = (abs % BPS) * scale / BPS;
-  return `${negative ? "−" : ""}${whole.toString()}.${frac
+  const frac = ((abs % 100n) * scale) / 100n;
+  return `${sign}${whole.toString()}.${frac
     .toString()
     .padStart(decimals, "0")}%`;
 }

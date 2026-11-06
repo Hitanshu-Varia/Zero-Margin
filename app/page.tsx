@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Num } from "@/components/Num";
 import { Panel, Stat } from "@/components/Panel";
 import { StatusChip } from "@/components/Badge";
@@ -23,7 +24,6 @@ import {
   formatUsdc,
   formatUsdcWhole,
 } from "@/lib/format";
-
 const B = BPS;
 
 function markPriceUsdc(shockBps: bigint): bigint {
@@ -114,7 +114,7 @@ function ScenarioGrid({
                   <div
                     aria-hidden="true"
                     style={{ height: `${height}px` }}
-                    className={`w-full rounded-[2px] ${
+                    className={`w-3/4 min-w-[10px] rounded-[2px] ${
                       negative
                         ? active ? "bg-down" : "bg-down-dim"
                         : active ? "bg-up" : "bg-up-dim"
@@ -142,7 +142,24 @@ function ScenarioGrid({
 }
 
 export default function TerminalPage() {
-  const [shockBps, setShockBps] = useState<bigint>(0n);
+  return (
+    <Suspense fallback={null}>
+      <Terminal />
+    </Suspense>
+  );
+}
+
+function Terminal() {
+  const params = useSearchParams();
+  const initialShock = useMemo(() => {
+    const raw = params.get("shock");
+    if (raw === null) return 0n;
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed)) return 0n;
+    const clamped = Math.max(-3000, Math.min(2000, Math.round(parsed / 10) * 10));
+    return BigInt(clamped);
+  }, [params]);
+  const [shockBps, setShockBps] = useState<bigint>(initialShock);
 
   const span = useMemo(
     () => evaluateSpan16(DEMO_BOOK.lpNotionalUsdc, DEMO_BOOK.shortNotionalUsdc),
@@ -169,6 +186,28 @@ export default function TerminalPage() {
       ),
     [shockBps],
   );
+  /** The −30% replay figures, always computed at the demo crash depth. */
+  const crashQuote = useMemo(
+    () =>
+      previewShockUnwind(
+        DEMO_BOOK.lpNotionalUsdc,
+        DEMO_BOOK.shortNotionalUsdc,
+        DEMO_BOOK.postedMarginUsdc,
+        -3_000n,
+        DEMO_VOL_SHOCK_BPS,
+      ),
+    [],
+  );
+  const crashIsolated = useMemo(
+    () =>
+      isolatedAccountAtShock(
+        DEMO_ISOLATED_BOOK.lpNotionalUsdc,
+        DEMO_ISOLATED_BOOK.postedMarginUsdc,
+        -3_000n,
+        DEMO_VOL_SHOCK_BPS,
+      ),
+    [],
+  );
 
   const mark = markPriceUsdc(shockBps);
 
@@ -193,6 +232,7 @@ export default function TerminalPage() {
   const settled = quote.protocolFeeUsdc > 0n && shockBps <= 0n;
   const bookTone =
     quote.badDebtUsdc > 0n ? "down" : settled ? "amber" : "text";
+  const hedgeRatio = (DEMO_BOOK.shortNotionalUsdc * 10_000n) / DEMO_BOOK.lpNotionalUsdc;
 
   const runCrash = useCallback(
     (target: bigint) => {
@@ -295,17 +335,19 @@ export default function TerminalPage() {
           </span>
           <span aria-hidden="true" className="h-px flex-1 bg-line" />
         </div>
-        <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
+        <div className="grid gap-5 lg:grid-cols-[5fr_6fr]">
         {/* Left: isolated account */}
         <Panel
           label="Isolated LP account"
+          className="flex flex-col"
+          bodyClassName="flex flex-1 flex-col"
           meta={<StatusChip tone={isolated.liquidated ? "down" : "status"}>
             {isolated.liquidated ? "liquidated" : "open"}
           </StatusChip>}
         >
-          <div className="px-4 pb-4 pt-4">
+          <div className="flex h-full flex-col px-4 pb-4 pt-4">
             <div className="text-[12px] uppercase tracking-wide text-muted">
-              Returned to trader
+              Current equity
             </div>
             <Num key={shockBps} tone={isolatedTone} size="hero" className="settle">
               {formatUsdc(isolated.equityUsdc)}
@@ -323,61 +365,66 @@ export default function TerminalPage() {
             <div
               role="img"
               aria-label={`Margin health: equity ${formatUsdcWhole(isolated.equityUsdc)} against maintenance threshold ${formatUsdcWhole(isolated.maintenanceMarginUsdc)}`}
-              className="mt-4 h-[6px] overflow-hidden rounded-full bg-surface-raised"
+              className="relative mt-4 h-[6px] overflow-visible rounded-full bg-transparent"
             >
               <div
                 aria-hidden="true"
-                className="relative h-full overflow-visible rounded-full bg-line-strong"
+                className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 overflow-visible rounded-full bg-surface"
               >
-                <div
-                  aria-hidden="true"
-                  className={`h-full rounded-full transition-[width] duration-100 ${
-                    isolated.liquidated
+              <div
+                aria-hidden="true"
+                className={`h-full rounded-full ${
+                  isolated.liquidated
+                    ? "bg-down"
+                    : isolated.equityUsdc <= isolated.maintenanceMarginUsdc
                       ? "bg-down"
-                      : isolated.equityUsdc <= isolated.maintenanceMarginUsdc
-                        ? "bg-down"
-                        : isolated.breachMarginBps < 12_500n
-                          ? "bg-amber"
-                          : "bg-line-strong"
-                  }`}
-                  style={{
-                    width: `${
-                      isolated.liquidated
-                        ? 4
-                        : isolated.postedMarginUsdc === 0n
-                          ? 0
-                          : Math.max(
-                              2,
+                      : isolated.breachMarginBps < 15_000n
+                        ? "bg-amber"
+                        : "bg-line-strong"
+                }`}
+                style={{
+                  width: `${
+                    isolated.liquidated
+                      ? 4
+                      : isolated.postedMarginUsdc === 0n
+                        ? 0
+                        : Math.max(
+                            2,
+                            Math.min(
+                              100,
                               Number(
-                                (isolated.equityUsdc * 1000n) /
-                                  isolated.postedMarginUsdc /
-                                  10n,
+                                (isolated.equityUsdc * 100n) /
+                                  isolated.postedMarginUsdc,
                               ),
-                            )
-                    }%`,
-                  }}
-                />
-                <div
-                  aria-hidden="true"
-                  title="Maintenance threshold — breach liquidates the account"
-                  className="absolute top-[-3px] h-[12px] w-[2px] bg-line-strong"
-                  style={{ left: "50%" }}
-                />
+                            ),
+                          )
+                  }%`,
+                }}
+              />
+              <div
+                aria-hidden="true"
+                title="Maintenance threshold — breach liquidates the account"
+                className="absolute top-[-4px] h-[11px] w-[2px] rounded-full bg-line-strong"
+                style={{ left: "50%" }}
+              />
               </div>
             </div>
             <div className="mt-1 flex justify-between font-mono text-[10px] text-dim">
-              <span>equity</span>
-              <span>maintenance breach</span>
+              <span>equity {formatPercentFromBps(isolated.breachMarginBps, 0)} of maint.</span>
+              <span>breach liquidates at 50%</span>
             </div>
 
             {isolated.liquidated ? (
               <div className="mt-4 rounded-field border border-down-dim bg-down-dim/30 px-3 py-2.5">
                 <StatusChip tone="down">liquidation executed</StatusChip>
                 <p className="mt-2 font-mono text-[12px] leading-relaxed text-muted">
-                  {formatBps(isolated.lpPnlUsdc < 0n ? -isolated.lpPnlUsdc : isolated.lpPnlUsdc)}{" "}
-                  LP loss ·{" "}
+                  LP loss{" "}
                   <span className="text-down">
-                    {formatBps(isolated.liquidationPenaltyUsdc)} penalty
+                    {formatUsdcWhole(isolated.lpPnlUsdc < 0n ? -isolated.lpPnlUsdc : isolated.lpPnlUsdc)}
+                  </span>{" "}
+                  · penalty{" "}
+                  <span className="text-down">
+                    {formatUsdcWhole(isolated.liquidationPenaltyUsdc)}
                   </span>{" "}
                   · returned{" "}
                   <span className="text-down">{formatUsdc(isolated.returnedToTraderUsdc)}</span>
@@ -392,12 +439,42 @@ export default function TerminalPage() {
                 tone={isolated.lpPnlUsdc < 0n ? "down" : "up"}
                 value={formatUsdc(isolated.lpPnlUsdc)}
               />
-              <Stat
-                label="Margin ratio"
-                tone={isolated.liquidated ? "down" : "text"}
-                value={`${formatPercentFromBps(isolated.breachMarginBps, 0)} of maint.`}
-              />
               <Stat label="Hedge" value={<span className="text-dim">none</span>} />
+            </div>
+
+            {/* Cost recap — computed from the engine, never stored */}
+            <div className="mt-auto pt-5">
+              <div className="mb-2 rule-t pt-3 text-[12px] uppercase tracking-wide text-muted">
+                Cost of the −30% replay
+              </div>
+              <div className="grid grid-cols-3 gap-px overflow-hidden rounded-field border border-line bg-line">
+                {[
+                  {
+                    label: "Isolated penalty",
+                    value: crashIsolated.liquidationPenaltyUsdc,
+                    tone: "text-down",
+                  },
+                  {
+                    label: "ZeroMargin fee",
+                    value: crashQuote.protocolFeeUsdc,
+                    tone: "text-amber",
+                  },
+                  {
+                    label: "Netted offset",
+                    value: crashQuote.nettedOffsetUsdc,
+                    tone: "text-up",
+                  },
+                ].map((cell) => (
+                  <div key={cell.label} className="bg-surface-raised px-3 py-2.5">
+                    <div className="text-[10px] uppercase tracking-wide text-dim">
+                      {cell.label}
+                    </div>
+                    <div className={`mt-1 font-mono text-[13px] tabular-nums ${cell.tone}`}>
+                      {formatUsdcWhole(cell.value)}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </Panel>
@@ -407,8 +484,12 @@ export default function TerminalPage() {
           accent
           label="ZeroMargin book"
           meta={
-            <StatusChip tone={quote.badDebtUsdc > 0n ? "down" : settled ? "amber" : "status"}>
-              {quote.badDebtUsdc > 0n ? "breach" : settled ? "unwind eligible" : "open"}
+            <StatusChip tone={quote.badDebtUsdc > 0n ? "down" : shockBps < 0n ? "amber" : "status"}>
+              {quote.badDebtUsdc > 0n
+                ? "breach"
+                : shockBps < 0n
+                  ? "settled"
+                  : "open hedged"}
             </StatusChip>
           }
         >
@@ -453,7 +534,7 @@ export default function TerminalPage() {
                 tone="amber"
                 value={`${formatBps(span.capitalSavingsBps)} · ${formatPercentFromBps(span.capitalSavingsBps)}`}
               />
-              <Stat label="Hedge ratio" value={`${shockPercent((DEMO_BOOK.shortNotionalUsdc * 100n) / DEMO_BOOK.lpNotionalUsdc)}%`} />
+              <Stat label="Hedge ratio" value={formatPercentFromBps(hedgeRatio, 0)} />
             </div>
 
             {/* ── Settlement waterfall ──────────────────────── */}
