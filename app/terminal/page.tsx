@@ -531,7 +531,7 @@ function Terminal() {
               <Stat
                 label="Capital savings"
                 tone="cobalt"
-                value={`${formatBps(span.capitalSavingsBps)}, ${formatPercentFromBps(span.capitalSavingsBps)}`}`.replace('}}}`','}}}`')
+                value={`${formatBps(span.capitalSavingsBps)}, ${formatPercentFromBps(span.capitalSavingsBps)}`}
               />
               <Stat label="Hedge ratio" value={formatPercentFromBps(hedgeRatio, 0)} />
             </div>
