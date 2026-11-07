@@ -225,12 +225,9 @@ function Terminal() {
         accent
         meta={
           <span className="flex items-center gap-2">
-            <span className="font-mono text-dim">live mark (chain)</span>
-            <span aria-hidden="true">→</span>
-            <Num tone="cobalt" size="xs">
-              {formatUsdcWhole(mark)}
-            </Num>
-            <span className="text-dim">/ WETH</span>
+            <span className="font-mono text-dim">
+              mark onchain: <span className="text-text">{formatUsdcWhole(mark)}</span> per WETH — set at book open, moves only when real swaps hit the pool
+            </span>
           </span>
         }
       >
@@ -698,11 +695,11 @@ function Terminal() {
         }}
       />
 
-      <p className="mt-5 max-w-3xl font-mono text-[12px] leading-relaxed text-dim">
-        Both panels evaluate the identical price shock through the identical
-        deterministic engine. Demo books: $100,000 LP; the ZeroMargin book
-        carries a $95,000 short against it. Numbers are USDC base units,
-        computed at {formatShockAbs(shockBps)} bps from entry.
+      <p className="max-w-3xl text-pretty font-mono text-[12px] leading-relaxed text-dim">
+        both panels run the same deterministic engine on the amounts in the
+        console above — a live onchain book fills them first, and anything you
+        edit is an instant preview of that exact book. usdc base units,
+        1e6 = $1.00.
       </p>
     </main>
   );

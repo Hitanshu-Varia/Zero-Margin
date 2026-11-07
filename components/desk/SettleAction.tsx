@@ -104,11 +104,10 @@ export function SettleAction({
           style={{ color: "var(--ink)" }}
           data-testid="settle-action"
         >
-          {pending ? "Settling" : "Settle this book"}
+          {pending ? "Settling" : "Preview the settle (no transaction broadcast)"}
         </button>
         <p className="font-mono text-[11px] text-dim">
-          {formatUsdcWhole(asBig(input.postedMarginUsdc))} on the virtual balance settles
-          both legs
+          recomputes the full walkthrough below for {formatUsdcWhole(asBig(input.postedMarginUsdc))} posted — this stays on the page, nothing broadcasts
         </p>
       </div>
 
