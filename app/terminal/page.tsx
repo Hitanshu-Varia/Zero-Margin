@@ -11,9 +11,7 @@ import { LiveBookActions } from "@/components/desk/LiveBookActions";
 import { LiveStateLine } from "@/components/desk/LiveStateLine";
 import { NotionalEditor } from "@/components/desk/NotionalEditor";
 import {
-  DEMO_BOOK,
   DEMO_ENTRY_PRICE_USDC,
-  DEMO_ISOLATED_BOOK,
   DEMO_VOL_SHOCK_BPS,
   evaluateSpan16,
   isolatedAccountAtShock,
@@ -135,7 +133,7 @@ function Terminal() {
   });
 
   // the book inputs: live when the app has an active book, user-editable always
-  const [notionals, setNotionals] = useState({ lp: DEMO_BOOK.lpNotionalUsdc, short: DEMO_BOOK.shortNotionalUsdc, posted: DEMO_BOOK.postedMarginUsdc });
+  const [notionals, setNotionals] = useState({ lp: 0n, short: 0n, posted: 0n });
   // is a real book open onchain for the demo wallet? drives what the panels
   // call themselves: worked example vs your live position
   const [bookActive, setBookActive] = useState<boolean | null>(null);
@@ -209,7 +207,7 @@ function Terminal() {
   const settled = quote.protocolFeeUsdc > 0n && shockBps <= 0n;
   const bookTone =
     quote.badDebtUsdc > 0n ? "down" : settled ? "cobalt" : "text";
-  const hedgeRatio = (notionals.short * 10_000n) / notionals.lp;
+  const hedgeRatio = notionals.lp === 0n ? 0n : (notionals.short * 10_000n) / notionals.lp;
 
   const runCrash = useCallback(
     (target: bigint) => {
@@ -244,9 +242,12 @@ function Terminal() {
         label="Crash console — sweep the shock, preview the settle"
         accent
         meta={
-          <span className="flex items-center gap-2">
-            <span className="font-mono text-dim">
-              mark onchain: <span className="text-text">{formatUsdcWhole(mark)}</span> per WETH — set at book open, moves only when real swaps hit the pool
+          <span className="flex flex-col items-end font-mono text-[11px]">
+            <span>
+              simulated price after your sweep: <span className="text-text">{formatUsdcWhole(mark)}</span> per WETH
+              <span className="text-dim">
+                {" "}— from the {formatUsdcWhole(DEMO_ENTRY_PRICE_USDC)} entry; chain mark walks only with real pool swaps
+              </span>
             </span>
           </span>
         }
@@ -312,10 +313,10 @@ function Terminal() {
               </>
             ) : (
               <>
-                <span className="font-medium text-text">These two panels are a worked example, not your wallet.</span>{" "}
-                Nobody has opened anything on Uniswap here — the figures below run the span
-                engine on the amounts in the console above (the spec's own GV-01 test book).
-                Open a real book when you want the chain to repeat the same flow.
+                <span className="font-medium text-text">No book exists yet — the figures start at zero and mean it.</span>{" "}
+                Nothing is open on Uniswap; these two panels are a calculator for the span
+                engine: type your own amounts above (or open a real book onchain and they
+                fill from the chain before you settle).
               </>
             )}
           </p>
@@ -323,7 +324,7 @@ function Terminal() {
         <div className="grid gap-5 lg:grid-cols-[5fr_6fr]">
         {/* Left: isolated account */}
         <Panel
-          label="Isolated LP account — the baseline, worked example"
+          label="Isolated LP account — standard margin practice"
           className="flex flex-col"
           bodyClassName="flex flex-1 flex-col"
           meta={<span className="font-mono text-[10px] text-dim">simulation · no wallet involved</span>}
@@ -434,7 +435,7 @@ function Terminal() {
             {/* Cost recap — computed from the engine, never stored */}
             <div className="mt-auto pt-5">
               <div className="mb-2 rule-t pt-3 text-[13px] text-muted">
-                Cost of the −30% crash (worked example)
+                Cost of the −30% crash at these amounts
               </div>
               <div className="grid grid-cols-1 gap-px sm:grid-cols-3 sm:gap-px overflow-hidden rounded-field border border-line bg-line">
                 {[
@@ -471,7 +472,7 @@ function Terminal() {
         {/* Right: ZeroMargin book */}
         <Panel
           accent
-          label={bookActive === true ? "ZeroMargin book — your live onchain book" : "ZeroMargin book — the netted account, worked example"}
+          label={bookActive === true ? "ZeroMargin book — your live onchain book" : "ZeroMargin book — the netted account"}
           meta={
             <span className="font-mono text-[10px] text-dim">
               {bookActive === true ? "onchain" : "simulation · editable amounts"}
@@ -713,9 +714,9 @@ function Terminal() {
 
       <SettleAction
         input={{
-          lpNotionalUsdc: DEMO_BOOK.lpNotionalUsdc.toString(),
-          shortNotionalUsdc: DEMO_BOOK.shortNotionalUsdc.toString(),
-          postedMarginUsdc: DEMO_BOOK.postedMarginUsdc.toString(),
+          lpNotionalUsdc: notionals.lp.toString(),
+          shortNotionalUsdc: notionals.short.toString(),
+          postedMarginUsdc: notionals.posted.toString(),
           priceShockBps: shockBps.toString(),
           volShockBps: DEMO_VOL_SHOCK_BPS.toString(),
         }}

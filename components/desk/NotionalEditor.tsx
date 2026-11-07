@@ -5,11 +5,10 @@ import { formatUsdcWhole } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
 /**
- * Live notional editor: the terminal's book inputs. Defaults resolve from
- * the deployed app (the live book when active) and stay user-editable —
- * every figure on the page recomputes from whatever is in these fields.
- * No book onchain? The spec demo book (GV-01) seeds the fields, labeled as
- * the seeded preview, with a one-click path to open a real book.
+ * Live notional editor: the terminal's book inputs. When a book is open
+ * onchain they fill from the chain; otherwise they start at zero and it is
+ * up to the user to set amounts. Every figure on the page recomputes from
+ * whatever is in these fields — no seeded demo numbers exist.
  */
 export function NotionalEditor({
   onNotionals,
@@ -40,10 +39,10 @@ export function NotionalEditor({
           setPosted(String(BigInt(body.onchain.postedMarginUsdc) / 1_000_000n));
           setActive(true);
         } else {
-          // seeded preview: the spec's GV-01 amounts, set by whoever authored the demo seeds
-          setLp("100000");
-          setShort("95000");
-          setPosted("25000");
+          // nothing exists: the fields start at zero and mean it
+          setLp("0");
+          setShort("0");
+          setPosted("0");
           setActive(false);
         }
       } catch {
@@ -107,7 +106,7 @@ export function NotionalEditor({
           "LP notional, $",
           lp ?? "",
           setLp,
-          active === null ? "…" : active ? "live book onchain" : "seeded preview, editable",
+          active === null ? "…" : active ? "live book onchain" : "set your own amounts",
           active === true,
         )}
         {field("Hedge notional, $", short ?? "", setShort)}
@@ -115,9 +114,10 @@ export function NotionalEditor({
       </div>
       {error && <p aria-live="polite" className="mt-1.5 font-mono text-[11px] text-down">{error}</p>}
       <p className="mt-1.5 font-pretty text-[11px] leading-relaxed text-dim">
-        every figure on this page recomputes from these three amounts at render;
-        what fills them first is the live onchain book, and what you type is a
-        live preview of that exact book.
+        every figure on this page recomputes from these three amounts at
+        render — they start at zero because nothing exists until it exists:
+        set the amounts here, or open a real book onchain and they fill from
+        the chain.
       </p>
     </div>
   );

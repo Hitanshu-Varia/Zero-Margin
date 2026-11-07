@@ -93,19 +93,25 @@ export function SettleAction({
   return (
     <div className="rule-t mt-4 pt-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={run}
-          disabled={pending}
-          className={cn(
-            "flex h-10 items-center rounded-field bg-paper px-5 text-[14px] font-medium transition-transform duration-100 ease-out active:scale-[0.97]",
-            pending && "opacity-60",
-          )}
-          style={{ color: "var(--ink)" }}
-          data-testid="settle-action"
-        >
-          {pending ? "Settling" : "Preview the settle (no transaction broadcast)"}
-        </button>
+        {asBig(input.lpNotionalUsdc) === 0n ? (
+          <p className="text-[13px] text-muted">
+            set an LP notional above to preview the settle
+          </p>
+        ) : (
+          <button
+            type="button"
+            onClick={run}
+            disabled={pending}
+            className={cn(
+              "flex h-10 items-center rounded-field bg-paper px-5 text-[14px] font-medium transition-transform duration-100 ease-out active:scale-[0.97]",
+              pending && "opacity-60",
+            )}
+            style={{ color: "var(--ink)" }}
+            data-testid="settle-action"
+          >
+            {pending ? "Settling" : "Preview the settle (no transaction broadcast)"}
+          </button>
+        )}
         <p className="font-mono text-[11px] text-dim">
           recomputes the full walkthrough below for {formatUsdcWhole(asBig(input.postedMarginUsdc))} posted — this stays on the page, nothing broadcasts
         </p>
