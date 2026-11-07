@@ -136,6 +136,26 @@ function Terminal() {
 
   // the book inputs: live when the app has an active book, user-editable always
   const [notionals, setNotionals] = useState({ lp: DEMO_BOOK.lpNotionalUsdc, short: DEMO_BOOK.shortNotionalUsdc, posted: DEMO_BOOK.postedMarginUsdc });
+  // is a real book open onchain for the demo wallet? drives what the panels
+  // call themselves: worked example vs your live position
+  const [bookActive, setBookActive] = useState<boolean | null>(null);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/app/state", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({}),
+        });
+        const body = await res.json();
+        if (alive && body.ok) setBookActive(body.onchain.isActive === true);
+      } catch {
+        if (alive) setBookActive(null);
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
 
   const span = evaluateSpan16(notionals.lp, notionals.short);
   const isolated = isolatedAccountAtShock(
@@ -283,22 +303,30 @@ function Terminal() {
 
       {/* ── Split screen ──────────────────────────────────────── */}
       <div className="mt-5">
-        <div className="mb-3 flex items-center gap-3">
-          <span aria-hidden="true" className="h-px flex-1 bg-line" />
-          <span className="font-mono text-[10px] tracking-[0.2em] text-dim">
-            the same shock, observed by both books
-          </span>
-          <span aria-hidden="true" className="h-px flex-1 bg-line" />
+        <div className="mb-3 rounded-field border border-line bg-surface px-4 py-2.5">
+          <p className="text-pretty text-[12px] leading-relaxed text-muted">
+            {bookActive === true ? (
+              <>
+                <span className="font-medium text-text">These two panels mirror your live onchain book.</span>{" "}
+                The engine prices the shock you sweep; the settle button moves the real contract.
+              </>
+            ) : (
+              <>
+                <span className="font-medium text-text">These two panels are a worked example, not your wallet.</span>{" "}
+                Nobody has opened anything on Uniswap here — the figures below run the span
+                engine on the amounts in the console above (the spec's own GV-01 test book).
+                Open a real book when you want the chain to repeat the same flow.
+              </>
+            )}
+          </p>
         </div>
         <div className="grid gap-5 lg:grid-cols-[5fr_6fr]">
         {/* Left: isolated account */}
         <Panel
-          label="Isolated LP account — margin practice today"
+          label="Isolated LP account — the baseline, worked example"
           className="flex flex-col"
           bodyClassName="flex flex-1 flex-col"
-          meta={<StatusChip tone={isolated.liquidated ? "down" : "status"}>
-            {isolated.liquidated ? "liquidated" : "open"}
-          </StatusChip>}
+          meta={<span className="font-mono text-[10px] text-dim">simulation · no wallet involved</span>}
         >
           <p className="px-4 pt-3 text-pretty text-[12px] leading-relaxed text-dim">
             A standard exchange account: the LP sits alone, no hedge. It must
@@ -406,7 +434,7 @@ function Terminal() {
             {/* Cost recap — computed from the engine, never stored */}
             <div className="mt-auto pt-5">
               <div className="mb-2 rule-t pt-3 text-[13px] text-muted">
-                Cost of the −30% replay
+                Cost of the −30% crash (worked example)
               </div>
               <div className="grid grid-cols-1 gap-px sm:grid-cols-3 sm:gap-px overflow-hidden rounded-field border border-line bg-line">
                 {[
@@ -443,15 +471,13 @@ function Terminal() {
         {/* Right: ZeroMargin book */}
         <Panel
           accent
-          label="ZeroMargin book — the netted account"
+          label={bookActive === true ? "ZeroMargin book — your live onchain book" : "ZeroMargin book — the netted account, worked example"}
           meta={
-            <StatusChip tone={quote.badDebtUsdc > 0n ? "down" : shockBps < 0n ? "cobalt" : "status"}>
-              {quote.badDebtUsdc > 0n
-                ? "breach"
-                : shockBps < 0n
-                  ? "settled"
-                  : "open hedged"}
-            </StatusChip>
+            <span className="font-mono text-[10px] text-dim">
+              {bookActive === true ? "onchain" : "simulation · editable amounts"}
+              {" · "}
+              {quote.badDebtUsdc > 0n ? "breach" : shockBps < 0n ? "settle preview" : "open hedged"}
+            </span>
           }
         >
           <div className="px-4 pb-4 pt-4">
