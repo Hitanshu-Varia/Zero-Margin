@@ -27,7 +27,7 @@ export function LiveDashboardBand() {
         ]);
         if (!alive) return;
         if (!a.ok) {
-          setError(a.problems?.join(", ").slice(0, 140) ?? "onchain read failed");
+          setError("Base Sepolia didn’t answer just now — the band retries on its own");
           return;
         }
         setError(null);

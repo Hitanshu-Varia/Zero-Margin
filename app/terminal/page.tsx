@@ -69,7 +69,7 @@ function ScenarioGrid({
         <div key={m} className="flex items-end gap-2">
           <span className="w-16 shrink-0 pt-3 text-[10px] leading-tight text-dim">
             {m === 0
-              ? "calm market, bps"
+              ? "calm market"
               : "normal volatility, bps"}
           </span>
           <div className="grid flex-1 grid-cols-8 gap-1">
@@ -475,11 +475,24 @@ function Terminal() {
 
             <div className="mt-4 rounded-field border border-cobalt/40 bg-cobalt-dim/20 px-3 py-2.5">
               <p className="font-mono text-[12px] leading-relaxed text-muted">
-                the hedge pays in{" "}
-                <span className="text-up">{formatUsdc(quote.shortGainUsdc)}</span> against the{" "}
-                <span className="text-down">{formatUsdc(quote.lpLossUsdc)}</span> LP loss,
-                covering{" "}
-                <span className="text-cobalt">{formatUsdc(quote.nettedOffsetUsdc)}</span> of it
+                {quote.nettedOffsetUsdc > 0n ? (
+                  <>
+                    the hedge pays in{" "}
+                    <span className="text-up">{formatUsdc(quote.shortGainUsdc)}</span> and{" "}
+                    <span className="text-cobalt">{formatUsdc(quote.nettedOffsetUsdc)}</span> of the{" "}
+                    <span className="text-down">{formatUsdc(quote.lpLossUsdc)}</span> LP loss is
+                    covered by that gain
+                  </>
+                ) : quote.lpLossUsdc > 0n ? (
+                  <>
+                    a flat market: the price barely moved, so the{" "}
+                    <span className="text-down">{formatUsdc(quote.lpLossUsdc)}</span> gap is the
+                    grid's volatility charge — the hedge has nothing to pay until the price
+                    actually falls, and the margin already priced it
+                  </>
+                ) : (
+                  <>nothing to settle at this price move</>
+                )}
                 {quote.badDebtUsdc === 0n && (
                   <span className="text-dim">, no liquidation penalty</span>
                 )}
@@ -558,15 +571,16 @@ function Terminal() {
                 {/* act 2 — what the hedge does NOT reach */}
                 <li className="flex items-baseline justify-between gap-3 rounded-field bg-surface-raised px-3 py-2">
                   <div className="min-w-0">
-                    <p className="text-[13px] text-text">3. shortfall the hedge cannot reach</p>
+                    <p className="text-[13px] text-text">3. the part your margin has to cover</p>
                     <p className="text-[11px] leading-relaxed text-dim">
-                      {"("}
-                      {formatUsdcWhole(quote.lpLossUsdc > 0n ? quote.lpLossUsdc : 0n)}
-                      {" − "}
-                      {formatUsdcWhole(quote.nettedOffsetUsdc)}
-                      {" = "}
-                      {formatUsdcWhole(quote.lpLossUsdc > quote.nettedOffsetUsdc ? quote.lpLossUsdc - quote.nettedOffsetUsdc : 0n)}
-                      {") — this part of the loss is yours"}
+                      {(() => {
+                        const shortfall = quote.lpLossUsdc > quote.nettedOffsetUsdc
+                          ? quote.lpLossUsdc - quote.nettedOffsetUsdc
+                          : 0n;
+                        return shortfall === 0n
+                          ? "the two legs cancel exactly — nothing needed from the deposit"
+                          : `${formatUsdcWhole(quote.lpLossUsdc)} loss − ${formatUsdcWhole(quote.nettedOffsetUsdc)} hedge gain = ${formatUsdcWhole(shortfall)} — comes out of the posted margin`;
+                      })()}
                     </p>
                   </div>
                   <span className="font-mono text-[13px] tabular-nums text-text">

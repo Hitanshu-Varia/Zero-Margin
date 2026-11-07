@@ -43,7 +43,7 @@ export async function GET() {
       source: "live-or-error",
       schema: ARKIV_SCHEMA,
       keeperQuery: KEEPER_QUERY,
-      problems: [`live Rabdi read failed: ${err instanceof Error ? err.message : String(err)}`],
+      problems: ["live Rabdi read failed — the store was unreachable; showing the bundled snapshot"],
       entities: ATTESTATIONS.map((e): Entity => plain(e as unknown as Entity)),
     });
   }

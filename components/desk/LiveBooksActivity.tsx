@@ -56,7 +56,7 @@ export function LiveBooksActivity() {
         ]);
         if (!alive) return;
         if (!a.ok) {
-          setError(a.problems?.join(", ").slice(0, 160) ?? "onchain read failed");
+          setError("Base Sepolia didn’t answer just now — hit retry below");
         } else {
           setApp(a);
         }

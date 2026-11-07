@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: false,
       source: "onchain-or-error",
-      problems: [err instanceof Error ? err.message.slice(0, 200) : "onchain read failed"],
+      problems: ["Base Sepolia was unreachable from this deployment; the page keeps computing locally"],
     });
   }
 }
